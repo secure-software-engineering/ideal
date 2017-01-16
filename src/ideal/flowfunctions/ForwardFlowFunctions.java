@@ -13,6 +13,7 @@ import heros.FlowFunction;
 import heros.FlowFunctions;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
+import ideal.Analysis;
 import ideal.AnalysisContext;
 import ideal.pointsofaliasing.CallSite;
 import ideal.pointsofaliasing.InstanceFieldWrite;
@@ -213,7 +214,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 								context.addPOA(instanceFieldWrite);
 							}
 						}
-					} else if (leftOp instanceof StaticFieldRef && AliasFinder.ENABLE_STATIC_FIELDS) {
+					} else if (leftOp instanceof StaticFieldRef && Analysis.ENABLE_STATIC_FIELDS) {
 						// d.f = e;
 						StaticFieldRef fr = (StaticFieldRef) leftOp;
 						SootField field = fr.getField();
@@ -248,7 +249,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 							out.add(a.deriveWithNewLocal((Local) leftOp, source.getFirstField().getType()));
 						}
 					}
-				} else if (rightOp instanceof StaticFieldRef && AliasFinder.ENABLE_STATIC_FIELDS) {
+				} else if (rightOp instanceof StaticFieldRef && Analysis.ENABLE_STATIC_FIELDS) {
 					StaticFieldRef sfr = (StaticFieldRef) rightOp;
 					if (source.isStatic() && source.firstFieldMatches(sfr.getField())) {
 						if (leftOp instanceof Local) {
@@ -277,14 +278,12 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		return new FlowFunction<WrappedAccessGraph>() {
 			@Override
 			public Set<WrappedAccessGraph> computeTargets(WrappedAccessGraph source) {
-				if (context.icfg().isEqualsMethod(callee) || context.icfg().isToStringMethod(callee))
-					return Collections.emptySet();
 				source = source.deriveWithoutEvent();
 				assert source != null;
 				Set<WrappedAccessGraph> out = new HashSet<>();
 				Stmt is = (Stmt) callSite;
 				source = source.deriveWithoutAllocationSite();
-				if (AliasFinder.ENABLE_STATIC_FIELDS && source.isStatic()) {
+				if (Analysis.ENABLE_STATIC_FIELDS && source.isStatic()) {
 					if (callee != null && context.icfg().isStaticFieldUsed(callee, source.getFirstField().getField())) {
 						return Collections.singleton(source);
 					} else {
@@ -358,11 +357,9 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 
 			@Override
 			public Set<WrappedAccessGraph> computeTargets(WrappedAccessGraph source) {
-				if (caller == null || context.icfg().isEqualsMethod(caller) || context.icfg().isToStringMethod(caller))
-					return Collections.emptySet();
 				// mapping of fields of AccessPath those will be killed in
 				// callToReturn
-				if (AliasFinder.ENABLE_STATIC_FIELDS && source.isStatic())
+				if (Analysis.ENABLE_STATIC_FIELDS && source.isStatic())
 					return Collections.singleton(source);
 
 				HashSet<WrappedAccessGraph> out = new HashSet<WrappedAccessGraph>();
@@ -471,8 +468,6 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		return new FlowFunction<WrappedAccessGraph>() {
 			@Override
 			public Set<WrappedAccessGraph> computeTargets(WrappedAccessGraph source) {
-				if (context.icfg().isEqualsMethod(callee) || context.icfg().isToStringMethod(callee))
-					return Collections.singleton(source);
 				for (int i = 0; i < invokeExpr.getArgCount(); i++) {
 					if (source.baseMatches(invokeExpr.getArg(i))) {
 						return Collections.emptySet();

@@ -6,9 +6,8 @@
 	<classpathentry kind="src" path="tests"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="lib/boomerang.jar"/>
-	<classpathentry kind="lib" path="lib/heros-trunk.jar"/>
-	<classpathentry kind="lib" path="lib/soot-trunk.jar"/>
-	<classpathentry kind="lib" path="lib/grph-1.8.0-big.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/soot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/boomerang"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/heros"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

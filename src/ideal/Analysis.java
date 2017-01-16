@@ -38,6 +38,7 @@ public class Analysis<V> {
    * Specifies the budget per alias query in milliseconds.
    */
   public static long ALIAS_BUDGET = 1000;
+  public static boolean ENABLE_STATIC_FIELDS = false;
   
   private final IDebugger<V> debugger;
   private static Stopwatch START_TIME;

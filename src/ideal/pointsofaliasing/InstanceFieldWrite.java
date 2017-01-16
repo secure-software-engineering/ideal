@@ -29,7 +29,7 @@ public class InstanceFieldWrite<V> extends PointOfAlias<V> {
     Set<PathEdge<Unit, WrappedAccessGraph>> res = new HashSet<>();
 
     AliasFinder aliasFinder = new AliasFinder(tsanalysis.icfg());
-    aliasFinder.context.startTime = Stopwatch.createStarted();
+    aliasFinder.startQuery();
     WrappedAccessGraph accessGraph = new WrappedAccessGraph(new AccessGraph(base, base.getType()));
     AliasResults results = tsanalysis.aliasesFor(accessGraph, curr, d1);
 

@@ -114,4 +114,9 @@ public class InternalAnalysisProblem<V> implements
   public EdgeFunction<V> allBottomFunction() {
     return new AllBottom<V>(edgeFunctions.top());
   }
+
+	@Override
+	public boolean recordEdges() {
+		return false;
+	}
 }

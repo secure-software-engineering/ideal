@@ -9,6 +9,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import boomerang.AliasFinder;
+import boomerang.BoomerangOptions;
 import boomerang.BoomerangTimeoutException;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cache.AliasResults;
@@ -168,12 +169,13 @@ public class AnalysisContext<V> {
 
 	public AliasResults aliasesFor(WrappedAccessGraph boomerangAccessGraph, Unit curr, WrappedAccessGraph d1) {
 		Analysis.checkTimeout();
-		AliasFinder boomerang = new AliasFinder(icfg(), bwicfg);
-		boomerang.context.startTime = Stopwatch.createStarted();
-		boomerang.context.budgetInMilliSeconds = Analysis.ALIAS_BUDGET;
+		BoomerangOptions opts = new BoomerangOptions();
+		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
+		opts.setTrackStaticFields(Analysis.ENABLE_STATIC_FIELDS);
+		AliasFinder boomerang = new AliasFinder(icfg(),opts);
 		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
-
 		try {
+			boomerang.startQuery();
 			AliasResults res = boomerang.findAliasAtStmt(boomerangAccessGraph.getDelegate(), curr,
 					getContextRequestorFor(d1, curr));
 			debugger.onAliasesComputed(boomerangAccessGraph, curr, d1, res);
