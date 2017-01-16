@@ -41,7 +41,6 @@ Do the same for Heros, Soot and Jasmin which are located in the libs folder of B
 
 ```
 libs/boomerang/libs/(heros|soot|jasmin)/
-
 ```
 
 IDE/AL does not contain compile time errors anymore and is readily set up.
