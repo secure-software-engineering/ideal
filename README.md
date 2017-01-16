@@ -29,7 +29,7 @@ For examples on how to use IDE/AL have a look at the test cases. They can be fou
 # Instructions
 
 This project is dependent on [Boomerang](https://github.com/uasys/boomerang), which requires [Soot](https://github.com/Sable/soot), [Heros](https://github.com/Sable/heros) and [Jasmin](https://github.com/Sable/jasmin) as submodules. 
-To checkout this project use the --recursive option to allow all submodule to be initialized and cloned automatically, i.e.
+To checkout this project use the --recursive option to allow all submodules to be initialized and cloned automatically, i.e.
 
 ```
 git clone --recursive git@github.com:uasys/ideal.git
