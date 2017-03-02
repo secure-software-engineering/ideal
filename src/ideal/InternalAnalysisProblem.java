@@ -12,6 +12,7 @@ import heros.InterproceduralCFG;
 import heros.JoinLattice;
 import heros.edgefunc.AllBottom;
 import heros.edgefunc.AllTop;
+import heros.solver.IDEDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.edgefunction.ForwardEdgeFunctions;
 import ideal.flowfunctions.ForwardFlowFunctions;
@@ -118,5 +119,10 @@ public class InternalAnalysisProblem<V> implements
 	@Override
 	public boolean recordEdges() {
 		return false;
+	}
+
+	@Override
+	public IDEDebugger<Unit, WrappedAccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> getDebugger() {
+		return context.debugger;
 	}
 }

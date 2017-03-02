@@ -3,7 +3,7 @@ package ideal.pointsofaliasing;
 import java.util.Collection;
 import java.util.Collections;
 
-import boomerang.cache.AliasResults;
+import boomerang.AliasResults;
 import heros.solver.PathEdge;
 import ideal.AnalysisContext;
 import ideal.flowfunctions.WrappedAccessGraph;
@@ -18,7 +18,7 @@ public class NullnessCheck<V> extends PointOfAlias<V> {
   public Collection<PathEdge<Unit, WrappedAccessGraph>> getPathEdges(
 AnalysisContext<V> tsanalysis) {
     AliasResults results = tsanalysis.aliasesFor(d2, curr, d1);
-    if (results.keySet().size() == 1) {
+    if (results.withoutNullAllocationSites().keySet().size() <= 1) {
       tsanalysis.storeComputedNullnessFlow(this, results);
     }
     return Collections.emptySet();

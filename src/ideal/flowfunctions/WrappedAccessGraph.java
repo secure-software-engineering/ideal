@@ -1,10 +1,11 @@
 package ideal.flowfunctions;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.accessgraph.FieldGraph;
+import boomerang.accessgraph.IFieldGraph;
 import boomerang.accessgraph.WrappedSootField;
 import heros.solver.JoinHandlingNode;
 import soot.Local;
@@ -37,7 +38,7 @@ public class WrappedAccessGraph implements JoinHandlingNode<WrappedAccessGraph>{
 	public Type getBaseType() {
 		return delegate.getBaseType();
 	}
-	public FieldGraph getFieldGraph() {
+	public IFieldGraph getFieldGraph() {
 		return delegate.getFieldGraph();
 	}
 
@@ -53,7 +54,7 @@ public class WrappedAccessGraph implements JoinHandlingNode<WrappedAccessGraph>{
 		return hasEvent;
 	}
 
-	public WrappedSootField getLastField() {
+	public Collection<WrappedSootField> getLastField() {
 		return delegate.getLastField();
 	}
 
@@ -89,12 +90,12 @@ public class WrappedAccessGraph implements JoinHandlingNode<WrappedAccessGraph>{
 		return new WrappedAccessGraph(delegate.makeStatic(), hasEvent);
 	}
 
-	public WrappedSootField getFirstField() {
+	public Collection<WrappedSootField> getFirstField() {
 		return delegate.getFirstField();
 	}
 
 	public boolean firstFieldMatches(SootField field) {
-		return delegate.firstFieldMatches(field);
+		return delegate.firstFieldMustMatch(field);
 	}
 
 	public WrappedAccessGraph deriveWithoutAllocationSite() {
@@ -159,7 +160,7 @@ public class WrappedAccessGraph implements JoinHandlingNode<WrappedAccessGraph>{
 		return new WrappedAccessGraph(delegate, true);
 	}
 
-	public Type getType() {
+	public Collection<Type> getType() {
 		return delegate.getType();
 	}
 	

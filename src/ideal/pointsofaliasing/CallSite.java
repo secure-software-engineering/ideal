@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
-import boomerang.cache.AliasResults;
 import heros.solver.PathEdge;
 import ideal.AnalysisContext;
 import ideal.flowfunctions.WrappedAccessGraph;
@@ -44,15 +44,17 @@ public class CallSite<V> extends PointOfAlias<V> {
 	}
 
 	private Collection<PathEdge<Unit, WrappedAccessGraph>> unbalancedReturn(AnalysisContext<V> tsanalysis) {
-		WrappedSootField lastField = d2.getLastField();
+		Collection<WrappedSootField> lastFields = d2.getLastField();
 		Set<WrappedAccessGraph> popLastField = d2.popLastField();
 		Set<PathEdge<Unit, WrappedAccessGraph>> res = new HashSet<>();
 		for (WrappedAccessGraph withoutLast : popLastField) {
 			AliasResults results = tsanalysis.aliasesFor(withoutLast, curr, d1);
-
 			for (AccessGraph mayAliasingWrappedAccessGraph : results.mayAliasSet()) {
-				AccessGraph g = mayAliasingWrappedAccessGraph.appendFields(new WrappedSootField[] { lastField });
-				res.add(new PathEdge<Unit, WrappedAccessGraph>(d1, succ, new WrappedAccessGraph(g, d2.hasEvent())));
+				for(WrappedSootField lastField : lastFields){
+					AccessGraph g = mayAliasingWrappedAccessGraph.appendFields(new WrappedSootField[] { lastField });
+					res.add(new PathEdge<Unit, WrappedAccessGraph>(d1, succ, new WrappedAccessGraph(g, d2.hasEvent())));
+					tsanalysis.debugger.indirectFlowAtCall(withoutLast, curr, new WrappedAccessGraph(g, d2.hasEvent()));
+				}
 			}
 		}
 		tsanalysis.storeComputedCallSiteFlow(this, res, false);
@@ -62,6 +64,7 @@ public class CallSite<V> extends PointOfAlias<V> {
 	private void checkMustAlias(AliasResults results, Set<PathEdge<Unit, WrappedAccessGraph>> res,
 			AnalysisContext<V> context) {
 		boolean isStrongUpdate = results.keySet().size() == 1;
+		System.out.println(results);
 		context.storeComputedCallSiteFlow(this, res, isStrongUpdate);
 	}
 

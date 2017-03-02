@@ -4,19 +4,16 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import boomerang.AliasFinder;
+import boomerang.AliasResults;
 import boomerang.BoomerangOptions;
 import boomerang.BoomerangTimeoutException;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.cache.AliasResults;
-import boomerang.cache.ResultCache;
+import boomerang.accessgraph.WrappedSootField;
 import boomerang.context.IContextRequester;
-import boomerang.context.NoContextRequester;
-import boomerang.debug.BoomerangEfficiencyDebugger;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
@@ -29,7 +26,6 @@ import ideal.pointsofaliasing.PointOfAlias;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.BackwardsInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 
 public class AnalysisContext<V> {
 
@@ -45,13 +41,11 @@ public class AnalysisContext<V> {
 	private Set<Pair<Pair<Unit, Unit>, AccessGraph>> nullnessBranches = new HashSet<>();
 	private IInfoflowCFG icfg;
 	private AnalysisSolver<V> solver;
-	private BackwardsInfoflowCFG bwicfg;
 	private AnalysisEdgeFunctions<V> edgeFunc;
 
 	public AnalysisContext(IInfoflowCFG icfg, BackwardsInfoflowCFG bwicfg, AnalysisEdgeFunctions<V> edgeFunc,
 			IDebugger<V> debugger) {
 		this.icfg = icfg;
-		this.bwicfg = bwicfg;
 		this.debugger = debugger;
 		this.edgeFunc = edgeFunc;
 	}
@@ -197,7 +191,6 @@ public class AnalysisContext<V> {
 		nullnessBranches = null;
 		icfg = null;
 		solver = null;
-		bwicfg = null;
 	}
 
 }

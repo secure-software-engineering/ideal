@@ -5,8 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import boomerang.AliasFinder;
+import boomerang.AliasResults;
+import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
-import boomerang.cache.AliasResults;
 import boomerang.forward.AbstractFlowFunctions;
 import heros.EdgeFunction;
 import heros.FlowFunction;
@@ -183,7 +184,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 
 							WrappedAccessGraph withNewLocal = source.deriveWithNewLocal(lBase, lBase.getType());
 							WrappedSootField newFirstField = new WrappedSootField(field, source.getBaseType(), curr);
-							if (AliasResults.canPrepend(withNewLocal.getDelegate(), newFirstField)) {
+							if (withNewLocal.getDelegate().canAppend(newFirstField)) {
 								WrappedAccessGraph newAp = withNewLocal.prependField(newFirstField);
 								out.add(newAp);
 								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as,
@@ -234,10 +235,11 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						// e = a.f && source == a.f.*
 						// replace in source
 						if (leftOp instanceof Local && !source.baseMatches(leftOp)) {
-							WrappedAccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) leftOp,
-									source.getFirstField().getType());
-
-							out.addAll(deriveWithNewLocal.popFirstField());
+							for(WrappedSootField firstField : source.getFirstField()){
+								WrappedAccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) leftOp,firstField.getType());
+	
+								out.addAll(deriveWithNewLocal.popFirstField());
+							}
 						}
 					}
 				} else if (rightOp instanceof ArrayRef) {
@@ -246,7 +248,9 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 
 						Set<WrappedAccessGraph> withoutFirstField = source.popFirstField();
 						for (WrappedAccessGraph a : withoutFirstField) {
-							out.add(a.deriveWithNewLocal((Local) leftOp, source.getFirstField().getType()));
+							for(WrappedSootField firstField : source.getFirstField()){
+								out.add(a.deriveWithNewLocal((Local) leftOp, firstField.getType()));
+							}
 						}
 					}
 				} else if (rightOp instanceof StaticFieldRef && Analysis.ENABLE_STATIC_FIELDS) {
@@ -255,7 +259,9 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						if (leftOp instanceof Local) {
 							Set<WrappedAccessGraph> withoutFirstField = source.popFirstField();
 							for (WrappedAccessGraph a : withoutFirstField) {
-								out.add(a.deriveWithNewLocal((Local) leftOp, source.getFirstField().getType()));
+								for(WrappedSootField firstField : source.getFirstField()){
+									out.add(a.deriveWithNewLocal((Local) leftOp, firstField.getType()));
+								}
 							}
 						}
 					}
@@ -266,6 +272,14 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		};
 	}
 
+
+	protected boolean isFirstFieldUsedTransitivelyInMethod(AccessGraph source, final SootMethod callee) {
+        for(WrappedSootField wrappedField :  source.getFirstField()){
+      	  if(context.icfg().isStaticFieldUsed(callee, wrappedField.getField()))
+      		  return true;
+        }
+		return false;
+	}
 	@Override
 	public FlowFunction<WrappedAccessGraph> getCallFlowFunction(final WrappedAccessGraph d1, final Unit callSite,
 			final SootMethod callee) {
@@ -284,7 +298,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 				Stmt is = (Stmt) callSite;
 				source = source.deriveWithoutAllocationSite();
 				if (Analysis.ENABLE_STATIC_FIELDS && source.isStatic()) {
-					if (callee != null && context.icfg().isStaticFieldUsed(callee, source.getFirstField().getField())) {
+					if (callee != null && isFirstFieldUsedTransitivelyInMethod(source.getDelegate(),callee)) {
 						return Collections.singleton(source);
 					} else {
 						return Collections.emptySet();

@@ -1,5 +1,6 @@
 package ideal;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,11 +11,12 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.base.Stopwatch;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.accessgraph.WrappedSootField;
 import heros.EdgeFunction;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
+import ideal.debug.JSONDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.flowfunctions.WrappedAccessGraph;
 import ideal.pointsofaliasing.PointOfAlias;
@@ -56,7 +58,8 @@ public class Analysis<V> {
     this.problem = problem;
     this.icfg = icfg;
     this.bwicfg = new BackwardsInfoflowCFG(icfg);
-    this.debugger = new NullDebugger<V>();
+//    this.debugger = new NullDebugger<V>();
+    this.debugger = new JSONDebugger<V>(new File("visualization/data.js"),icfg);
   }
 
   public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, IDebugger<V> debugger) {
@@ -67,6 +70,7 @@ public class Analysis<V> {
     this.debugger = debugger;
   }
   public void run() {
+	WrappedSootField.TRACK_TYPE =false;
     initialSeeds = computeSeeds();
     debugger.computedSeeds(seedToInitivalValue);
     debugger.beforeAnalysis();

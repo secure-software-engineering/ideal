@@ -9,5 +9,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/soot"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/boomerang"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/heros"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/AliasAnalysis"/>
+	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -4,15 +4,18 @@ import java.util.Map;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.cache.AliasResults;
+import boomerang.AliasResults;
 import heros.EdgeFunction;
+import heros.InterproceduralCFG;
+import heros.solver.IDEDebugger;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
 import ideal.flowfunctions.WrappedAccessGraph;
 import ideal.pointsofaliasing.PointOfAlias;
+import soot.SootMethod;
 import soot.Unit;
 
-public interface IDebugger<V> {
+public interface IDebugger<V> extends IDEDebugger<Unit, WrappedAccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
   void computedSeeds(Map<PathEdge<Unit, WrappedAccessGraph>, EdgeFunction<V>> seedToInitivalValue);
 
@@ -45,7 +48,7 @@ public interface IDebugger<V> {
 
   void beforeAlias(WrappedAccessGraph boomerangAccessGraph, Unit curr, WrappedAccessGraph d1);
 
-  void killAsOfStrongUpdate(WrappedAccessGraph d1, Unit callSite, WrappedAccessGraph callNode, WrappedAccessGraph returnSideNode,
+  void killAsOfStrongUpdate(WrappedAccessGraph d1, Unit callSite, WrappedAccessGraph callNode, Unit returnSite,
       WrappedAccessGraph returnSideNode2);
 
   void detectedStrongUpdate(Unit callSite, WrappedAccessGraph receivesUpdate);
@@ -55,6 +58,10 @@ public interface IDebugger<V> {
   void solvePOA(PointOfAlias<V> p);
 
 	void onNormalPropagation(WrappedAccessGraph d1, Unit curr, Unit succ, WrappedAccessGraph source);
+
+	void indirectFlowAtWrite(WrappedAccessGraph source, Unit curr, WrappedAccessGraph target);
+
+	void indirectFlowAtCall(WrappedAccessGraph source, Unit curr, WrappedAccessGraph target);
 
 
 }

@@ -4,12 +4,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Table.Cell;
 
-import boomerang.context.Context;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
 import heros.InterproceduralCFG;
@@ -85,88 +83,30 @@ public class AnalysisSolver<V>
 
   public IContextRequester getContextRequestorFor(final WrappedAccessGraph d1, final Unit stmt) {
     return new IContextRequester() {
-      @Override
-      public Collection<Context> getCallSiteOf(Context child) {
-        if (!(child instanceof AnalysisSolver.AliasContext)) {
-          throw new RuntimeException("Test ");
-        }
-        @SuppressWarnings("unchecked")
-        AliasContext aliasContext = (AliasContext) child;
-        Set<Context> res = new HashSet<>();
-        if (aliasContext.fact.equals(zeroValue)) {
-          for (Unit callsites : icfg.getCallersOf(icfg.getMethodOf(aliasContext.stmt))) {
-            res.add(new AliasContext(zeroValue, callsites));
-          }
-          return res;
-        }
-        Collection<Unit> startPoints = icfg.getStartPointsOf(icfg.getMethodOf(aliasContext.stmt));
+
+	@Override
+	public boolean continueAtCallSite(Unit callSite, SootMethod callee) {
+		if(d1.equals(zeroValue))
+			return true;
+		assert callee == icfg.getMethodOf(stmt);
+        Collection<Unit> startPoints = icfg.getStartPointsOf(icfg.getMethodOf(stmt));
 
         for (Unit sp : startPoints) {
-
-          Map<Unit, Set<Pair<WrappedAccessGraph, WrappedAccessGraph>>> inc = incoming(aliasContext.fact, sp);
-
-          for (Entry<Unit, Set<Pair<WrappedAccessGraph, WrappedAccessGraph>>> e : inc.entrySet()) {
-            for (Pair<WrappedAccessGraph, WrappedAccessGraph> p : e.getValue()) {
-              res.add(new AliasContext(p.getO2(), e.getKey()));
-            }
-          }
+          Map<Unit, Set<Pair<WrappedAccessGraph, WrappedAccessGraph>>> inc = incoming(d1, sp);
+          System.out.println(sp);
+          System.out.println(d1);
+          System.out.println(inc);
+          if(inc.containsKey(callSite))
+        	  return true;
         }
-        return res;
-      }
+		return false;
+	}
 
-      @Override
-      public Context initialContext(Unit stmt) {
-        return new AliasContext(d1, stmt);
-      }
+	@Override
+	public boolean isEntryPointMethod(SootMethod method) {
+		return false;
+	}
     };
-  }
-
-  private class AliasContext implements Context {
-    final Unit stmt;
-    final WrappedAccessGraph fact;
-
-    AliasContext(WrappedAccessGraph fact, Unit stmt) {
-      this.fact = fact;
-      this.stmt = stmt;
-    }
-
-    @Override
-    public Unit getStmt() {
-      return stmt;
-    }
-
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + ((fact == null) ? 0 : fact.hashCode());
-      result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
-      return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj)
-        return true;
-      if (obj == null)
-        return false;
-      if (getClass() != obj.getClass())
-        return false;
-      @SuppressWarnings("unchecked")
-      AliasContext other = (AliasContext) obj;
-      if (fact == null) {
-        if (other.fact != null)
-          return false;
-      } else if (!fact.equals(other.fact))
-        return false;
-      if (stmt == null) {
-        if (other.stmt != null)
-          return false;
-      } else if (!stmt.equals(other.stmt))
-        return false;
-      return true;
-    }
-
   }
 
   public void computeValues(PathEdge<Unit, WrappedAccessGraph> seed) {

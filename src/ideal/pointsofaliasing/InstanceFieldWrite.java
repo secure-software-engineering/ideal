@@ -4,11 +4,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.base.Stopwatch;
-
 import boomerang.AliasFinder;
+import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.cache.AliasResults;
 import heros.solver.PathEdge;
 import ideal.AnalysisContext;
 import ideal.flowfunctions.WrappedAccessGraph;
@@ -37,6 +35,7 @@ public class InstanceFieldWrite<V> extends PointOfAlias<V> {
     for (AccessGraph mayAliasingWrappedAccessGraph : results.mayAliasSet()) {
     	WrappedAccessGraph withFields = new WrappedAccessGraph(mayAliasingWrappedAccessGraph.appendGraph(d2.getFieldGraph()),d2.hasEvent());
       outFlows.add(withFields);
+      tsanalysis.debugger.indirectFlowAtWrite(d2,curr,withFields);
       res.add(new PathEdge<Unit, WrappedAccessGraph>(d1, succ, withFields));
     }
     tsanalysis.storeComputeInstanceFieldWrite(this, outFlows);

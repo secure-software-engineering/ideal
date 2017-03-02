@@ -57,17 +57,17 @@ public class ForwardEdgeFunctions<V> implements EdgeFunctions<Unit, WrappedAcces
 
   @Override
   public EdgeFunction<V> getCallToReturnEdgeFunction(WrappedAccessGraph d1,
-      Unit callSite, WrappedAccessGraph callNode, Unit returnSite, WrappedAccessGraph returnSideNode) {
+      Unit callSite, WrappedAccessGraph callNode, Unit returnSite, WrappedAccessGraph returnSiteNode) {
     if (!context.isInIDEPhase())
       return ALL_BOTTOM;
     
     // Assign the top function to call-to-return flows where we know about a strong update.
-    if (context.isStrongUpdate(callSite, returnSideNode)) {
-      context.debugger.killAsOfStrongUpdate(d1, callSite, callNode, returnSideNode, returnSideNode);
+    if (context.isStrongUpdate(callSite, returnSiteNode)) {
+      context.debugger.killAsOfStrongUpdate(d1, callSite, callNode, returnSite, returnSiteNode);
       return ALL_TOP;
     }
     return edgeFunctions.getCallToReturnEdgeFunction(d1, callSite, callNode, returnSite,
-        returnSideNode);
+        returnSiteNode);
   }
 
 }

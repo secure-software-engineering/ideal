@@ -3,12 +3,14 @@ package ideal.debug;
 import java.util.Map;
 import java.util.Set;
 
-import boomerang.cache.AliasResults;
+import boomerang.AliasResults;
+import boomerang.ifdssolver.IPathEdge;
 import heros.EdgeFunction;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
 import ideal.flowfunctions.WrappedAccessGraph;
 import ideal.pointsofaliasing.PointOfAlias;
+import soot.SootMethod;
 import soot.Unit;
 
 public class NullDebugger<V> implements IDebugger<V> {
@@ -85,7 +87,7 @@ public class NullDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void killAsOfStrongUpdate(WrappedAccessGraph d1, Unit callSite, WrappedAccessGraph callNode,
-			WrappedAccessGraph returnSideNode, WrappedAccessGraph returnSideNode2) {
+			Unit returnSite, WrappedAccessGraph returnSideNode2) {
 
 	}
 
@@ -107,6 +109,48 @@ public class NullDebugger<V> implements IDebugger<V> {
 	@Override
 	public void onNormalPropagation(WrappedAccessGraph sourceFact, Unit curr, Unit succ,WrappedAccessGraph d2) {
 
+	}
+
+	@Override
+	public void addSummary(SootMethod methodToSummary, PathEdge<Unit, WrappedAccessGraph> summary) {
+		
+	}
+
+	@Override
+	public void normalFlow(Unit start, WrappedAccessGraph startFact, Unit target, WrappedAccessGraph targetFact) {
+		
+	}
+
+	@Override
+	public void callFlow(Unit start, WrappedAccessGraph startFact, Unit target, WrappedAccessGraph targetFact) {
+		
+	}
+
+	@Override
+	public void callToReturn(Unit start, WrappedAccessGraph startFact, Unit target, WrappedAccessGraph targetFact) {
+		
+	}
+
+	@Override
+	public void returnFlow(Unit start, WrappedAccessGraph startFact, Unit target, WrappedAccessGraph targetFact) {
+		
+	}
+
+	@Override
+	public void setValue(Unit start, WrappedAccessGraph startFact, V value) {
+		
+	}
+
+	@Override
+	public void indirectFlowAtWrite(WrappedAccessGraph source, Unit curr, WrappedAccessGraph target) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void indirectFlowAtCall(WrappedAccessGraph source, Unit curr, WrappedAccessGraph target) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
