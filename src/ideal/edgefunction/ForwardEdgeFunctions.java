@@ -1,15 +1,15 @@
 package ideal.edgefunction;
 
+import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.EdgeFunctions;
 import heros.edgefunc.AllBottom;
 import heros.edgefunc.AllTop;
 import ideal.AnalysisContext;
-import ideal.flowfunctions.WrappedAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 
-public class ForwardEdgeFunctions<V> implements EdgeFunctions<Unit, WrappedAccessGraph, SootMethod, V> {
+public class ForwardEdgeFunctions<V> implements EdgeFunctions<Unit, AccessGraph, SootMethod, V> {
 
   private AnalysisContext<V> context;
   private final EdgeFunction<V> ALL_TOP;
@@ -25,8 +25,8 @@ public class ForwardEdgeFunctions<V> implements EdgeFunctions<Unit, WrappedAcces
   }
 
   @Override
-  public EdgeFunction<V> getNormalEdgeFunction(WrappedAccessGraph d1, Unit curr,
-      WrappedAccessGraph currNode, Unit succ, WrappedAccessGraph succNode) {
+  public EdgeFunction<V> getNormalEdgeFunction(AccessGraph d1, Unit curr,
+      AccessGraph currNode, Unit succ, AccessGraph succNode) {
     if (!context.isInIDEPhase())
       return ALL_BOTTOM;
 
@@ -37,17 +37,17 @@ public class ForwardEdgeFunctions<V> implements EdgeFunctions<Unit, WrappedAcces
   }
 
   @Override
-  public EdgeFunction<V> getCallEdgeFunction(WrappedAccessGraph callerD1, Unit callSite,
-      WrappedAccessGraph srcNode, SootMethod calleeMethod, WrappedAccessGraph destNode) {
+  public EdgeFunction<V> getCallEdgeFunction(AccessGraph callerD1, Unit callSite,
+      AccessGraph srcNode, SootMethod calleeMethod, AccessGraph destNode) {
     if (!context.isInIDEPhase())
       return ALL_BOTTOM;
     return edgeFunctions.getCallEdgeFunction(callerD1, callSite, srcNode, calleeMethod, destNode);
   }
 
   @Override
-  public EdgeFunction<V> getReturnEdgeFunction(WrappedAccessGraph callerD1,
-      Unit callSite, SootMethod calleeMethod, Unit exitStmt, WrappedAccessGraph exitNode, Unit returnSite,
-      WrappedAccessGraph retNode) {
+  public EdgeFunction<V> getReturnEdgeFunction(AccessGraph callerD1,
+      Unit callSite, SootMethod calleeMethod, Unit exitStmt, AccessGraph exitNode, Unit returnSite,
+      AccessGraph retNode) {
     if (!context.isInIDEPhase())
       return ALL_BOTTOM;
     return edgeFunctions.getReturnEdgeFunction(callerD1, callSite, calleeMethod, exitStmt, exitNode,
@@ -56,8 +56,8 @@ public class ForwardEdgeFunctions<V> implements EdgeFunctions<Unit, WrappedAcces
   }
 
   @Override
-  public EdgeFunction<V> getCallToReturnEdgeFunction(WrappedAccessGraph d1,
-      Unit callSite, WrappedAccessGraph callNode, Unit returnSite, WrappedAccessGraph returnSiteNode) {
+  public EdgeFunction<V> getCallToReturnEdgeFunction(AccessGraph d1,
+      Unit callSite, AccessGraph callNode, Unit returnSite, AccessGraph returnSiteNode) {
     if (!context.isInIDEPhase())
       return ALL_BOTTOM;
     

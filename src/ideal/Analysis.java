@@ -18,7 +18,6 @@ import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
 import ideal.debug.JSONDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
-import ideal.flowfunctions.WrappedAccessGraph;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -45,9 +44,9 @@ public class Analysis<V> {
   private final IDebugger<V> debugger;
   private static Stopwatch START_TIME;
   private AnalysisContext<V> context;
-  private Set<PathEdge<Unit, WrappedAccessGraph>> initialSeeds = new HashSet<>();
+  private Set<PathEdge<Unit, AccessGraph>> initialSeeds = new HashSet<>();
   private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
-  private Map<PathEdge<Unit, WrappedAccessGraph>, EdgeFunction<V>> seedToInitivalValue = new HashMap<>();
+  private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> seedToInitivalValue = new HashMap<>();
   private final IInfoflowCFG icfg;
   protected final AnalysisProblem<V> problem;
   private final AnalysisEdgeFunctions<V> edgeFunc;
@@ -74,14 +73,14 @@ public class Analysis<V> {
     initialSeeds = computeSeeds();
     debugger.computedSeeds(seedToInitivalValue);
     debugger.beforeAnalysis();
-    for (PathEdge<Unit, WrappedAccessGraph> seed : initialSeeds) {
+    for (PathEdge<Unit, AccessGraph> seed : initialSeeds) {
       analysisForSeed(seed);
     }
     debugger.afterAnalysis();
   }
 
 
-  private void analysisForSeed(final PathEdge<Unit, WrappedAccessGraph> seed) {
+  private void analysisForSeed(final PathEdge<Unit, AccessGraph> seed) {
     boolean timeout = false;
     debugger.startWithSeed(seed);
     timeout = false;
@@ -110,19 +109,19 @@ public class Analysis<V> {
     solver.destroy();
   }
 
-  private void phase1(PathEdge<Unit, WrappedAccessGraph> seed, AnalysisSolver<V> solver) {
+  private void phase1(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver) {
     debugger.startPhase1WithSeed(seed, solver);
-    Set<PathEdge<Unit, WrappedAccessGraph>> worklist = new HashSet<>();
+    Set<PathEdge<Unit, AccessGraph>> worklist = new HashSet<>();
     if(icfg.isExitStmt(seed.getTarget()) || icfg.isCallStmt(seed.getTarget())){
     	worklist.add(seed);
     } else{
 	    for(Unit u : icfg.getSuccsOf(seed.getTarget())){
-	    	worklist.add(new PathEdge<Unit, WrappedAccessGraph>(seed.factAtSource(),u,seed.factAtTarget()));
+	    	worklist.add(new PathEdge<Unit, AccessGraph>(seed.factAtSource(),u,seed.factAtTarget()));
 	    }
     }
     while (!worklist.isEmpty()) {
       debugger.startForwardPhase(worklist);
-      for (PathEdge<Unit, WrappedAccessGraph> s : worklist) {
+      for (PathEdge<Unit, AccessGraph> s : worklist) {
         solver.injectPhase1Seed(s.factAtSource(), s.getTarget(), s.factAtTarget());
       }
       worklist.clear();
@@ -140,7 +139,7 @@ public class Analysis<V> {
     debugger.finishPhase1WithSeed(seed, solver);
   }
 
-  private void phase2(PathEdge<Unit, WrappedAccessGraph> s, AnalysisSolver<V> solver) {
+  private void phase2(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
     debugger.startPhase2WithSeed(s, solver);
     context.enableIDEPhase();
     if(icfg.isExitStmt(s.getTarget())){
@@ -161,8 +160,8 @@ public class Analysis<V> {
     debugger.finishPhase2WithSeed(s, solver);
   }
 
-  private Set<PathEdge<Unit, WrappedAccessGraph>> computeSeeds() {
-    Set<PathEdge<Unit, WrappedAccessGraph>> seeds = new HashSet<>();
+  private Set<PathEdge<Unit, AccessGraph>> computeSeeds() {
+    Set<PathEdge<Unit, AccessGraph>> seeds = new HashSet<>();
     ReachableMethods rm = Scene.v().getReachableMethods();
     QueueReader<MethodOrMethodContext> listener = rm.listener();
     while (listener.hasNext()) {
@@ -172,8 +171,8 @@ public class Analysis<V> {
     return seeds;
   }
 
-  private Collection<? extends PathEdge<Unit, WrappedAccessGraph>> computeSeeds(SootMethod method) {
-    Set<PathEdge<Unit, WrappedAccessGraph>> seeds = new HashSet<>();
+  private Collection<? extends PathEdge<Unit, AccessGraph>> computeSeeds(SootMethod method) {
+    Set<PathEdge<Unit, AccessGraph>> seeds = new HashSet<>();
 
     if (!method.hasActiveBody())
       return seeds;
@@ -181,8 +180,8 @@ public class Analysis<V> {
       Collection<SootMethod> calledMethods =
           (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u) : new HashSet<SootMethod>());
         for (Pair<AccessGraph, EdgeFunction<V>> fact : problem.generate(u, calledMethods)) {
-          PathEdge<Unit, WrappedAccessGraph> pathEdge =
-              new PathEdge<Unit, WrappedAccessGraph>(InternalAnalysisProblem.ZERO, u, new WrappedAccessGraph(fact.getO1()));
+          PathEdge<Unit, AccessGraph> pathEdge =
+              new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u, fact.getO1());
           seeds.add(pathEdge);
           seedToInitivalValue.put(pathEdge, fact.getO2());
         }

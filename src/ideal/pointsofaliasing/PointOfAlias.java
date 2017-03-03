@@ -2,18 +2,18 @@ package ideal.pointsofaliasing;
 
 import java.util.Collection;
 
+import boomerang.accessgraph.AccessGraph;
 import heros.solver.PathEdge;
 import ideal.AnalysisContext;
-import ideal.flowfunctions.WrappedAccessGraph;
 import soot.Unit;
 
 public abstract class PointOfAlias<V> {
-  protected WrappedAccessGraph d2;
+  protected AccessGraph d2;
   protected Unit curr;
   protected Unit succ;
-  protected WrappedAccessGraph d1;
+  protected AccessGraph d1;
 
-  public PointOfAlias(WrappedAccessGraph d1, Unit stmt, WrappedAccessGraph d2, Unit succ) {
+  public PointOfAlias(AccessGraph d1, Unit stmt, AccessGraph d2, Unit succ) {
     this.d1 = d1;
     this.curr = stmt;
     this.d2 = d2;
@@ -24,7 +24,7 @@ public abstract class PointOfAlias<V> {
   /**
    * Generates the path edges the given POA should generate.
    */
-  public abstract Collection<PathEdge<Unit, WrappedAccessGraph>> getPathEdges(
+  public abstract Collection<PathEdge<Unit, AccessGraph>> getPathEdges(
       AnalysisContext<V> tsanalysis);
 
 

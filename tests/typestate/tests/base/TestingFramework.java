@@ -30,9 +30,9 @@ public abstract class TestingFramework<V> {
     Options.v().set_allow_phantom_refs(true);
 
     List<String> includeList = new LinkedList<String>();
-    includeList.add("java.lang.");
-    includeList.add("java.util.");
-    includeList.add("java.io.");
+    includeList.add("java.lang.*");
+    includeList.add("java.util.*");
+    includeList.add("java.io.*");
     includeList.add("sun.misc.");
     includeList.add("java.net.");
     includeList.add("javax.servlet.");

@@ -17,11 +17,11 @@ import org.json.simple.JSONObject;
 import com.google.common.base.Joiner;
 
 import boomerang.AliasResults;
+import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
-import ideal.flowfunctions.WrappedAccessGraph;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;
@@ -49,7 +49,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 		this.icfg = icfg;
 	}
 	@Override
-	public void computedSeeds(Map<PathEdge<Unit, WrappedAccessGraph>, EdgeFunction<V>> seedToInitivalValue) {
+	public void computedSeeds(Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> seedToInitivalValue) {
 
 	}
 
@@ -61,7 +61,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 	
 	
 	@Override
-	public void addSummary(SootMethod methodToSummary, PathEdge<Unit, WrappedAccessGraph> summary) {
+	public void addSummary(SootMethod methodToSummary, PathEdge<Unit, AccessGraph> summary) {
 		for (Unit callSite : icfg.getCallersOf(methodToSummary)) {
 			ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf(callSite));
 			for(Unit start : icfg.getStartPointsOf(methodToSummary)){
@@ -72,7 +72,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void normalFlow(Unit start, WrappedAccessGraph startFact, Unit target, WrappedAccessGraph targetFact) {
+	public void normalFlow(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
 		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf(start));
 		cfg.addEdge(
 				new ESGEdge(new ESGNode(start, startFact), new ESGNode(target, targetFact), "normalFlow"));
@@ -88,7 +88,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void callFlow(Unit start, WrappedAccessGraph startFact, Unit target, WrappedAccessGraph targetFact) {
+	public void callFlow(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
 		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf(start));
 		ESGNode callSiteNode = new ESGNode(start, startFact);
 		CalleeESGNode calleeNode = new CalleeESGNode(target,targetFact, callSiteNode);
@@ -96,68 +96,68 @@ public class JSONDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void callToReturn(Unit start, WrappedAccessGraph startFact, Unit target, WrappedAccessGraph targetFact) {
+	public void callToReturn(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
 		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf(start));
 		cfg.addEdge(new ESGEdge(new ESGNode(start, startFact), new ESGNode(target, targetFact),
 				"call2ReturnFlow"));
 	}
 
 	@Override
-	public void returnFlow(Unit start, WrappedAccessGraph startFact, Unit target, WrappedAccessGraph targetFact) {
+	public void returnFlow(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
 		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf(target));
 		ESGNode nodeInMethod = new ESGNode(target, targetFact);
 		cfg.addEdge(new ESGEdge(new CalleeESGNode(start, startFact, nodeInMethod), nodeInMethod, "returnFlow"));
 	}
 
 	@Override
-	public void indirectFlowAtCall(WrappedAccessGraph source, Unit curr, WrappedAccessGraph target) {
+	public void indirectFlowAtCall(AccessGraph source, Unit curr, AccessGraph target) {
 		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
 		cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr, target), "indirectFlow"));
 	}
 	
 	@Override
-	public void indirectFlowAtWrite(WrappedAccessGraph source, Unit curr, WrappedAccessGraph target) {
+	public void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target) {
 		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
 		cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr, target), "indirectFlow"));
 	}
 
 	@Override
-	public void killAsOfStrongUpdate(WrappedAccessGraph d1, Unit callSite, WrappedAccessGraph callNode,
-			Unit returnSite, WrappedAccessGraph returnSiteNode) {
+	public void killAsOfStrongUpdate(AccessGraph d1, Unit callSite, AccessGraph callNode,
+			Unit returnSite, AccessGraph returnSiteNode) {
 		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf(callSite));
 		cfg.addTopEdge(new ESGEdge(new ESGNode(callSite, callNode), new ESGNode(returnSite, returnSiteNode), "topEdge"));
 	}
 	@Override
-	public void setValue(Unit start, WrappedAccessGraph startFact, V value) {
+	public void setValue(Unit start, AccessGraph startFact, V value) {
 		esgNodeToLatticeVal.put(new ESGNode(start,startFact),value);
 	}
 
 	@Override
-	public void startWithSeed(PathEdge<Unit, WrappedAccessGraph> seed) {
+	public void startWithSeed(PathEdge<Unit, AccessGraph> seed) {
 
 	}
 
 	@Override
-	public void startPhase1WithSeed(PathEdge<Unit, WrappedAccessGraph> seed, AnalysisSolver<V> solver) {
+	public void startPhase1WithSeed(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver) {
 
 	}
 
 	@Override
-	public void startPhase2WithSeed(PathEdge<Unit, WrappedAccessGraph> s, AnalysisSolver<V> solver) {
+	public void startPhase2WithSeed(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
 	}
 
 	@Override
-	public void finishPhase1WithSeed(PathEdge<Unit, WrappedAccessGraph> seed, AnalysisSolver<V> solver) {
-
-	}
-
-	@Override
-	public void finishPhase2WithSeed(PathEdge<Unit, WrappedAccessGraph> s, AnalysisSolver<V> solver) {
+	public void finishPhase1WithSeed(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver) {
 
 	}
 
 	@Override
-	public void finishWithSeed(PathEdge<Unit, WrappedAccessGraph> seed, boolean timeout, boolean isInErrorState, AnalysisSolver<V> solver) {
+	public void finishPhase2WithSeed(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
+
+	}
+
+	@Override
+	public void finishWithSeed(PathEdge<Unit, AccessGraph> seed, boolean timeout, boolean isInErrorState, AnalysisSolver<V> solver) {
 
 	}
 
@@ -172,34 +172,34 @@ public class JSONDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void startForwardPhase(Set<PathEdge<Unit, WrappedAccessGraph>> worklist) {
+	public void startForwardPhase(Set<PathEdge<Unit, AccessGraph>> worklist) {
 
 	}
 
 	@Override
-	public void onAliasesComputed(WrappedAccessGraph boomerangAccessGraph, Unit curr, WrappedAccessGraph d1,
+	public void onAliasesComputed(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1,
 			AliasResults res) {
 
 	}
 
 	@Override
-	public void onAliasTimeout(WrappedAccessGraph boomerangAccessGraph, Unit curr, WrappedAccessGraph d1) {
+	public void onAliasTimeout(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
 
 	}
 
 	@Override
-	public void beforeAlias(WrappedAccessGraph boomerangAccessGraph, Unit curr, WrappedAccessGraph d1) {
+	public void beforeAlias(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
 
 	}
 
 
 	@Override
-	public void detectedStrongUpdate(Unit callSite, WrappedAccessGraph receivesUpdate) {
+	public void detectedStrongUpdate(Unit callSite, AccessGraph receivesUpdate) {
 
 	}
 
 	@Override
-	public void onAnalysisTimeout(PathEdge<Unit, WrappedAccessGraph> seed) {
+	public void onAnalysisTimeout(PathEdge<Unit, AccessGraph> seed) {
 
 	}
 
@@ -209,7 +209,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void onNormalPropagation(WrappedAccessGraph sourceFact, Unit curr, Unit succ,WrappedAccessGraph d2) {
+	public void onNormalPropagation(AccessGraph sourceFact, Unit curr, Unit succ,AccessGraph d2) {
 
 	}
 
@@ -217,7 +217,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 
 		private ESGNode linkedNode;
 
-		CalleeESGNode(Unit u, WrappedAccessGraph a, ESGNode linkedNode) {
+		CalleeESGNode(Unit u, AccessGraph a, ESGNode linkedNode) {
 			super(u, a);
 			this.linkedNode = linkedNode;
 		}
@@ -254,9 +254,9 @@ public class JSONDebugger<V> implements IDebugger<V> {
 
 	private static class ESGNode {
 		Unit u;
-		WrappedAccessGraph a;
+		AccessGraph a;
 
-		ESGNode(Unit u, WrappedAccessGraph a) {
+		ESGNode(Unit u, AccessGraph a) {
 			this.u = u;
 			this.a = a;
 			esgNodeCounter++;
@@ -355,7 +355,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 
 	private class ExplodedSuperGraph {
 		private SootMethod method;
-		private LinkedList<WrappedAccessGraph> facts = new LinkedList<>();
+		private LinkedList<AccessGraph> facts = new LinkedList<>();
 		private LinkedList<ESGNode> nodes = new LinkedList<>();
 		private LinkedList<CalleeESGNode> calleeNodes = new LinkedList<>();
 		private LinkedList<ESGEdge> edges = new LinkedList<>();
@@ -401,7 +401,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 			int offset = 0;
 			int labelYOffset = 0;
 			int charSize = 8;
-			for (WrappedAccessGraph g : facts) {
+			for (AccessGraph g : facts) {
 				labelYOffset = Math.max(labelYOffset, charSize * g.toString().length());
 			}
 			int index = 0;
@@ -457,9 +457,9 @@ public class JSONDebugger<V> implements IDebugger<V> {
 				}
 			}
 
-			LinkedList<WrappedAccessGraph> factsList = new LinkedList<>();
+			LinkedList<AccessGraph> factsList = new LinkedList<>();
 
-			for (WrappedAccessGraph u : facts) {
+			for (AccessGraph u : facts) {
 				JSONObject nodeObj = new JSONObject();
 				JSONObject pos = new JSONObject();
 				factsList.add(u);

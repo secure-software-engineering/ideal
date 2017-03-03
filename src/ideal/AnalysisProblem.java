@@ -7,7 +7,6 @@ import heros.EdgeFunction;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.edgefunction.AnalysisEdgeFunctions;
-import ideal.flowfunctions.WrappedAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 
@@ -35,7 +34,7 @@ public interface AnalysisProblem<V> {
    * This is invoked as a callback when the analysis is finised. It retrieves the seed and the solver as input.
    * The client may wish to use that information.
    */
-  void onAnalysisFinished(PathEdge<Unit, WrappedAccessGraph> seed, AnalysisSolver<V> solver);
+  void onAnalysisFinished(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver);
 
   /**
    * Just used to report errors in the typestate analysis.

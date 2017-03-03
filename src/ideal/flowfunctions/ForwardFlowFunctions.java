@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import boomerang.AliasFinder;
-import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.forward.AbstractFlowFunctions;
@@ -52,19 +51,19 @@ import soot.jimple.Stmt;
  *
  */
 public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
-		implements FlowFunctions<Unit, WrappedAccessGraph, SootMethod> {
+		implements FlowFunctions<Unit, AccessGraph, SootMethod> {
 	private AnalysisContext<V> context;
 	public ForwardFlowFunctions(AnalysisContext<V> context) {
 		this.context = context;
 	}
 
 	@Override
-	public FlowFunction<WrappedAccessGraph> getNormalFlowFunction(final WrappedAccessGraph sourceFact, final Unit curr,
+	public FlowFunction<AccessGraph> getNormalFlowFunction(final AccessGraph sourceFact, final Unit curr,
 			final Unit succ) {
-		return new FlowFunction<WrappedAccessGraph>() {
+		return new FlowFunction<AccessGraph>() {
 
 			@Override
-			public Set<WrappedAccessGraph> computeTargets(WrappedAccessGraph source) {
+			public Set<AccessGraph> computeTargets(AccessGraph source) {
 				context.debugger.onNormalPropagation(sourceFact, curr, succ, source);
 				if (curr instanceof IdentityStmt) {
 					IdentityStmt identityStmt = (IdentityStmt) curr;
@@ -73,7 +72,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						Local leftOp = (Local) identityStmt.getLeftOp();
 						// e = d;
 						if (!source.isStatic() && typeCompatible(((Local) leftOp).getType(), source.getBaseType())) {
-							HashSet<WrappedAccessGraph> out = new HashSet<WrappedAccessGraph>();
+							HashSet<AccessGraph> out = new HashSet<AccessGraph>();
 							out.add(source);
 							out.add(source.deriveWithNewLocal((Local) leftOp, source.getBaseType()));
 							return out;
@@ -108,7 +107,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 				Value leftOp = as.getLeftOp();
 				Value rightOp = as.getRightOp();
 
-				HashSet<WrappedAccessGraph> out = new HashSet<WrappedAccessGraph>();
+				HashSet<AccessGraph> out = new HashSet<AccessGraph>();
 				out.add(source);
 
 				if (rightOp instanceof Constant || rightOp instanceof NewExpr) {
@@ -136,7 +135,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 							SootField field = fr.getField();
 
 							if (source.baseAndFirstFieldMatches(base, field)) {
-								Set<WrappedAccessGraph> popFirstField = source.popFirstField();
+								Set<AccessGraph> popFirstField = source.popFirstField();
 								out.addAll(popFirstField);
 							} else {
 								return Collections.emptySet();
@@ -182,10 +181,10 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						if (base instanceof Local) {
 							Local lBase = (Local) base;
 
-							WrappedAccessGraph withNewLocal = source.deriveWithNewLocal(lBase, lBase.getType());
+							AccessGraph withNewLocal = source.deriveWithNewLocal(lBase, lBase.getType());
 							WrappedSootField newFirstField = new WrappedSootField(field, source.getBaseType(), curr);
-							if (withNewLocal.getDelegate().canAppend(newFirstField)) {
-								WrappedAccessGraph newAp = withNewLocal.prependField(newFirstField);
+							if (withNewLocal.canAppend(newFirstField)) {
+								AccessGraph newAp = withNewLocal.prependField(newFirstField);
 								out.add(newAp);
 								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as,
 										lBase, newAp, succ);
@@ -203,8 +202,8 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						if (base instanceof Local) {
 							Local lBase = (Local) base;
 
-							WrappedAccessGraph withNewLocal = source.deriveWithNewLocal(lBase, lBase.getType());
-							WrappedAccessGraph newAp = withNewLocal.prependField(
+							AccessGraph withNewLocal = source.deriveWithNewLocal(lBase, lBase.getType());
+							AccessGraph newAp = withNewLocal.prependField(
 									new WrappedSootField(AliasFinder.ARRAY_FIELD, source.getBaseType(), curr));
 							out.add(newAp);
 							InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as, lBase,
@@ -220,8 +219,8 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						StaticFieldRef fr = (StaticFieldRef) leftOp;
 						SootField field = fr.getField();
 
-						WrappedAccessGraph staticap = source.makeStatic();
-						WrappedAccessGraph newAp = staticap
+						AccessGraph staticap = source.makeStatic();
+						AccessGraph newAp = staticap
 								.prependField(new WrappedSootField(field, source.getBaseType(), curr));
 						out.add(newAp);
 						return out;
@@ -236,7 +235,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						// replace in source
 						if (leftOp instanceof Local && !source.baseMatches(leftOp)) {
 							for(WrappedSootField firstField : source.getFirstField()){
-								WrappedAccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) leftOp,firstField.getType());
+								AccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) leftOp,firstField.getType());
 	
 								out.addAll(deriveWithNewLocal.popFirstField());
 							}
@@ -246,8 +245,8 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 					ArrayRef arrayRef = (ArrayRef) rightOp;
 					if (source.baseAndFirstFieldMatches(arrayRef.getBase(), AliasFinder.ARRAY_FIELD)) {
 
-						Set<WrappedAccessGraph> withoutFirstField = source.popFirstField();
-						for (WrappedAccessGraph a : withoutFirstField) {
+						Set<AccessGraph> withoutFirstField = source.popFirstField();
+						for (AccessGraph a : withoutFirstField) {
 							for(WrappedSootField firstField : source.getFirstField()){
 								out.add(a.deriveWithNewLocal((Local) leftOp, firstField.getType()));
 							}
@@ -255,10 +254,10 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 					}
 				} else if (rightOp instanceof StaticFieldRef && Analysis.ENABLE_STATIC_FIELDS) {
 					StaticFieldRef sfr = (StaticFieldRef) rightOp;
-					if (source.isStatic() && source.firstFieldMatches(sfr.getField())) {
+					if (source.isStatic() && source.firstFieldMustMatch(sfr.getField())) {
 						if (leftOp instanceof Local) {
-							Set<WrappedAccessGraph> withoutFirstField = source.popFirstField();
-							for (WrappedAccessGraph a : withoutFirstField) {
+							Set<AccessGraph> withoutFirstField = source.popFirstField();
+							for (AccessGraph a : withoutFirstField) {
 								for(WrappedSootField firstField : source.getFirstField()){
 									out.add(a.deriveWithNewLocal((Local) leftOp, firstField.getType()));
 								}
@@ -281,7 +280,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		return false;
 	}
 	@Override
-	public FlowFunction<WrappedAccessGraph> getCallFlowFunction(final WrappedAccessGraph d1, final Unit callSite,
+	public FlowFunction<AccessGraph> getCallFlowFunction(final AccessGraph d1, final Unit callSite,
 			final SootMethod callee) {
 		assert callee != null;
 		final Local[] paramLocals = new Local[callee.getParameterCount()];
@@ -289,16 +288,15 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 			paramLocals[i] = callee.getActiveBody().getParameterLocal(i);
 
 		final Local thisLocal = callee.isStatic() ? null : callee.getActiveBody().getThisLocal();
-		return new FlowFunction<WrappedAccessGraph>() {
+		return new FlowFunction<AccessGraph>() {
 			@Override
-			public Set<WrappedAccessGraph> computeTargets(WrappedAccessGraph source) {
-				source = source.deriveWithoutEvent();
+			public Set<AccessGraph> computeTargets(AccessGraph source) {
 				assert source != null;
-				Set<WrappedAccessGraph> out = new HashSet<>();
+				Set<AccessGraph> out = new HashSet<>();
 				Stmt is = (Stmt) callSite;
 				source = source.deriveWithoutAllocationSite();
 				if (Analysis.ENABLE_STATIC_FIELDS && source.isStatic()) {
-					if (callee != null && isFirstFieldUsedTransitivelyInMethod(source.getDelegate(),callee)) {
+					if (callee != null && isFirstFieldUsedTransitivelyInMethod(source,callee)) {
 						return Collections.singleton(source);
 					} else {
 						return Collections.emptySet();
@@ -323,7 +321,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						InstanceInvokeExpr iIExpr = (InstanceInvokeExpr) is.getInvokeExpr();
 
 						if (source.baseMatches(iIExpr.getBase())) {
-							if (callee != null && !hasCompatibleTypesForCall(source.getDelegate(), callee.getDeclaringClass()))
+							if (callee != null && !hasCompatibleTypesForCall(source, callee.getDeclaringClass()))
 								return Collections.emptySet();
 							if (d1 != null && d1.hasAllocationSite() && source.getFieldCount() < 1) {
 								Unit sourceStmt = d1.getSourceStmt();
@@ -348,7 +346,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 								}
 							}
 
-							WrappedAccessGraph replacedThisValue = source.deriveWithNewLocal(thisLocal, source.getBaseType());
+							AccessGraph replacedThisValue = source.deriveWithNewLocal(thisLocal, source.getBaseType());
 							out.add(replacedThisValue);
 						}
 					}
@@ -359,24 +357,24 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 	@Override
-	public FlowFunction<WrappedAccessGraph> getReturnFlowFunction(final WrappedAccessGraph callerD1, final WrappedAccessGraph calleeD1, final Unit callSite,
-			final WrappedAccessGraph callerCallSiteFact, final SootMethod callee, final Unit exitStmt, final Unit returnSite) {
+	public FlowFunction<AccessGraph> getReturnFlowFunction(final AccessGraph callerD1, final AccessGraph calleeD1, final Unit callSite,
+			final AccessGraph callerCallSiteFact, final SootMethod callee, final Unit exitStmt, final Unit returnSite) {
 		final Local[] paramLocals = new Local[callee.getParameterCount()];
 		for (int i = 0; i < callee.getParameterCount(); i++)
 			paramLocals[i] = callee.getActiveBody().getParameterLocal(i);
 		final Local thisLocal = callee.isStatic() ? null : callee.getActiveBody().getThisLocal();
 		final SootMethod caller = (returnSite != null ? context.icfg().getMethodOf(returnSite) : null);
-		return new FlowFunction<WrappedAccessGraph>() {
+		return new FlowFunction<AccessGraph>() {
 			
 
 			@Override
-			public Set<WrappedAccessGraph> computeTargets(WrappedAccessGraph source) {
+			public Set<AccessGraph> computeTargets(AccessGraph source) {
 				// mapping of fields of AccessPath those will be killed in
 				// callToReturn
 				if (Analysis.ENABLE_STATIC_FIELDS && source.isStatic())
 					return Collections.singleton(source);
 
-				HashSet<WrappedAccessGraph> out = new HashSet<WrappedAccessGraph>();
+				HashSet<AccessGraph> out = new HashSet<AccessGraph>();
 				if (callSite instanceof Stmt) {
 					Stmt is = (Stmt) callSite;
 
@@ -388,20 +386,16 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 								Value arg = ie.getArg(i);
 								if (arg instanceof Local) {
 									if (typeCompatible(((Local) arg).getType(), source.getBaseType())) {
-										WrappedAccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) arg,
+										AccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) arg,
 												source.getBaseType());
 										
 										EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getReturnEdgeFunction(callerD1, callSite, callee, exitStmt, source, returnSite, deriveWithNewLocal);
-										if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
-												deriveWithNewLocal = deriveWithNewLocal.deriveWithEvent();
-										}
 										out.add(deriveWithNewLocal);
 										CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,deriveWithNewLocal,
 												returnSite);
 										if (context.isInIDEPhase()) {
 											out.addAll(context.callSiteFlows(callSitePOA));
 										} else {
-											if(callSitePOA.triggersQuery())
 												context.addPOA(callSitePOA);
 										}
 									}
@@ -416,12 +410,9 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 								Local newBase = (Local) iIExpr.getBase();
 								
 								if (pointsToSetCompatible(newBase, source.getBase()) && typeCompatible(newBase.getType(), source.getBaseType())) {
-									WrappedAccessGraph possibleAccessPath = source.deriveWithNewLocal((Local) iIExpr.getBase(),
+									AccessGraph possibleAccessPath = source.deriveWithNewLocal((Local) iIExpr.getBase(),
 											source.getBaseType());
 									EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getReturnEdgeFunction(callerD1, callSite, callee, exitStmt, source, returnSite, possibleAccessPath);
-									if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
-										possibleAccessPath = possibleAccessPath.deriveWithEvent();
-									}
 									out.add(possibleAccessPath);
 									
 									CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,possibleAccessPath,
@@ -429,7 +420,6 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 									if (context.isInIDEPhase()) {
 										out.addAll(context.callSiteFlows(callSitePOA));
 									} else {
-										if(callSitePOA.triggersQuery())
 											context.addPOA(callSitePOA);
 									}
 								}
@@ -464,7 +454,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 	@Override
-	public FlowFunction<WrappedAccessGraph> getCallToReturnFlowFunction(WrappedAccessGraph sourceFact, final Unit callStmt,
+	public FlowFunction<AccessGraph> getCallToReturnFlowFunction(AccessGraph sourceFact, final Unit callStmt,
 			Unit returnSite, boolean hasCallees) {
 		if (!hasCallees) {
 			return Identity.v();
@@ -478,10 +468,9 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		}
 
 		final InvokeExpr invokeExpr = callSite.getInvokeExpr();
-		final SootMethod callee = invokeExpr.getMethod();
-		return new FlowFunction<WrappedAccessGraph>() {
+		return new FlowFunction<AccessGraph>() {
 			@Override
-			public Set<WrappedAccessGraph> computeTargets(WrappedAccessGraph source) {
+			public Set<AccessGraph> computeTargets(AccessGraph source) {
 				for (int i = 0; i < invokeExpr.getArgCount(); i++) {
 					if (source.baseMatches(invokeExpr.getArg(i))) {
 						return Collections.emptySet();

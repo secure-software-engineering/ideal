@@ -2,11 +2,11 @@ package typestate;
 
 import java.util.Set;
 
+import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.edgefunc.AllBottom;
 import heros.edgefunc.EdgeIdentity;
 import ideal.edgefunction.AnalysisEdgeFunctions;
-import ideal.flowfunctions.WrappedAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 import typestate.finiteautomata.Transition;
@@ -22,36 +22,36 @@ public class TypestateEdgeFunctions implements AnalysisEdgeFunctions<TypestateDo
   }
 
   @Override
-  public EdgeFunction<TypestateDomainValue> getNormalEdgeFunction(WrappedAccessGraph d1, Unit curr,
-      WrappedAccessGraph currNode, Unit succ, WrappedAccessGraph succNode) {
+  public EdgeFunction<TypestateDomainValue> getNormalEdgeFunction(AccessGraph d1, Unit curr,
+      AccessGraph currNode, Unit succ, AccessGraph succNode) {
     return EdgeIdentity.v();
   }
 
   @Override
-  public EdgeFunction<TypestateDomainValue> getCallEdgeFunction(WrappedAccessGraph callerD1, Unit callSite,
-      WrappedAccessGraph srcNode, SootMethod calleeMethod, WrappedAccessGraph destNode) {
+  public EdgeFunction<TypestateDomainValue> getCallEdgeFunction(AccessGraph callerD1, Unit callSite,
+      AccessGraph srcNode, SootMethod calleeMethod, AccessGraph destNode) {
     Set<? extends Transition> trans =
-        func.getCallTransitionsFor(callerD1.getDelegate(), callSite, calleeMethod, srcNode.getDelegate(), destNode.getDelegate());
+        func.getCallTransitionsFor(callerD1, callSite, calleeMethod, srcNode, destNode);
     if (trans.isEmpty())
       return EdgeIdentity.v();
     return new TransitionFunction(trans);
   }
 
   @Override
-  public EdgeFunction<TypestateDomainValue> getReturnEdgeFunction(WrappedAccessGraph callerD1,
-      Unit callSite, SootMethod calleeMethod, Unit exitStmt, WrappedAccessGraph exitNode, Unit returnSite,
-      WrappedAccessGraph retNode) {
+  public EdgeFunction<TypestateDomainValue> getReturnEdgeFunction(AccessGraph callerD1,
+      Unit callSite, SootMethod calleeMethod, Unit exitStmt, AccessGraph exitNode, Unit returnSite,
+      AccessGraph retNode) {
 
-    Set<? extends Transition> trans = func.getReturnTransitionsFor(callerD1.getDelegate(), callSite, calleeMethod,
-        exitStmt, exitNode.getDelegate(), returnSite, retNode.getDelegate());
+    Set<? extends Transition> trans = func.getReturnTransitionsFor(callerD1, callSite, calleeMethod,
+        exitStmt, exitNode, returnSite, retNode);
     if (trans.isEmpty())
       return EdgeIdentity.v();
     return new TransitionFunction(trans);
   }
 
   @Override
-  public EdgeFunction<TypestateDomainValue> getCallToReturnEdgeFunction(WrappedAccessGraph d1,
-      Unit callSite, WrappedAccessGraph callNode, Unit returnSite, WrappedAccessGraph returnSideNode) {
+  public EdgeFunction<TypestateDomainValue> getCallToReturnEdgeFunction(AccessGraph d1,
+      Unit callSite, AccessGraph callNode, Unit returnSite, AccessGraph returnSideNode) {
     return EdgeIdentity.v();
   }
 

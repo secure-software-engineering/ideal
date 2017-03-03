@@ -16,17 +16,16 @@ import heros.solver.IDEDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.edgefunction.ForwardEdgeFunctions;
 import ideal.flowfunctions.ForwardFlowFunctions;
-import ideal.flowfunctions.WrappedAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 
 public class InternalAnalysisProblem<V> implements
-    IDETabulationProblem<Unit, WrappedAccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
+    IDETabulationProblem<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
   private InterproceduralCFG<Unit, SootMethod> icfg;
   private AnalysisContext<V> context;
   private AnalysisEdgeFunctions<V> edgeFunctions;
-  public final static WrappedAccessGraph ZERO = new WrappedAccessGraph(new AccessGraph(null, null));
+  public final static AccessGraph ZERO = new AccessGraph(null, null);
 
   InternalAnalysisProblem(InterproceduralCFG<Unit, SootMethod> icfg, AnalysisContext<V> context,
       AnalysisEdgeFunctions<V> edgeFunctions) {
@@ -56,7 +55,7 @@ public class InternalAnalysisProblem<V> implements
   }
 
   @Override
-  public FlowFunctions<Unit, WrappedAccessGraph, SootMethod> flowFunctions() {
+  public FlowFunctions<Unit, AccessGraph, SootMethod> flowFunctions() {
     return new ForwardFlowFunctions<V>(context);
   }
 
@@ -66,17 +65,17 @@ public class InternalAnalysisProblem<V> implements
   }
 
   @Override
-  public Map<Unit, Set<WrappedAccessGraph>> initialSeeds() {
+  public Map<Unit, Set<AccessGraph>> initialSeeds() {
     return null;
   }
 
   @Override
-  public WrappedAccessGraph zeroValue() {
+  public AccessGraph zeroValue() {
     return ZERO;
   }
 
   @Override
-  public EdgeFunctions<Unit, WrappedAccessGraph, SootMethod, V> edgeFunctions() {
+  public EdgeFunctions<Unit, AccessGraph, SootMethod, V> edgeFunctions() {
     return new ForwardEdgeFunctions<>(context, edgeFunctions);
   }
 
@@ -122,7 +121,7 @@ public class InternalAnalysisProblem<V> implements
 	}
 
 	@Override
-	public IDEDebugger<Unit, WrappedAccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> getDebugger() {
+	public IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> getDebugger() {
 		return context.debugger;
 	}
 }

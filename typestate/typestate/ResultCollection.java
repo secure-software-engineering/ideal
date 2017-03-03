@@ -1,16 +1,13 @@
 package typestate;
 
 import java.util.Iterator;
-import java.util.Set;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
-import ideal.flowfunctions.WrappedAccessGraph;
 import soot.SootMethod;
-import typestate.finiteautomata.Transition;
 
 public class ResultCollection<V> implements Iterable<Cell<SootMethod, AccessGraph, V>> {
 	private Table<SootMethod, AccessGraph, V> resultTable = HashBasedTable.create();

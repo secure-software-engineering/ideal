@@ -12,13 +12,11 @@ import boomerang.AliasResults;
 import boomerang.BoomerangOptions;
 import boomerang.BoomerangTimeoutException;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.accessgraph.WrappedSootField;
 import boomerang.context.IContextRequester;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
-import ideal.flowfunctions.WrappedAccessGraph;
 import ideal.pointsofaliasing.CallSite;
 import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
@@ -35,8 +33,8 @@ public class AnalysisContext<V> {
 	public final IDebugger<V> debugger;
 	private Set<PointOfAlias<V>> poas = new HashSet<>();
 	private boolean idePhase;
-	private Multimap<CallSite<V>, WrappedAccessGraph> callSiteToFlows = HashMultimap.create();
-	private Multimap<InstanceFieldWrite<V>, WrappedAccessGraph> fieldWritesToFlows = HashMultimap.create();
+	private Multimap<CallSite<V>, AccessGraph> callSiteToFlows = HashMultimap.create();
+	private Multimap<InstanceFieldWrite<V>, AccessGraph> fieldWritesToFlows = HashMultimap.create();
 	private Set<Pair<Unit, AccessGraph>> callSiteToStrongUpdates = new HashSet<>();
 	private Set<Pair<Pair<Unit, Unit>, AccessGraph>> nullnessBranches = new HashSet<>();
 	private IInfoflowCFG icfg;
@@ -83,15 +81,15 @@ public class AnalysisContext<V> {
 	 * @param res
 	 * @param isStrongUpdate
 	 */
-	public void storeComputedCallSiteFlow(CallSite<V> callSitePOA, Set<PathEdge<Unit, WrappedAccessGraph>> res,
+	public void storeComputedCallSiteFlow(CallSite<V> callSitePOA, Set<PathEdge<Unit, AccessGraph>> res,
 			boolean isStrongUpdate) {
-		for (PathEdge<Unit, WrappedAccessGraph> edge : res) {
-			WrappedAccessGraph receivesUpdate = edge.factAtTarget();
-			callSiteToFlows.put(callSitePOA.ignoreEvent(), receivesUpdate);
+		for (PathEdge<Unit, AccessGraph> edge : res) {
+			AccessGraph receivesUpdate = edge.factAtTarget();
+			callSiteToFlows.put(callSitePOA, receivesUpdate);
 			if (isStrongUpdate) {
 				debugger.detectedStrongUpdate(callSitePOA.getCallSite(), receivesUpdate);
 				callSiteToStrongUpdates
-						.add(new Pair<Unit, AccessGraph>(callSitePOA.getCallSite(), receivesUpdate.getDelegate()));
+						.add(new Pair<Unit, AccessGraph>(callSitePOA.getCallSite(), receivesUpdate));
 			}
 		}
 	}
@@ -101,10 +99,10 @@ public class AnalysisContext<V> {
 	 * @param cs The call site POA object.
 	 * @return
 	 */
-	public Collection<WrappedAccessGraph> callSiteFlows(CallSite<V> cs) {
+	public Collection<AccessGraph> callSiteFlows(CallSite<V> cs) {
 		if (!isInIDEPhase())
 			throw new RuntimeException("This can only be applied in the kill phase");
-		return callSiteToFlows.get(cs.ignoreEvent());
+		return callSiteToFlows.get(cs);
 	}
 
 	/**
@@ -113,7 +111,7 @@ public class AnalysisContext<V> {
 	 * @param outFlows
 	 */
 	public void storeComputeInstanceFieldWrite(InstanceFieldWrite<V> instanceFieldWrite,
-			Set<WrappedAccessGraph> outFlows) {
+			Set<AccessGraph> outFlows) {
 		fieldWritesToFlows.putAll(instanceFieldWrite, outFlows);
 	}
 
@@ -122,7 +120,7 @@ public class AnalysisContext<V> {
 	 * @param ifr
 	 * @return
 	 */
-	public Collection<WrappedAccessGraph> instanceFieldWriteFlows(InstanceFieldWrite<V> ifr) {
+	public Collection<AccessGraph> instanceFieldWriteFlows(InstanceFieldWrite<V> ifr) {
 		if (!isInIDEPhase())
 			throw new RuntimeException("This can only be applied in the kill phase");
 		return fieldWritesToFlows.get(ifr);
@@ -134,15 +132,15 @@ public class AnalysisContext<V> {
 	 * @param returnSideNode
 	 * @return
 	 */
-	public boolean isStrongUpdate(Unit callSite, WrappedAccessGraph returnSideNode) {
-		Pair<Unit, AccessGraph> key = new Pair<>(callSite, returnSideNode.getDelegate());
+	public boolean isStrongUpdate(Unit callSite, AccessGraph returnSideNode) {
+		Pair<Unit, AccessGraph> key = new Pair<>(callSite, returnSideNode);
 		return callSiteToStrongUpdates.contains(key);
 	}
 
 	
-	public boolean isNullnessBranch(Unit curr, Unit succ, WrappedAccessGraph returnSideNode) {
+	public boolean isNullnessBranch(Unit curr, Unit succ, AccessGraph returnSideNode) {
 		Pair<Pair<Unit, Unit>, AccessGraph> key = new Pair<>(new Pair<Unit, Unit>(curr, succ),
-				returnSideNode.getDelegate());
+				returnSideNode);
 		return nullnessBranches.contains(key);
 	}
 
@@ -157,11 +155,11 @@ public class AnalysisContext<V> {
 		return icfg;
 	}
 
-	public IContextRequester getContextRequestorFor(final WrappedAccessGraph d1, final Unit stmt) {
+	public IContextRequester getContextRequestorFor(final AccessGraph d1, final Unit stmt) {
 		return solver.getContextRequestorFor(d1, stmt);
 	}
 
-	public AliasResults aliasesFor(WrappedAccessGraph boomerangAccessGraph, Unit curr, WrappedAccessGraph d1) {
+	public AliasResults aliasesFor(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
 		Analysis.checkTimeout();
 		BoomerangOptions opts = new BoomerangOptions();
 		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
@@ -170,7 +168,7 @@ public class AnalysisContext<V> {
 		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
 		try {
 			boomerang.startQuery();
-			AliasResults res = boomerang.findAliasAtStmt(boomerangAccessGraph.getDelegate(), curr,
+			AliasResults res = boomerang.findAliasAtStmt(boomerangAccessGraph, curr,
 					getContextRequestorFor(d1, curr)).withoutNullAllocationSites();
 			debugger.onAliasesComputed(boomerangAccessGraph, curr, d1, res);
 			return res;

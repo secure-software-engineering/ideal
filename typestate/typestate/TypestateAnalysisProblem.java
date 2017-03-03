@@ -17,7 +17,6 @@ import ideal.AnalysisProblem;
 import ideal.AnalysisSolver;
 import ideal.InternalAnalysisProblem;
 import ideal.edgefunction.AnalysisEdgeFunctions;
-import ideal.flowfunctions.WrappedAccessGraph;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
@@ -50,7 +49,7 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
   }
  
   @Override
-	public void onAnalysisFinished(PathEdge<Unit, WrappedAccessGraph> seed,
+	public void onAnalysisFinished(PathEdge<Unit, AccessGraph> seed,
 			AnalysisSolver<TypestateDomainValue> solver) {
     ReachableMethods rm = Scene.v().getReachableMethods();
     QueueReader<MethodOrMethodContext> listener = rm.listener();
@@ -64,8 +63,8 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
       Collection<Unit> endPointsOf = solver.icfg().getEndPointsOf(method);
 
       for (Unit eP : endPointsOf) {
-        Set<WrappedAccessGraph> localsAtEndPoint = new HashSet<>();
-        for (Cell<WrappedAccessGraph, WrappedAccessGraph, EdgeFunction<TypestateDomainValue>> cell : solver
+        Set<AccessGraph> localsAtEndPoint = new HashSet<>();
+        for (Cell<AccessGraph, AccessGraph, EdgeFunction<TypestateDomainValue>> cell : solver
             .getPathEdgesAt(eP)) {
           if (!cell.getRowKey().equals(InternalAnalysisProblem.ZERO)) {
             continue;
@@ -73,18 +72,18 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
           localsAtEndPoint.add(cell.getColumnKey());
         }
         boolean escapes = false;
-        for (WrappedAccessGraph ag : localsAtEndPoint) {
+        for (AccessGraph ag : localsAtEndPoint) {
           if (BoomerangContext.isParameterOrThisValue(method, ag.getBase())) {
             escapes = true;
           }
         }
         if (!escapes) {
-          Map<WrappedAccessGraph, TypestateDomainValue> resultAt = solver.resultsAt(eP);
-          for (Entry<WrappedAccessGraph, TypestateDomainValue> fact : resultAt.entrySet()) {
+          Map<AccessGraph, TypestateDomainValue> resultAt = solver.resultsAt(eP);
+          for (Entry<AccessGraph, TypestateDomainValue> fact : resultAt.entrySet()) {
             if (localsAtEndPoint.contains(fact.getKey())) {
               if (!fact.getValue().equals(solver.bottom()))
                 endingPathsOfPropagation
-                    .put(method, fact.getKey().getDelegate(), fact.getValue());
+                    .put(method, fact.getKey(), fact.getValue());
             }
           }
         }

@@ -1,7 +1,7 @@
 package ideal.edgefunction;
 
+import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunctions;
-import ideal.flowfunctions.WrappedAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 
@@ -9,7 +9,7 @@ import soot.Unit;
  * This class just lifts the regular JoinLattice from the Heros solver to the EdgeFunction.
  *
  */
-public interface AnalysisEdgeFunctions<V> extends EdgeFunctions<Unit, WrappedAccessGraph, SootMethod, V> {
+public interface AnalysisEdgeFunctions<V> extends EdgeFunctions<Unit, AccessGraph, SootMethod, V> {
   V bottom();
 
   V top();
