@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.context.IContextRequester;
@@ -82,33 +84,44 @@ public class AnalysisSolver<V>
 
 
   public IContextRequester getContextRequestorFor(final WrappedAccessGraph d1, final Unit stmt) {
-    return new IContextRequester() {
+    return new ContextRequester(d1,stmt);
+  }
 
-	@Override
-	public boolean continueAtCallSite(Unit callSite, SootMethod callee) {
-		if(d1.equals(zeroValue))
-			return true;
-		assert callee == icfg.getMethodOf(stmt);
-        Collection<Unit> startPoints = icfg.getStartPointsOf(icfg.getMethodOf(stmt));
+  
+	private class ContextRequester implements IContextRequester {
+		Multimap<SootMethod, WrappedAccessGraph> methodToStartFact = HashMultimap.create();
+		private WrappedAccessGraph d1;
 
-        for (Unit sp : startPoints) {
-          Map<Unit, Set<Pair<WrappedAccessGraph, WrappedAccessGraph>>> inc = incoming(d1, sp);
-          System.out.println(sp);
-          System.out.println(d1);
-          System.out.println(inc);
-          if(inc.containsKey(callSite))
-        	  return true;
-        }
-		return false;
-	}
+		public ContextRequester(WrappedAccessGraph d1, Unit stmt) {
+			this.d1 = d1;
+			methodToStartFact.put(icfg.getMethodOf(stmt), d1);
+		}
+
+		@Override
+		public boolean continueAtCallSite(Unit callSite, SootMethod callee) {
+			if (d1.equals(zeroValue))
+				return true;
+			Collection<Unit> startPoints = icfg.getStartPointsOf(callee);
+
+			for (Unit sp : startPoints) {
+				for (WrappedAccessGraph g : methodToStartFact.get(callee)) {
+					Map<Unit, Set<Pair<WrappedAccessGraph, WrappedAccessGraph>>> inc = incoming(g, sp);
+					for(Set<Pair<WrappedAccessGraph, WrappedAccessGraph>> in : inc.values()){
+						for(Pair<WrappedAccessGraph, WrappedAccessGraph> e : in){
+							methodToStartFact.put(icfg.getMethodOf(callSite), e.getO2());
+						}
+					}
+					if (inc.containsKey(callSite))
+						return true;
+				}
+			}
+			return false;
+		}
 
 	@Override
 	public boolean isEntryPointMethod(SootMethod method) {
 		return false;
-	}
-    };
-  }
-
+	}}
   public void computeValues(PathEdge<Unit, WrappedAccessGraph> seed) {
     HashMap<Unit, Set<WrappedAccessGraph>> map = new HashMap<Unit, Set<WrappedAccessGraph>>();
     HashSet<WrappedAccessGraph> hashSet = new HashSet<>();

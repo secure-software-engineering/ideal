@@ -64,7 +64,6 @@ public class CallSite<V> extends PointOfAlias<V> {
 	private void checkMustAlias(AliasResults results, Set<PathEdge<Unit, WrappedAccessGraph>> res,
 			AnalysisContext<V> context) {
 		boolean isStrongUpdate = results.keySet().size() == 1;
-		System.out.println(results);
 		context.storeComputedCallSiteFlow(this, res, isStrongUpdate);
 	}
 

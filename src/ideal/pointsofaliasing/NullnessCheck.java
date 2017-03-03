@@ -19,7 +19,8 @@ public class NullnessCheck<V> extends PointOfAlias<V> {
 AnalysisContext<V> tsanalysis) {
     AliasResults results = tsanalysis.aliasesFor(d2, curr, d1);
     if (results.withoutNullAllocationSites().keySet().size() <= 1) {
-      tsanalysis.storeComputedNullnessFlow(this, results);
+
+      tsanalysis.storeComputedNullnessFlow(this, results.withoutNullAllocationSites());
     }
     return Collections.emptySet();
   }

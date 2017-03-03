@@ -171,7 +171,7 @@ public class AnalysisContext<V> {
 		try {
 			boomerang.startQuery();
 			AliasResults res = boomerang.findAliasAtStmt(boomerangAccessGraph.getDelegate(), curr,
-					getContextRequestorFor(d1, curr));
+					getContextRequestorFor(d1, curr)).withoutNullAllocationSites();
 			debugger.onAliasesComputed(boomerangAccessGraph, curr, d1, res);
 			return res;
 		} catch (BoomerangTimeoutException e) {
