@@ -2,8 +2,11 @@ package ideal;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.collect.ForwardingMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -21,6 +24,7 @@ import ideal.pointsofaliasing.CallSite;
 import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
+import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.BackwardsInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
@@ -40,6 +44,8 @@ public class AnalysisContext<V> {
 	private IInfoflowCFG icfg;
 	private AnalysisSolver<V> solver;
 	private AnalysisEdgeFunctions<V> edgeFunc;
+	private Multimap<AccessGraph, Unit> eventD1ToCallSite = HashMultimap.create();
+	private AliasFinder boomerang;
 
 	public AnalysisContext(IInfoflowCFG icfg, BackwardsInfoflowCFG bwicfg, AnalysisEdgeFunctions<V> edgeFunc,
 			IDebugger<V> debugger) {
@@ -164,7 +170,7 @@ public class AnalysisContext<V> {
 		BoomerangOptions opts = new BoomerangOptions();
 		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
 		opts.setTrackStaticFields(Analysis.ENABLE_STATIC_FIELDS);
-		AliasFinder boomerang = new AliasFinder(icfg(),opts);
+		boomerang = new AliasFinder(icfg(),opts);
 		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
 		try {
 			boomerang.startQuery();
@@ -189,6 +195,28 @@ public class AnalysisContext<V> {
 		nullnessBranches = null;
 		icfg = null;
 		solver = null;
+	}
+
+	public void addEventFor(AccessGraph callerD1, Unit callSite) {
+		if(!eventD1ToCallSite.put(callerD1,callSite)){
+			return;
+		}
+		SootMethod caller = icfg().getMethodOf(callSite);
+		for(Unit sP : icfg().getStartPointsOf(caller)){
+			Map<Unit, Set<Pair<AccessGraph, AccessGraph>>> incoming = solver.incoming(callerD1, sP);
+			for(Entry<Unit, Set<Pair<AccessGraph, AccessGraph>>> e : incoming.entrySet()){
+				for(Pair<AccessGraph, AccessGraph> p : e.getValue()){
+					addEventFor(p.getO2(), e.getKey());
+				}
+			}
+		}
+	}
+
+	public boolean hasEvent(AccessGraph d1, Unit curr) {
+		Collection<Unit> callSitesWithEvents = eventD1ToCallSite.get(d1);
+		if(callSitesWithEvents == null)
+			return false;
+		return callSitesWithEvents.contains(curr);
 	}
 
 }

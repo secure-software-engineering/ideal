@@ -17,6 +17,7 @@ import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
 import ideal.debug.JSONDebugger;
+import ideal.debug.NullDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.MethodOrMethodContext;
@@ -57,8 +58,8 @@ public class Analysis<V> {
     this.problem = problem;
     this.icfg = icfg;
     this.bwicfg = new BackwardsInfoflowCFG(icfg);
-//    this.debugger = new NullDebugger<V>();
-    this.debugger = new JSONDebugger<V>(new File("visualization/data.js"),icfg);
+    this.debugger = new NullDebugger<V>();
+//    this.debugger = new JSONDebugger<V>(new File("visualization/data.js"),icfg);
   }
 
   public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, IDebugger<V> debugger) {
@@ -69,7 +70,8 @@ public class Analysis<V> {
     this.debugger = debugger;
   }
   public void run() {
-	WrappedSootField.TRACK_TYPE =false;
+	WrappedSootField.TRACK_TYPE = false;
+	WrappedSootField.TRACK_STMT = false;
     initialSeeds = computeSeeds();
     debugger.computedSeeds(seedToInitivalValue);
     debugger.beforeAnalysis();

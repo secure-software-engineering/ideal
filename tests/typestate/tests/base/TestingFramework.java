@@ -11,6 +11,7 @@ import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
+import soot.jimple.Jimple;
 import soot.options.Options;
 
 public abstract class TestingFramework<V> {
@@ -33,14 +34,14 @@ public abstract class TestingFramework<V> {
     includeList.add("java.lang.*");
     includeList.add("java.util.*");
     includeList.add("java.io.*");
-    includeList.add("sun.misc.");
-    includeList.add("java.net.");
-    includeList.add("javax.servlet.");
-    includeList.add("javax.crypto.");
-    includeList.add("java.security.");
+    includeList.add("sun.misc.*");
+    includeList.add("java.net.*");
+    includeList.add("javax.servlet.*");
+    includeList.add("javax.crypto.*");
+    includeList.add("java.security.*");
+    includeList.add("android.*");
+    includeList.add("org.apache.http.*");
 
-    includeList.add("android.");
-    includeList.add("org.apache.http.");
     Options.v().set_include(includeList);
     Options.v().set_soot_classpath(sootCp);
     Options.v().set_main_class(targetClass);

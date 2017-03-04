@@ -363,7 +363,6 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		for (int i = 0; i < callee.getParameterCount(); i++)
 			paramLocals[i] = callee.getActiveBody().getParameterLocal(i);
 		final Local thisLocal = callee.isStatic() ? null : callee.getActiveBody().getThisLocal();
-		final SootMethod caller = (returnSite != null ? context.icfg().getMethodOf(returnSite) : null);
 		return new FlowFunction<AccessGraph>() {
 			
 
@@ -390,13 +389,16 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 												source.getBaseType());
 										
 										EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getReturnEdgeFunction(callerD1, callSite, callee, exitStmt, source, returnSite, deriveWithNewLocal);
+										if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
+											context.addEventFor(callerD1,callSite);
+										}
 										out.add(deriveWithNewLocal);
 										CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,deriveWithNewLocal,
 												returnSite);
 										if (context.isInIDEPhase()) {
 											out.addAll(context.callSiteFlows(callSitePOA));
 										} else {
-												context.addPOA(callSitePOA);
+											context.addPOA(callSitePOA);
 										}
 									}
 								}
@@ -413,6 +415,9 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 									AccessGraph possibleAccessPath = source.deriveWithNewLocal((Local) iIExpr.getBase(),
 											source.getBaseType());
 									EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getReturnEdgeFunction(callerD1, callSite, callee, exitStmt, source, returnSite, possibleAccessPath);
+									if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
+										context.addEventFor(callerD1,callSite);
+									}
 									out.add(possibleAccessPath);
 									
 									CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,possibleAccessPath,
@@ -420,7 +425,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 									if (context.isInIDEPhase()) {
 										out.addAll(context.callSiteFlows(callSitePOA));
 									} else {
-											context.addPOA(callSitePOA);
+										context.addPOA(callSitePOA);
 									}
 								}
 							}
