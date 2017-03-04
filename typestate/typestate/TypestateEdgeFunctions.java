@@ -51,8 +51,11 @@ public class TypestateEdgeFunctions implements AnalysisEdgeFunctions<TypestateDo
 
   @Override
   public EdgeFunction<TypestateDomainValue> getCallToReturnEdgeFunction(AccessGraph d1,
-      Unit callSite, AccessGraph callNode, Unit returnSite, AccessGraph returnSideNode) {
-    return EdgeIdentity.v();
+      Unit callSite, AccessGraph d2, Unit returnSite, AccessGraph d3) {
+	    Set<? extends Transition> trans = func.getCallToReturnTransitionsFor(d1, callSite, d2,returnSite,d3);
+	        if (trans.isEmpty())
+	          return EdgeIdentity.v();
+        return new TransitionFunction(trans);
   }
 
   @Override

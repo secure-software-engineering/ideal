@@ -127,7 +127,6 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
         NewExpr newExpr = (NewExpr) ((AssignStmt) unit).getRightOp();
         if (newExpr.getType() instanceof RefType) {
           RefType refType = (RefType) newExpr.getType();
-          System.out.println(unit);
           if (getImplementersOfIterator("java.util.Iterator").contains(refType.getSootClass())) {
             Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();
             AssignStmt stmt = (AssignStmt) unit;

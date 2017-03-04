@@ -43,6 +43,26 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 		return getMatchingTransitions(callee, destNode, Type.OnCall);
 	}
 
+	public Set<Transition> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2,
+			Unit returnSite, AccessGraph d3) {
+		Set<Transition> res = new HashSet<>();
+		if(callSite instanceof Stmt){
+			Stmt stmt = (Stmt) callSite;
+			if(stmt.containsInvokeExpr() && stmt.getInvokeExpr() instanceof InstanceInvokeExpr){
+				SootMethod method = stmt.getInvokeExpr().getMethod();
+				InstanceInvokeExpr e = (InstanceInvokeExpr)stmt.getInvokeExpr();
+				if(e.getBase().equals(d2.getBase())){
+					for (MatcherTransition trans : transition) {
+						if(trans.matches(method) && trans.getType().equals(Type.OnCallToReturn)){
+							res.add(new Transition(trans.from(),trans.to()));
+						}
+					}	
+				}
+			}
+		}
+		return res;
+	}
+
 	private Set<Transition> getMatchingTransitions(SootMethod method, AccessGraph node, Type type) {
 		Set<Transition> res = new HashSet<>();
 		if (node.getFieldCount() == 0) {

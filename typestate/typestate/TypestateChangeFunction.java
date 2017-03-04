@@ -23,4 +23,7 @@ public interface TypestateChangeFunction {
 
   boolean seedInApplicationClass();
 
+  Set<? extends Transition> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2, Unit returnSite,
+		AccessGraph d3);
+
 }
