@@ -1,6 +1,7 @@
 package typestate.impl.pipedinputstream;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -62,11 +63,6 @@ public class PipedInputStreamStateMachine extends MatcherStateMachine implements
 		return selectMethodByName(getSubclassesOf("java.io.PipedInputStream"), "connect");
 	}
 
-	@Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
-
 
 	private Set<SootMethod> readMethods() {
 		return selectMethodByName(getSubclassesOf("java.io.PipedInputStream"), "read");
@@ -74,8 +70,10 @@ public class PipedInputStreamStateMachine extends MatcherStateMachine implements
 
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
+		if(!m.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
 		return generateAtConstructor(unit, calledMethod, initialTrans);
 	}
 }

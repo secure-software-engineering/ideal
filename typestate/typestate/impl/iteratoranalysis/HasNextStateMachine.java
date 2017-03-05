@@ -66,10 +66,6 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
     addTransition(
         new MatcherTransition(States.ERROR, retrieveHasNextMethods(),Parameter.This, States.ERROR, Type.OnReturn));
   }
-  @Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
   private Set<SootMethod> retrieveHasNextMethods() {
     if (hasNextMethods == null)
       hasNextMethods =
@@ -110,15 +106,15 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
   }
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
       Collection<SootMethod> calledMethod) {
     boolean matches = false;
-    for (SootMethod method : calledMethod) {
-      if (initialTrans.matches(method)) {
+    for (SootMethod m : calledMethod) {
+      if (initialTrans.matches(m)) {
         matches = true;
       }
     }
-    if (!matches)
+    if (!matches || !method.getDeclaringClass().isApplicationClass())
       return Collections.emptySet();
     if (unit instanceof AssignStmt) {
       Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();

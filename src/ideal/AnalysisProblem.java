@@ -16,11 +16,12 @@ public interface AnalysisProblem<V> {
 	 * This function generates the seed. Each (reachable) statement of the analyzed code is visited. 
 	 * To place a seed, a pair of access graph and an edge function must be specified. From this node
 	 * the analysis starts its analysis.
+	 * @param method 
 	 * @param stmt The statement over which is itearted over
 	 * @param calledMethod If stmt is a call site, this set contains the set of called method for the call site.
 	 * @return
 	 */
-  Collection<Pair<AccessGraph, EdgeFunction<V>>> generate(Unit stmt,
+  Collection<Pair<AccessGraph, EdgeFunction<V>>> generate(SootMethod method, Unit stmt,
       Collection<SootMethod> calledMethod);
 
   /**

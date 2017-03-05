@@ -79,10 +79,6 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
     return selectMethodByName(getImplementersOfIterator("java.util.Iterator"), "next");
   }
 
-  @Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
   private Set<SootMethod> retrieveIteratorConstructors() {
     Set<SootMethod> selectMethodByName = selectMethodByName(Scene.v().getClasses(), "iterator");
     Set<SootMethod> res = new HashSet<>();
@@ -112,16 +108,10 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
   }
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
       Collection<SootMethod> calledMethod) {
-    boolean matches = false;
-    // for (SootMethod method : calledMethod) {
-    // if (initialTrans.matches(method)) {
-    // matches = true;
-    // }
-    // }
-    // if (!matches)
-    // return Collections.emptySet();
+    if(!method.getDeclaringClass().isApplicationClass())
+    	return Collections.emptySet();
     if (unit instanceof AssignStmt) {
       if (((AssignStmt) unit).getRightOp() instanceof NewExpr) {
         NewExpr newExpr = (NewExpr) ((AssignStmt) unit).getRightOp();

@@ -148,7 +148,7 @@ public class FileMustBeClosedTests extends TypestateTestingFramework {
 
   @Test
   public void test27() {
-    expectNErrors("file.Target27", 2);
+    expectNErrors("file.Target27", 3);
   }
   @Test
   public void test11() {

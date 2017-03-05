@@ -3,22 +3,16 @@ package typestate.impl.signature;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
-import soot.Local;
-import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.InstanceInvokeExpr;
-import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
-import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
@@ -26,7 +20,6 @@ import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 import typestate.finiteautomata.State;
-import typestate.finiteautomata.Transition;
 
 public class SignatureStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
@@ -76,10 +69,6 @@ public class SignatureStateMachine extends MatcherStateMachine implements Typest
     addTransition(new MatcherTransition(States.ERROR, verify(),Parameter.This, States.ERROR, Type.OnReturn));
     addTransition(new MatcherTransition(States.ERROR, update(),Parameter.This, States.ERROR, Type.OnReturn));
   }
-  @Override
-	public boolean seedInApplicationClass() {
-		return false;
-	}
   private Set<SootMethod> constructor() {
     List<SootClass> subclasses = getSubclassesOf("java.security.Signature");
     Set<SootMethod> out = new HashSet<>();
@@ -110,8 +99,10 @@ public class SignatureStateMachine extends MatcherStateMachine implements Typest
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
+	  if(!m.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
 	  return generateReturnValueOf(unit, calledMethod, initialTrans);
   }
 

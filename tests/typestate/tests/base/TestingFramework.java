@@ -3,6 +3,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import boomerang.preanalysis.PreparationTransformer;
 import ideal.Analysis;
 import soot.G;
 import soot.PackManager;
@@ -67,6 +68,7 @@ public abstract class TestingFramework<V> {
         TestingFramework.this.getAnalysis().run();
       }
     });
+    PackManager.v().getPack("wjtp").add(new Transform("wjtp.ifds-prepare",new PreparationTransformer()));
     PackManager.v().getPack("wjtp").add(transform);
     PackManager.v().getPack("cg").apply();
     PackManager.v().getPack("wjtp").apply();

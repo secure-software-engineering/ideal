@@ -56,10 +56,6 @@ public class URLConnStateMachine extends MatcherStateMachine implements Typestat
 				new MatcherTransition(States.ERROR, illegalOpertaion(), Parameter.This, States.ERROR, Type.OnReturn));
 	}
 
-	@Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
 
 	private Set<SootMethod> connect() {
 		return selectMethodByName(getSubclassesOf("java.net.URLConnection"), "connect");
@@ -73,8 +69,10 @@ public class URLConnStateMachine extends MatcherStateMachine implements Typestat
 
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
+		if(!m.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
 		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, connect(), initialTrans);
 //		for (Unit isRet : icfg.getSuccsOf(unit)) {
 //			if (connect().contains(methodOf)) {

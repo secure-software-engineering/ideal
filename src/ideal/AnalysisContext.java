@@ -170,7 +170,8 @@ public class AnalysisContext<V> {
 		BoomerangOptions opts = new BoomerangOptions();
 		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
 		opts.setTrackStaticFields(Analysis.ENABLE_STATIC_FIELDS);
-		boomerang = new AliasFinder(icfg(),opts);
+		if(boomerang == null)
+			boomerang = new AliasFinder(icfg(),opts);
 		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
 		try {
 			boomerang.startQuery();

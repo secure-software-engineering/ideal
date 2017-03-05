@@ -56,10 +56,6 @@ public class SocketStateMachine extends MatcherStateMachine implements Typestate
     addTransition(new MatcherTransition(States.INIT, useMethods(),Parameter.This, States.ERROR, Type.OnReturn));
     addTransition(new MatcherTransition(States.ERROR, useMethods(),Parameter.This, States.ERROR, Type.OnReturn));
   }
-  @Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
   private Set<SootMethod> socketConstructor() {
     List<SootClass> subclasses = getSubclassesOf("java.net.Socket");
     Set<SootMethod> out = new HashSet<>();
@@ -90,8 +86,10 @@ public class SocketStateMachine extends MatcherStateMachine implements Typestate
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
+	  if(!m.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
 	  return generateAtConstructor(unit, calledMethod, initialTrans);
 
   }

@@ -104,7 +104,7 @@ public class AnalysisSolver<V>
 			Collection<Unit> startPoints = icfg.getStartPointsOf(callee);
 
 			for (Unit sp : startPoints) {
-				for (AccessGraph g : methodToStartFact.get(callee)) {
+				for (AccessGraph g : new HashSet<>(methodToStartFact.get(callee))) {
 					Map<Unit, Set<Pair<AccessGraph, AccessGraph>>> inc = incoming(g, sp);
 					for(Set<Pair<AccessGraph, AccessGraph>> in : inc.values()){
 						for(Pair<AccessGraph, AccessGraph> e : in){

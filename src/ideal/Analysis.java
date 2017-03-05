@@ -73,6 +73,8 @@ public class Analysis<V> {
 	WrappedSootField.TRACK_TYPE = false;
 	WrappedSootField.TRACK_STMT = false;
     initialSeeds = computeSeeds();
+    if(initialSeeds.isEmpty())
+    	System.err.println("No seeds found!");
     debugger.computedSeeds(seedToInitivalValue);
     debugger.beforeAnalysis();
     for (PathEdge<Unit, AccessGraph> seed : initialSeeds) {
@@ -96,16 +98,18 @@ public class Analysis<V> {
       solver.destroy();
       solver = new AnalysisSolver<>(context.icfg(), context, edgeFunc);
       context.setSolver(solver);
-      phase2(seed, solver);
-      problem.onAnalysisFinished(seed,solver);
       isInErrorState = problem.isInErrorState();
     } catch (AnalysisTimeoutException e) {
+    	System.out.println("Timeout of IDEAL");
       isInErrorState = true;
+      timeout = true;
       debugger.onAnalysisTimeout(seed);
     } catch (RuntimeException e) {
+    	System.out.println("RuntimeException");
       e.printStackTrace();
       isInErrorState = true;
     }
+    problem.onAnalysisFinished(seed,solver);
     debugger.finishWithSeed(seed, timeout, isInErrorState, solver);
     context.destroy();
     solver.destroy();
@@ -181,7 +185,7 @@ public class Analysis<V> {
     for (Unit u : method.getActiveBody().getUnits()) {
       Collection<SootMethod> calledMethods =
           (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u) : new HashSet<SootMethod>());
-        for (Pair<AccessGraph, EdgeFunction<V>> fact : problem.generate(u, calledMethods)) {
+        for (Pair<AccessGraph, EdgeFunction<V>> fact : problem.generate(method,u, calledMethods)) {
           PathEdge<Unit, AccessGraph> pathEdge =
               new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u, fact.getO1());
           seeds.add(pathEdge);

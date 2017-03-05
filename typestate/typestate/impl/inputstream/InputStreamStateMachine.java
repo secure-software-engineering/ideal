@@ -61,12 +61,6 @@ public class InputStreamStateMachine extends MatcherStateMachine implements Type
 		addTransition(new MatcherTransition(States.CLOSED, Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>")), Parameter.This, States.ERROR, Type.OnCallToReturn));
 		addTransition(new MatcherTransition(States.ERROR, Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>")), Parameter.This, States.ERROR, Type.OnCallToReturn));
 	}
-
-	@Override
-	public boolean seedInApplicationClass() {
-		return false;
-	}
-
 	private Set<SootMethod> closeMethods() {
 		return selectMethodByName(getImplementersOf("java.io.InputStream"), "close");
 	}
@@ -87,7 +81,7 @@ public class InputStreamStateMachine extends MatcherStateMachine implements Type
 	}
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), initialTrans);
 	}

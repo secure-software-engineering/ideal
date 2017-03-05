@@ -59,10 +59,6 @@ public class VectorStateMachine extends MatcherStateMachine implements Typestate
 		addTransition(
 				new MatcherTransition(States.ACCESSED_EMPTY, accessElement(), Parameter.This,States.ACCESSED_EMPTY, Type.OnReturn));
 	}
-	@Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
 	private Set<SootMethod> removeAllElements() {
 		List<SootClass> vectorClasses = getSubclassesOf("java.util.Vector");
 		Set<SootMethod> selectMethodByName = selectMethodByName(vectorClasses, "removeAllElements");
@@ -97,8 +93,10 @@ public class VectorStateMachine extends MatcherStateMachine implements Typestate
 
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
+		if(!m.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
 		boolean matches = false;
 		for (SootMethod method : calledMethod) {
 			if (initialTrans.matches(method) && !initialTrans.matches(icfg.getMethodOf(unit))) {

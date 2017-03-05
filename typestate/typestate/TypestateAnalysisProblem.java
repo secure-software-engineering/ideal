@@ -51,6 +51,7 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
   @Override
 	public void onAnalysisFinished(PathEdge<Unit, AccessGraph> seed,
 			AnalysisSolver<TypestateDomainValue> solver) {
+	errorPathEdges = new HashSet<>();
     ReachableMethods rm = Scene.v().getReachableMethods();
     QueueReader<MethodOrMethodContext> listener = rm.listener();
     while (listener.hasNext()) {
@@ -98,12 +99,13 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
   }
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit stmt,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit stmt,
       Collection<SootMethod> optional) {
-    return func.generate(stmt, optional);
+    return func.generate(method,stmt, optional);
   }
 
   public Set<Cell<SootMethod, AccessGraph, TypestateDomainValue>> getErrors() {
+	  System.out.println(errorPathEdges);
     return errorPathEdges;
   }
 
@@ -113,6 +115,8 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
 
   @Override
   public boolean isInErrorState() {
+	  System.out.println(errorPathEdges);
+
     return !errorPathEdges.isEmpty();
   }
 

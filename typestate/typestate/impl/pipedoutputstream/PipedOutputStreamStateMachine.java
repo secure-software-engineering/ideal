@@ -73,11 +73,6 @@ public class PipedOutputStreamStateMachine extends MatcherStateMachine implement
 		return selectMethodByName(getSubclassesOf("java.io.PipedOutputStream"), "connect");
 	}
 
-	@Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
-
 
 	private Set<SootMethod> readMethods() {
 		return selectMethodByName(getSubclassesOf("java.io.PipedOutputStream"), "write");
@@ -85,8 +80,10 @@ public class PipedOutputStreamStateMachine extends MatcherStateMachine implement
 
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
+		if(!m.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
 		return generateAtConstructor(unit, calledMethod, initialTrans);
 	}
 }

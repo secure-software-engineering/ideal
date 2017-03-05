@@ -58,10 +58,6 @@ public class OutputStreamStateMachine extends MatcherStateMachine implements Typ
 		addTransition(new MatcherTransition(States.ERROR, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 	}
 
-	@Override
-	public boolean seedInApplicationClass() {
-		return false;
-	}
 
 	private Set<SootMethod> closeMethods() {
 		return selectMethodByName(getImplementersOf("java.io.OutputStream"), "close");
@@ -83,7 +79,7 @@ public class OutputStreamStateMachine extends MatcherStateMachine implements Typ
 	}
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		return generateThisAtAnyCallSitesOf(unit,calledMethod,closeMethods(), initialTrans);
 	}

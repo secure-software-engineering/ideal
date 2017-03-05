@@ -56,10 +56,6 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
         new MatcherTransition(States.ERROR, anyMethodOtherThanLoad(),Parameter.This, States.ERROR, Type.OnReturn));
 
   }
-  @Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
   private Set<SootMethod> anyMethodOtherThanLoad() {
     List<SootClass> subclasses = getSubclassesOf("java.security.KeyStore");
     Set<SootMethod> loadMethods = loadMethods();
@@ -90,7 +86,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
     boolean matches = false;
     for (SootMethod method : calledMethod) {
@@ -98,7 +94,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
         matches = true;
       }
     }
-    if (!matches)
+    if (!matches || !m.getDeclaringClass().isApplicationClass())
       return Collections.emptySet();
     if (unit instanceof AssignStmt) {
       Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();

@@ -111,14 +111,14 @@ public class JSONDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void indirectFlowAtCall(AccessGraph source, Unit curr, AccessGraph target) {
-		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
-		cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr, target), "indirectFlow"));
+//		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
+//		cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr, target), "indirectFlow"));
 	}
 	
 	@Override
 	public void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target) {
-		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
-		cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr, target), "indirectFlow"));
+//		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
+//		cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr, target), "indirectFlow"));
 	}
 
 	@Override

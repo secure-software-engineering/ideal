@@ -53,15 +53,15 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method,Unit unit,
       Collection<SootMethod> calledMethod) {
     boolean matches = false;
-    for (SootMethod method : calledMethod) {
-      if (initialTrans.matches(method)) {
+    for (SootMethod m : calledMethod) {
+      if (initialTrans.matches(m)) {
         matches = true;
       }
     }
-    if (!matches)
+    if (!matches || !method.getDeclaringClass().isApplicationClass())
       return Collections.emptySet();
     if (unit instanceof Stmt && ((Stmt) unit).getInvokeExpr() instanceof InstanceInvokeExpr) {
       InstanceInvokeExpr iie = (InstanceInvokeExpr) ((Stmt) unit).getInvokeExpr();
@@ -74,12 +74,6 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine
     return Collections.emptySet();
   }
 
-
-
-	@Override
-	public boolean seedInApplicationClass() {
-		return true;
-	}
 
 
 }

@@ -59,10 +59,6 @@ public class PrintStreamStateMachine extends MatcherStateMachine
   private Set<SootMethod> closeMethods() {
     return selectMethodByName(getSubclassesOf("java.io.PrintStream"), "close");
   }
-  @Override
-	public boolean seedInApplicationClass() {
-		return false;
-	}
 
   private Set<SootMethod> readMethods() {
     List<SootClass> subclasses = getSubclassesOf("java.io.PrintStream");
@@ -78,8 +74,10 @@ public class PrintStreamStateMachine extends MatcherStateMachine
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
+	  if(!m.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
     return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), initialTrans);
   }
 
