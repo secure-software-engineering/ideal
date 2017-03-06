@@ -75,6 +75,8 @@ public class Analysis<V> {
     initialSeeds = computeSeeds();
     if(initialSeeds.isEmpty())
     	System.err.println("No seeds found!");
+    else
+    	System.err.println("Analysing " + initialSeeds.size() +" seeds!");
     debugger.computedSeeds(seedToInitivalValue);
     debugger.beforeAnalysis();
     for (PathEdge<Unit, AccessGraph> seed : initialSeeds) {
