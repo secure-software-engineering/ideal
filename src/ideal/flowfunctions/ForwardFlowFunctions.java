@@ -29,6 +29,7 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
+import soot.JastAddJ.ThrowStmt;
 import soot.jimple.ArrayRef;
 import soot.jimple.AssignStmt;
 import soot.jimple.CastExpr;
@@ -65,20 +66,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
 				context.debugger.onNormalPropagation(sourceFact, curr, succ, source);
-				if (curr instanceof IdentityStmt) {
-					IdentityStmt identityStmt = (IdentityStmt) curr;
-					if (identityStmt.getRightOp() instanceof CaughtExceptionRef
-							&& identityStmt.getLeftOp() instanceof Local) {
-						Local leftOp = (Local) identityStmt.getLeftOp();
-						// e = d;
-						if (!source.isStatic() && typeCompatible(((Local) leftOp).getType(), source.getBaseType())) {
-							HashSet<AccessGraph> out = new HashSet<AccessGraph>();
-							out.add(source);
-							out.add(source.deriveWithNewLocal((Local) leftOp, source.getBaseType()));
-							return out;
-						}
-					}
-				}
+
 				if (!(curr instanceof AssignStmt)) {
 					if (curr instanceof IfStmt) {
 						IfStmt ifStmt = (IfStmt) curr;
