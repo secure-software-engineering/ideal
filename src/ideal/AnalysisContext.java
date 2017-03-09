@@ -44,8 +44,10 @@ public class AnalysisContext<V> {
 	private IInfoflowCFG icfg;
 	private AnalysisSolver<V> solver;
 	private AnalysisEdgeFunctions<V> edgeFunc;
-	private Multimap<AccessGraph, Unit> eventD1ToCallSite = HashMultimap.create();
-	private AliasFinder boomerang;
+	private Set<AccessGraph> hasEvents = new HashSet<>();
+	AliasFinder boomerang;
+	private Multimap<AccessGraph,AccessGraph> sourceToTargetFact = HashMultimap.create();
+
 
 	public AnalysisContext(IInfoflowCFG icfg, BackwardsInfoflowCFG bwicfg, AnalysisEdgeFunctions<V> edgeFunc,
 			IDebugger<V> debugger) {
@@ -169,7 +171,7 @@ public class AnalysisContext<V> {
 		Analysis.checkTimeout();
 		BoomerangOptions opts = new BoomerangOptions();
 		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
-		opts.setTrackStaticFields(Analysis.ENABLE_STATIC_FIELDS);
+		opts.setTrackStaticFields(false);
 		if(boomerang == null)
 			boomerang = new AliasFinder(icfg(),opts);
 		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
@@ -196,28 +198,34 @@ public class AnalysisContext<V> {
 		nullnessBranches = null;
 		icfg = null;
 		solver = null;
+		boomerang = null;
+		sourceToTargetFact.clear();
 	}
 
-	public void addEventFor(AccessGraph callerD1, Unit callSite) {
-		if(!eventD1ToCallSite.put(callerD1,callSite)){
+	public void addEventFor(AccessGraph fact,Set<AccessGraph> visited) {
+		if(visited.contains(fact))
 			return;
-		}
-		SootMethod caller = icfg().getMethodOf(callSite);
-		for(Unit sP : icfg().getStartPointsOf(caller)){
-			Map<Unit, Set<Pair<AccessGraph, AccessGraph>>> incoming = solver.incoming(callerD1, sP);
-			for(Entry<Unit, Set<Pair<AccessGraph, AccessGraph>>> e : incoming.entrySet()){
-				for(Pair<AccessGraph, AccessGraph> p : e.getValue()){
-					addEventFor(p.getO2(), e.getKey());
-				}
-			}
+		visited.add(fact);
+		hasEvents.add(fact);
+		for(AccessGraph targets : sourceToTargetFact.get(fact)){
+			addEventFor(targets, visited);
 		}
 	}
 
-	public boolean hasEvent(AccessGraph d1, Unit curr) {
-		Collection<Unit> callSitesWithEvents = eventD1ToCallSite.get(d1);
-		if(callSitesWithEvents == null)
-			return false;
-		return callSitesWithEvents.contains(curr);
+	public boolean hasEvent(AccessGraph fact) {
+		return hasEvents.contains(fact);
+	}
+
+	public void flowFromTo(AccessGraph source, AccessGraph target) {
+		if(source.equals(target))
+			return;
+		sourceToTargetFact.put(source,target);
+		if(hasEvent(source))
+			addEventFor(target, new HashSet<AccessGraph>());
+	}
+
+	public void addEventFor(AccessGraph fact) {
+		addEventFor(fact, new HashSet<AccessGraph>());
 	}
 
 }

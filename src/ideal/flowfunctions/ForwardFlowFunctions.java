@@ -171,7 +171,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 
 							AccessGraph withNewLocal = source.deriveWithNewLocal(lBase, lBase.getType());
 							WrappedSootField newFirstField = new WrappedSootField(field, source.getBaseType(), curr);
-							if (withNewLocal.canAppend(newFirstField)) {
+							if (!Scene.v().getPointsToAnalysis().reachingObjects(lBase).isEmpty() && withNewLocal.canPrepend(newFirstField)) {
 								AccessGraph newAp = withNewLocal.prependField(newFirstField);
 								out.add(newAp);
 								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as,
@@ -373,12 +373,14 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 								Value arg = ie.getArg(i);
 								if (arg instanceof Local) {
 									if (typeCompatible(((Local) arg).getType(), source.getBaseType())) {
+										if(Scene.v().getPointsToAnalysis().reachingObjects((Local) arg).isEmpty())
+											return Collections.emptySet();
 										AccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) arg,
 												source.getBaseType());
 										
 										EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getReturnEdgeFunction(callerD1, callSite, callee, exitStmt, source, returnSite, deriveWithNewLocal);
 										if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
-											context.addEventFor(callerD1,callSite);
+											context.addEventFor(deriveWithNewLocal);
 										}
 										out.add(deriveWithNewLocal);
 										CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,deriveWithNewLocal,
@@ -398,13 +400,14 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 
 								InstanceInvokeExpr iIExpr = (InstanceInvokeExpr) is.getInvokeExpr();
 								Local newBase = (Local) iIExpr.getBase();
-								
+								if(Scene.v().getPointsToAnalysis().reachingObjects((Local) newBase).isEmpty())
+									return Collections.emptySet();
 								if (pointsToSetCompatible(newBase, source.getBase()) && typeCompatible(newBase.getType(), source.getBaseType())) {
 									AccessGraph possibleAccessPath = source.deriveWithNewLocal((Local) iIExpr.getBase(),
 											source.getBaseType());
 									EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getReturnEdgeFunction(callerD1, callSite, callee, exitStmt, source, returnSite, possibleAccessPath);
 									if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
-										context.addEventFor(callerD1,callSite);
+										context.addEventFor(possibleAccessPath);
 									}
 									out.add(possibleAccessPath);
 									

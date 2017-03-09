@@ -95,7 +95,9 @@ public class OutputStreamStateMachine extends MatcherStateMachine implements Typ
 	@Override
 	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
-		return generateThisAtAnyCallSitesOf(unit,calledMethod,closeMethods(), initialTrans);
+		if(!method.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
+		return generateThisAtAnyCallSitesOf(unit,calledMethod,constructors(), initialTrans);
 	}
 
 

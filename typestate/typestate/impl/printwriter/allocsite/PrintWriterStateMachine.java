@@ -86,7 +86,7 @@ public class PrintWriterStateMachine extends MatcherStateMachine implements Type
 			Collection<SootMethod> calledMethod) {
 		if(!m.getDeclaringClass().isApplicationClass())
 			return Collections.emptySet();
-		return generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), initialTrans);
+		return generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(), initialTrans);
 	}
 
 }

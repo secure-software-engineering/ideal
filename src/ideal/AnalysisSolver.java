@@ -99,8 +99,9 @@ public class AnalysisSolver<V>
 
 		@Override
 		public boolean continueAtCallSite(Unit callSite, SootMethod callee) {
-			if (d1.equals(zeroValue))
+			if (d1.equals(zeroValue)){
 				return true;
+			}
 			Collection<Unit> startPoints = icfg.getStartPointsOf(callee);
 
 			for (Unit sp : startPoints) {

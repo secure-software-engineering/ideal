@@ -100,6 +100,8 @@ public class InputStreamStateMachine extends MatcherStateMachine implements Type
 	@Override
 	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), initialTrans);
+		if(!method.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(), initialTrans);
 	}
 }

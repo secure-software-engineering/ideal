@@ -25,11 +25,12 @@ public class CallSite<V> extends PointOfAlias<V> {
 	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
 		Collection<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
-		if (tsanalysis.hasEvent(d1, curr)){
+		if (tsanalysis.hasEvent(d2)){
 			res = balancedReturn(tsanalysis);
 		}
-		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2))
+		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)){
 			res.addAll(unbalancedReturn(tsanalysis));
+		}
 		return res;
 	}
 

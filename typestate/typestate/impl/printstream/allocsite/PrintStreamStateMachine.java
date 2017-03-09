@@ -95,7 +95,7 @@ public class PrintStreamStateMachine extends MatcherStateMachine
       Collection<SootMethod> calledMethod) {
 	  if(!m.getDeclaringClass().isApplicationClass())
 			return Collections.emptySet();
-    return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), initialTrans);
+    return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(), initialTrans);
   }
 
 }

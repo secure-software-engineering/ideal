@@ -3,9 +3,14 @@ package ideal;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.EdgeFunctions;
+import heros.Flow;
 import heros.FlowFunctions;
 import heros.IDETabulationProblem;
 import heros.InterproceduralCFG;
@@ -123,5 +128,17 @@ public class InternalAnalysisProblem<V> implements
 	@Override
 	public IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> getDebugger() {
 		return context.debugger;
+	}
+
+	@Override
+	public Flow<AccessGraph> flowWrapper() {
+		// TODO Auto-generated method stub
+		return new Flow<AccessGraph>(){
+
+			@Override
+			public void fromTo(AccessGraph source, AccessGraph target) {
+				context.flowFromTo(source,target);
+				
+			}};
 	}
 }

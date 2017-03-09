@@ -51,7 +51,8 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
   @Override
 	public void onAnalysisFinished(PathEdge<Unit, AccessGraph> seed,
 			AnalysisSolver<TypestateDomainValue> solver) {
-	errorPathEdges = new HashSet<>();
+	errorPathEdges.clear();
+	endingPathsOfPropagation.clear();
     ReachableMethods rm = Scene.v().getReachableMethods();
     QueueReader<MethodOrMethodContext> listener = rm.listener();
     while (listener.hasNext()) {
