@@ -99,6 +99,7 @@ public class Analysis<V> {
       phase1(seed, solver);
       solver.destroy();
       solver = new AnalysisSolver<>(context.icfg(), context, edgeFunc);
+      phase2(seed,solver);
       context.setSolver(solver);
       isInErrorState = problem.isInErrorState();
     } catch (AnalysisTimeoutException e) {
