@@ -59,7 +59,7 @@ public class Analysis<V> {
     this.icfg = icfg;
     this.bwicfg = new BackwardsInfoflowCFG(icfg);
     this.debugger = new NullDebugger<V>();
-//    this.debugger = new JSONDebugger<V>(new File("visualization/data.js"),icfg);
+//    this.debugger = new JSONDebugger<V>(new File("/Users/johannesspath/Documents/ideal-workspace/ideal/visualization/data.js"),icfg);
   }
 
   public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, IDebugger<V> debugger) {
@@ -79,7 +79,23 @@ public class Analysis<V> {
     	System.err.println("Analysing " + initialSeeds.size() +" seeds!");
     debugger.computedSeeds(seedToInitivalValue);
     debugger.beforeAnalysis();
+    String inclClasses = System.getProperty("application_includes");
     for (PathEdge<Unit, AccessGraph> seed : initialSeeds) {
+//    	if(!icfg.getMethodOf(seed.getTarget()).toString().equals("<net.sourceforge.pmd.dfa.Structure: void <init>()>"))
+//    		continue;
+    	if(inclClasses != null){
+    		//TODO remove this after experiments are performed.
+    		String[] split = inclClasses.split(":");
+    		SootMethod methodOf = icfg.getMethodOf(seed.getTarget());
+    		boolean analyse = false;
+    		for(String s : split){
+    	    	if(methodOf.toString().contains(s)){
+    	    		analyse = true;
+    	    	}
+    		}
+    		if(!analyse)
+    			continue;
+    	}
       analysisForSeed(seed);
     }
     debugger.afterAnalysis();
