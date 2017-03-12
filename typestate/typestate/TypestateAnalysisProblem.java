@@ -106,7 +106,6 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
   }
 
   public Set<Cell<SootMethod, AccessGraph, TypestateDomainValue>> getErrors() {
-	  System.out.println(errorPathEdges);
     return errorPathEdges;
   }
 
@@ -117,7 +116,6 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
   @Override
   public boolean isInErrorState() {
 	  System.out.println(errorPathEdges);
-
     return !errorPathEdges.isEmpty();
   }
 

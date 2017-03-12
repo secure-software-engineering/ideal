@@ -10,6 +10,7 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.Local;
 import soot.RefType;
 import soot.Scene;
@@ -106,7 +107,7 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
   }
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method, Unit unit,
       Collection<SootMethod> calledMethod) {
     boolean matches = false;
     for (SootMethod m : calledMethod) {
@@ -114,7 +115,7 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
         matches = true;
       }
     }
-    if (!matches || !method.getDeclaringClass().isApplicationClass())
+    if (!matches)
       return Collections.emptySet();
     if (unit instanceof AssignStmt) {
       Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();

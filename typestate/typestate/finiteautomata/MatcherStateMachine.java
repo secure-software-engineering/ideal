@@ -12,6 +12,7 @@ import boomerang.BoomerangContext;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -174,4 +175,17 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 			}
 		}
 		return Collections.emptySet();
-	}}
+	}
+	@Override
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit stmt,
+			Collection<SootMethod> calledMethods) {
+
+		if(Analysis.SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
+			return Collections.emptySet();
+		return generateSeed(method, stmt, calledMethods);
+	}
+	
+	public abstract Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method, Unit stmt,
+			Collection<SootMethod> calledMethods);
+}
+	

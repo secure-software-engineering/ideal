@@ -7,9 +7,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.management.RuntimeErrorException;
+
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -62,13 +65,26 @@ public class InputStreamStateMachine extends MatcherStateMachine implements Type
 		addTransition(new MatcherTransition(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 		addTransition(new MatcherTransition(States.ERROR, closeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 
-		addTransition(new MatcherTransition(States.CLOSED, Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>")), Parameter.This, States.ERROR, Type.OnCallToReturn));
-		addTransition(new MatcherTransition(States.ERROR, Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>")), Parameter.This, States.ERROR, Type.OnCallToReturn));
+		addTransition(new MatcherTransition(States.CLOSED, nativeReadMethods(), Parameter.This, States.ERROR, Type.OnCallToReturn));
+		addTransition(new MatcherTransition(States.ERROR, nativeReadMethods(), Parameter.This, States.ERROR, Type.OnCallToReturn));
+		addTransition(new MatcherTransition(States.OPEN, nativeReadMethods(), Parameter.This, States.OPEN, Type.OnCallToReturn));
+	}
+
+
+	private Set<SootMethod> nativeReadMethods() {
+		List<SootClass> subclasses = getSubclassesOf("java.io.InputStream");
+		Set<SootMethod> out = new HashSet<>();
+		for (SootClass c : subclasses) {
+			for (SootMethod m : c.getMethods())
+				if (m.isNative() && m.toString().contains("read()"))
+					out.add(m);
+		}
+		return out;
 	}
 
 
 	private Set<SootMethod> constructors() {
-		List<SootClass> subclasses = getSubclassesOf("java.util.InputStream");
+		List<SootClass> subclasses = getSubclassesOf("java.io.InputStream");
 		Set<SootMethod> out = new HashSet<>();
 		for (SootClass c : subclasses) {
 			for (SootMethod m : c.getMethods())
@@ -98,10 +114,9 @@ public class InputStreamStateMachine extends MatcherStateMachine implements Type
 	}
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
-		if(!method.getDeclaringClass().isApplicationClass())
-			return Collections.emptySet();
+		
 		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(), initialTrans);
 	}
 }

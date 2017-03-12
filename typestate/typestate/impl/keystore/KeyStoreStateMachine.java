@@ -10,6 +10,7 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -86,7 +87,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
     boolean matches = false;
     for (SootMethod method : calledMethod) {
@@ -94,7 +95,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
         matches = true;
       }
     }
-    if (!matches || !m.getDeclaringClass().isApplicationClass())
+    if (!matches)
       return Collections.emptySet();
     if (unit instanceof AssignStmt) {
       Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();

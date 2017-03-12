@@ -10,6 +10,7 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -79,7 +80,7 @@ public class OutputStreamStateMachine extends MatcherStateMachine implements Typ
 	}
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		return generateThisAtAnyCallSitesOf(unit,calledMethod,closeMethods(), initialTrans);
 	}

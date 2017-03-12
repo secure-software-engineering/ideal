@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -93,10 +94,8 @@ public class VectorStateMachine extends MatcherStateMachine implements Typestate
 
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
+	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
-		if(!m.getDeclaringClass().isApplicationClass())
-			return Collections.emptySet();
 		boolean matches = false;
 		for (SootMethod method : calledMethod) {
 			if (initialTrans.matches(method) && !initialTrans.matches(icfg.getMethodOf(unit))) {

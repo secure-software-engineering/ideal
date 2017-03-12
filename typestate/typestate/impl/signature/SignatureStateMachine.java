@@ -9,6 +9,7 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
@@ -99,10 +100,8 @@ public class SignatureStateMachine extends MatcherStateMachine implements Typest
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod m, Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
-	  if(!m.getDeclaringClass().isApplicationClass())
-			return Collections.emptySet();
 	  return generateReturnValueOf(unit, calledMethod, initialTrans);
   }
 

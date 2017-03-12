@@ -8,6 +8,7 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -23,8 +24,7 @@ import typestate.finiteautomata.MatcherTransition.Type;
 import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
 
-public class FileMustBeClosedStateMachine extends MatcherStateMachine
-    implements TypestateChangeFunction {
+public class FileMustBeClosedStateMachine extends MatcherStateMachine{
   private MatcherTransition initialTrans;
 
   public static enum States implements State {
@@ -53,7 +53,7 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method,Unit unit,
+  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method,Unit unit,
       Collection<SootMethod> calledMethod) {
     boolean matches = false;
     for (SootMethod m : calledMethod) {
@@ -61,7 +61,7 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine
         matches = true;
       }
     }
-    if (!matches || !method.getDeclaringClass().isApplicationClass())
+    if (!matches)
       return Collections.emptySet();
     if (unit instanceof Stmt && ((Stmt) unit).getInvokeExpr() instanceof InstanceInvokeExpr) {
       InstanceInvokeExpr iie = (InstanceInvokeExpr) ((Stmt) unit).getInvokeExpr();
