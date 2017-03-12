@@ -40,6 +40,7 @@ public class CallSite<V> extends PointOfAlias<V> {
 		AliasResults results = tsanalysis.aliasesFor(d2, curr, d1);
 		for (AccessGraph mayAliasingAccessGraph : results.mayAliasSet()) {
 			res.add(new PathEdge<Unit, AccessGraph>(d1, succ,mayAliasingAccessGraph));
+			tsanalysis.flowFromTo(d2, mayAliasingAccessGraph);
 		}
 		checkMustAlias(results, res, tsanalysis);
 		return res;

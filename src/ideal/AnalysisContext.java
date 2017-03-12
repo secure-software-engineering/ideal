@@ -142,7 +142,7 @@ public class AnalysisContext<V> {
 	 */
 	public boolean isStrongUpdate(Unit callSite, AccessGraph returnSideNode) {
 		Pair<Unit, AccessGraph> key = new Pair<>(callSite, returnSideNode);
-		return callSiteToStrongUpdates.contains(key);
+		return Analysis.ENABLE_STRONG_UPDATES && callSiteToStrongUpdates.contains(key);
 	}
 
 	

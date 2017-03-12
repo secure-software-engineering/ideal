@@ -41,9 +41,13 @@ public class Analysis<V> {
    */
   public static long ALIAS_BUDGET = 1000;
   public static boolean ENABLE_STATIC_FIELDS = true;
-  
+  public static boolean ENABLE_STRONG_UPDATES = true;
+  public static boolean SEED_IN_APPLICATION_CLASS_METHOD = false;
+
   private final IDebugger<V> debugger;
   private static Stopwatch START_TIME;
+
+
   private AnalysisContext<V> context;
   private Set<PathEdge<Unit, AccessGraph>> initialSeeds = new HashSet<>();
   private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
@@ -70,6 +74,9 @@ public class Analysis<V> {
     this.debugger = debugger;
   }
   public void run() {
+	if(!ENABLE_STRONG_UPDATES){
+		System.err.println("Strong updates are disabled.");
+	}
 	WrappedSootField.TRACK_TYPE = false;
 	WrappedSootField.TRACK_STMT = false;
     initialSeeds = computeSeeds();
@@ -81,8 +88,6 @@ public class Analysis<V> {
     debugger.beforeAnalysis();
     String inclClasses = System.getProperty("application_includes");
     for (PathEdge<Unit, AccessGraph> seed : initialSeeds) {
-//    	if(!icfg.getMethodOf(seed.getTarget()).toString().equals("<net.sourceforge.pmd.dfa.Structure: void <init>()>"))
-//    		continue;
     	if(inclClasses != null){
     		//TODO remove this after experiments are performed.
     		String[] split = inclClasses.split(":");
@@ -117,18 +122,13 @@ public class Analysis<V> {
       solver = new AnalysisSolver<>(context.icfg(), context, edgeFunc);
       phase2(seed,solver);
       context.setSolver(solver);
-      isInErrorState = problem.isInErrorState();
     } catch (AnalysisTimeoutException e) {
     	System.out.println("Timeout of IDEAL");
-      isInErrorState = true;
       timeout = true;
       debugger.onAnalysisTimeout(seed);
-    } catch (RuntimeException e) {
-    	System.out.println("RuntimeException");
-      e.printStackTrace();
-      isInErrorState = true;
     }
     problem.onAnalysisFinished(seed,solver);
+    isInErrorState = timeout || problem.isInErrorState();
     debugger.finishWithSeed(seed, timeout, isInErrorState, solver);
     context.destroy();
     solver.destroy();
@@ -205,6 +205,7 @@ public class Analysis<V> {
       Collection<SootMethod> calledMethods =
           (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u) : new HashSet<SootMethod>());
         for (Pair<AccessGraph, EdgeFunction<V>> fact : problem.generate(method,u, calledMethods)) {
+
           PathEdge<Unit, AccessGraph> pathEdge =
               new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u, fact.getO1());
           seeds.add(pathEdge);

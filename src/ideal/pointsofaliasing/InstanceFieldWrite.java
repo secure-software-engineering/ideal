@@ -25,8 +25,6 @@ public class InstanceFieldWrite<V> extends PointOfAlias<V> {
   public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
     Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
-    AliasFinder aliasFinder = new AliasFinder(tsanalysis.icfg());
-    aliasFinder.startQuery();
     AccessGraph accessGraph = new AccessGraph(base, base.getType());
     AliasResults results = tsanalysis.aliasesFor(accessGraph, curr, d1);
 

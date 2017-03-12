@@ -450,11 +450,11 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 	@Override
-	public FlowFunction<AccessGraph> getCallToReturnFlowFunction(AccessGraph sourceFact, final Unit callStmt,
-			Unit returnSite, boolean hasCallees) {
-		if (!hasCallees) {
-			return Identity.v();
-		}
+	public FlowFunction<AccessGraph> getCallToReturnFlowFunction(final AccessGraph sourceFact, final Unit callStmt,
+			final Unit returnSite, final boolean hasCallees) {
+//		if (!hasCallees) {
+//			return Identity.v();
+//		}
 		if (!(callStmt instanceof Stmt)) {
 			return Identity.v();
 		}
@@ -467,6 +467,8 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		return new FlowFunction<AccessGraph>() {
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
+				
+				if(hasCallees){
 				for (int i = 0; i < invokeExpr.getArgCount(); i++) {
 					if (source.baseMatches(invokeExpr.getArg(i))) {
 						return Collections.emptySet();
@@ -478,6 +480,12 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 					if (source.baseMatches(base)) {
 						return Collections.emptySet();
 					}
+				}
+				}
+				EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getCallToReturnEdgeFunction(sourceFact, callStmt, source, returnSite, source);
+				
+				if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
+					context.addEventFor(source);
 				}
 				return Collections.singleton(source);
 			}
