@@ -29,7 +29,6 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
-import soot.JastAddJ.ThrowStmt;
 import soot.jimple.ArrayRef;
 import soot.jimple.AssignStmt;
 import soot.jimple.CastExpr;
@@ -218,7 +217,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 					Value base = fr.getBase();
 					SootField field = fr.getField();
 
-					if (source.baseAndFirstFieldMatches(base, field)) {
+					if (source.baseMatches(base) && source.firstFirstFieldMayMatch(field)) {
 						// e = a.f && source == a.f.*
 						// replace in source
 						if (leftOp instanceof Local && !source.baseMatches(leftOp)) {
@@ -469,18 +468,18 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
 				
 				if(hasCallees){
-				for (int i = 0; i < invokeExpr.getArgCount(); i++) {
-					if (source.baseMatches(invokeExpr.getArg(i))) {
-						return Collections.emptySet();
+					for (int i = 0; i < invokeExpr.getArgCount(); i++) {
+						if (source.baseMatches(invokeExpr.getArg(i))) {
+							return Collections.emptySet();
+						}
 					}
-				}
-				if (invokeExpr instanceof InstanceInvokeExpr) {
-					InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
-					Value base = iie.getBase();
-					if (source.baseMatches(base)) {
-						return Collections.emptySet();
+					if (invokeExpr instanceof InstanceInvokeExpr) {
+						InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
+						Value base = iie.getBase();
+						if (source.baseMatches(base)) {
+							return Collections.emptySet();
+						}
 					}
-				}
 				}
 				EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getCallToReturnEdgeFunction(sourceFact, callStmt, source, returnSite, source);
 				
