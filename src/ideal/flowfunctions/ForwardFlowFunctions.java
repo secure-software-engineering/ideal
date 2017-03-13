@@ -205,10 +205,14 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						// d.f = e;
 						StaticFieldRef fr = (StaticFieldRef) leftOp;
 						SootField field = fr.getField();
+						AccessGraph newAp = source
+								.prependField(new WrappedSootField(field, source.getBaseType(), curr)).makeStatic();
 
-						AccessGraph staticap = source.makeStatic();
-						AccessGraph newAp = staticap
-								.prependField(new WrappedSootField(field, source.getBaseType(), curr));
+						if(newAp.hasSetBasedFieldGraph()){
+							newAp = source.dropTail()
+									.prependField(new WrappedSootField(field, source.getBaseType(), curr)).makeStatic();
+							out.add(newAp);
+						}
 						out.add(newAp);
 						return out;
 					}

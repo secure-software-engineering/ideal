@@ -171,7 +171,7 @@ public class AnalysisContext<V> {
 		Analysis.checkTimeout();
 		BoomerangOptions opts = new BoomerangOptions();
 		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
-		opts.setTrackStaticFields(false);
+		opts.setTrackStaticFields(true);
 		if(boomerang == null)
 			boomerang = new AliasFinder(icfg(),opts);
 		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
@@ -181,7 +181,8 @@ public class AnalysisContext<V> {
 					getContextRequestorFor(d1, curr)).withoutNullAllocationSites();
 			debugger.onAliasesComputed(boomerangAccessGraph, curr, d1, res);
 			return res;
-		} catch (BoomerangTimeoutException e) {
+		} catch (Exception e) {
+			e.printStackTrace();
 			debugger.onAliasTimeout(boomerangAccessGraph, curr, d1);
 			Analysis.checkTimeout();
 			return new AliasResults();
