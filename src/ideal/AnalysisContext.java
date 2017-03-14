@@ -44,9 +44,8 @@ public class AnalysisContext<V> {
 	private IInfoflowCFG icfg;
 	private AnalysisSolver<V> solver;
 	private AnalysisEdgeFunctions<V> edgeFunc;
-	private Set<AccessGraph> hasEvents = new HashSet<>();
 	AliasFinder boomerang;
-	private Multimap<AccessGraph,AccessGraph> sourceToTargetFact = HashMultimap.create();
+	private Multimap<Unit, AccessGraph> eventAtCallSite = HashMultimap.create();
 
 
 	public AnalysisContext(IInfoflowCFG icfg, BackwardsInfoflowCFG bwicfg, AnalysisEdgeFunctions<V> edgeFunc,
@@ -200,33 +199,16 @@ public class AnalysisContext<V> {
 		icfg = null;
 		solver = null;
 		boomerang = null;
-		sourceToTargetFact.clear();
+		eventAtCallSite.clear();
 	}
 
-	public void addEventFor(AccessGraph fact,Set<AccessGraph> visited) {
-		if(visited.contains(fact))
-			return;
-		visited.add(fact);
-		hasEvents.add(fact);
-		for(AccessGraph targets : sourceToTargetFact.get(fact)){
-			addEventFor(targets, visited);
-		}
+
+	public void addEventFor(Unit callSite, AccessGraph returnedFact) {
+		eventAtCallSite .put(callSite,returnedFact);
 	}
 
-	public boolean hasEvent(AccessGraph fact) {
-		return hasEvents.contains(fact);
-	}
-
-	public void flowFromTo(AccessGraph source, AccessGraph target) {
-		if(source.equals(target))
-			return;
-		sourceToTargetFact.put(source,target);
-		if(hasEvent(source))
-			addEventFor(target, new HashSet<AccessGraph>());
-	}
-
-	public void addEventFor(AccessGraph fact) {
-		addEventFor(fact, new HashSet<AccessGraph>());
+	public boolean hasEventFor(Unit callSite, AccessGraph returnedFact) {
+		return eventAtCallSite.get(callSite).contains(returnedFact);
 	}
 
 }

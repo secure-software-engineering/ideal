@@ -131,13 +131,14 @@ public class InternalAnalysisProblem<V> implements
 	}
 
 	@Override
-	public Flow<AccessGraph> flowWrapper() {
+	public Flow<Unit,AccessGraph> flowWrapper() {
 		// TODO Auto-generated method stub
-		return new Flow<AccessGraph>(){
+		return new Flow<Unit,AccessGraph>(){
+
 
 			@Override
-			public void fromTo(AccessGraph source, AccessGraph target) {
-				context.flowFromTo(source,target);
+			public void nonIdentityReturn(Unit callSite, AccessGraph returnedFact) {
+				context.addEventFor(callSite,returnedFact);
 				
 			}};
 	}

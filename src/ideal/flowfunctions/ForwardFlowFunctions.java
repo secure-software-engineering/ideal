@@ -396,10 +396,6 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 										AccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) arg,
 												source.getBaseType());
 										
-										EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getReturnEdgeFunction(callerD1, callSite, callee, exitStmt, source, returnSite, deriveWithNewLocal);
-										if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
-											context.addEventFor(deriveWithNewLocal);
-										}
 										out.add(deriveWithNewLocal);
 										CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,deriveWithNewLocal,
 												returnSite);
@@ -423,10 +419,6 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 								if (pointsToSetCompatible(newBase, source.getBase()) && typeCompatible(newBase.getType(), source.getBaseType())) {
 									AccessGraph possibleAccessPath = source.deriveWithNewLocal((Local) iIExpr.getBase(),
 											source.getBaseType());
-									EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getReturnEdgeFunction(callerD1, callSite, callee, exitStmt, source, returnSite, possibleAccessPath);
-									if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
-										context.addEventFor(possibleAccessPath);
-									}
 									out.add(possibleAccessPath);
 									
 									CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,possibleAccessPath,
@@ -499,11 +491,6 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 							return Collections.emptySet();
 						}
 					}
-				}
-				EdgeFunction<V> returnEdgeFunction = context.getEdgeFunctions().getCallToReturnEdgeFunction(sourceFact, callStmt, source, returnSite, source);
-				
-				if(!returnEdgeFunction.equalTo(EdgeIdentity.<V>v())){
-					context.addEventFor(source);
 				}
 				return Collections.singleton(source);
 			}

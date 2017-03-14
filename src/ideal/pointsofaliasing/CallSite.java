@@ -25,7 +25,7 @@ public class CallSite<V> extends PointOfAlias<V> {
 	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
 		Collection<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
-		if (tsanalysis.hasEvent(d2)){
+		if (tsanalysis.hasEventFor(curr,d2)){
 			res = balancedReturn(tsanalysis);
 		}
 		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)){
@@ -40,7 +40,6 @@ public class CallSite<V> extends PointOfAlias<V> {
 		AliasResults results = tsanalysis.aliasesFor(d2, curr, d1);
 		for (AccessGraph mayAliasingAccessGraph : results.mayAliasSet()) {
 			res.add(new PathEdge<Unit, AccessGraph>(d1, succ,mayAliasingAccessGraph));
-			tsanalysis.flowFromTo(d2, mayAliasingAccessGraph);
 		}
 		checkMustAlias(results, res, tsanalysis);
 		return res;
