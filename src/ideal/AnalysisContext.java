@@ -2,18 +2,14 @@ package ideal;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.common.collect.ForwardingMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
 import boomerang.BoomerangOptions;
-import boomerang.BoomerangTimeoutException;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.context.IContextRequester;
 import heros.solver.Pair;
@@ -24,7 +20,7 @@ import ideal.pointsofaliasing.CallSite;
 import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
-import soot.SootMethod;
+import soot.Scene;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.BackwardsInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
@@ -44,7 +40,6 @@ public class AnalysisContext<V> {
 	private IInfoflowCFG icfg;
 	private AnalysisSolver<V> solver;
 	private AnalysisEdgeFunctions<V> edgeFunc;
-	AliasFinder boomerang;
 	private Multimap<Unit, AccessGraph> eventAtCallSite = HashMultimap.create();
 
 
@@ -167,18 +162,25 @@ public class AnalysisContext<V> {
 	}
 
 	public AliasResults aliasesFor(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
+		if(!Analysis.ALIASING)
+			return new AliasResults();
 		Analysis.checkTimeout();
 		BoomerangOptions opts = new BoomerangOptions();
 		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
-		opts.setTrackStaticFields(true);
-		if(boomerang == null)
-			boomerang = new AliasFinder(icfg(),opts);
+		opts.setTrackStaticFields(Analysis.ALIASING_FOR_STATIC_FIELDS);
+			AliasFinder boomerang = new AliasFinder(icfg(),opts);
+		if(!boomerangAccessGraph.isStatic() && Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
+			return new AliasResults();
 		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
 		try {
 			boomerang.startQuery();
 			AliasResults res = boomerang.findAliasAtStmt(boomerangAccessGraph, curr,
 					getContextRequestorFor(d1, curr)).withoutNullAllocationSites();
 			debugger.onAliasesComputed(boomerangAccessGraph, curr, d1, res);
+			if(res.queryTimedout()){
+				System.out.println("TIMOEUT");
+				debugger.onAliasTimeout(boomerangAccessGraph, curr, d1);
+			}
 			return res;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -198,7 +200,6 @@ public class AnalysisContext<V> {
 		nullnessBranches = null;
 		icfg = null;
 		solver = null;
-		boomerang = null;
 		eventAtCallSite.clear();
 	}
 

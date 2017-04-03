@@ -64,8 +64,14 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
+
+				if(curr instanceof IdentityStmt){
+					IdentityStmt identityStmt = (IdentityStmt) curr;
+					if (identityStmt.getRightOp() instanceof CaughtExceptionRef)
+						return Collections.emptySet();
+				}
 				context.debugger.onNormalPropagation(sourceFact, curr, succ, source);
-				if (curr instanceof IdentityStmt) {
+				if (AliasFinder.HANDLE_EXCEPTION_FLOW && !source.isStatic() && curr instanceof IdentityStmt) {
 					IdentityStmt identityStmt = (IdentityStmt) curr;
 					if (identityStmt.getRightOp() instanceof CaughtExceptionRef
 							&& identityStmt.getLeftOp() instanceof Local) {
@@ -76,6 +82,8 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 							out.add(source);
 							out.add(source.deriveWithNewLocal((Local) leftOp, source.getBaseType()));
 							return out;
+						} else{
+							return Collections.emptySet();
 						}
 					}
 				}
@@ -314,7 +322,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 					for (int i = 0; i < paramLocals.length; i++) {
 						Value arg = ie.getArg(i);
 						if (arg instanceof Local && source.baseMatches(arg)) {
-							if (typeCompatible(paramLocals[i].getType(), source.getBaseType())) {
+							if (!pointsToSetEmpty(paramLocals[i]) && typeCompatible(paramLocals[i].getType(), source.getBaseType())) {
 								out.add(source.deriveWithNewLocal(paramLocals[i], source.getBaseType()));
 							}
 						}
@@ -351,15 +359,20 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 
 								}
 							}
-
-							AccessGraph replacedThisValue = source.deriveWithNewLocal(thisLocal, source.getBaseType());
-							out.add(replacedThisValue);
+							if(!pointsToSetEmpty(thisLocal)){
+								AccessGraph replacedThisValue = source.deriveWithNewLocal(thisLocal, source.getBaseType());
+								out.add(replacedThisValue);
+							}
 						}
 					}
 				}
 				return out;
 			}
 		};
+	}
+
+	protected boolean pointsToSetEmpty(Local local) {
+		return Scene.v().getPointsToAnalysis().reachingObjects(local).isEmpty();
 	}
 
 	@Override
@@ -387,11 +400,11 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 						InvokeExpr ie = is.getInvokeExpr();
 						for (int i = 0; i < paramLocals.length; i++) {
 
-							if (paramLocals[i] == source.getBase()) {
+							if (paramLocals[i].equals(source.getBase())) {
 								Value arg = ie.getArg(i);
 								if (arg instanceof Local) {
 									if (typeCompatible(((Local) arg).getType(), source.getBaseType())) {
-										if(Scene.v().getPointsToAnalysis().reachingObjects((Local) arg).isEmpty())
+										if(pointsToSetEmpty((Local) arg))
 											return Collections.emptySet();
 										AccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) arg,
 												source.getBaseType());
@@ -443,7 +456,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 					Value returns = returnStmt.getOp();
 					// d = return out;
 					if (leftOp instanceof Local) {
-						if (returns instanceof Local && source.getBase() == returns) {
+						if (returns instanceof Local && source.getBase().equals(returns) && !pointsToSetEmpty((Local)leftOp)) {
 							out.add(source.deriveWithNewLocal((Local) leftOp, source.getBaseType()));
 						}
 					}

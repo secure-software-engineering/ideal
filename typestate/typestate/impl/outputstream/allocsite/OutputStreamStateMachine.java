@@ -58,7 +58,6 @@ public class OutputStreamStateMachine extends MatcherStateMachine implements Typ
 		addTransition(
 				new MatcherTransition(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(new MatcherTransition(States.OPEN, writeMethods(), Parameter.This, States.OPEN, Type.OnReturn));
-		addTransition(new MatcherTransition(States.OPEN, writeMethods(), Parameter.This, States.OPEN, Type.OnReturn));
 		addTransition(new MatcherTransition(States.CLOSED, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 		addTransition(new MatcherTransition(States.ERROR, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 	}

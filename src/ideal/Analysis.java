@@ -39,13 +39,16 @@ public class Analysis<V> {
   /**
    * Specifies the budget per alias query in milliseconds.
    */
-  public static long ALIAS_BUDGET = 1000;
+  public static long ALIAS_BUDGET = 500;
   public static boolean ENABLE_STATIC_FIELDS = true;
   public static boolean ENABLE_STRONG_UPDATES = true;
+  public static boolean ALIASING = true;
+  public static boolean ALIASING_FOR_STATIC_FIELDS = false;
   public static boolean SEED_IN_APPLICATION_CLASS_METHOD = false;
 
   private final IDebugger<V> debugger;
   private static Stopwatch START_TIME;
+
 
 
   private AnalysisContext<V> context;
