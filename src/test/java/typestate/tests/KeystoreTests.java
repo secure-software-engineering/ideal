@@ -12,17 +12,17 @@ public class KeystoreTests extends TypestateTestingFramework {
 
   @Test
   public void test1() {
-    expectNErrors("keystore.KeyStoreTarget1", 0);
+    expectNErrors("targets.keystore.KeyStoreTarget1", 0);
   }
 
   @Test
   public void test2() {
-    expectNErrors("keystore.KeyStoreTarget2", 1);
+    expectNErrors("targets.keystore.KeyStoreTarget2", 1);
   }
 
   @Test
   public void test3() {
-    expectNErrors("keystore.KeyStoreTarget3", 0);
+    expectNErrors("targets.keystore.KeyStoreTarget3", 0);
   }
 
 

@@ -1,4 +1,4 @@
-package printwriter;
+package targets.printwriter;
 
 import java.io.IOException;
 import java.io.PrintWriter;

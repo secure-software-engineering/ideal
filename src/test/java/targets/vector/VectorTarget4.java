@@ -1,4 +1,4 @@
-package vector;
+package targets.vector;
 
 import java.util.Vector;
 

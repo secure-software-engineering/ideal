@@ -1,4 +1,4 @@
-package file;
+package targets.file;
 
 public class Target3 {
   public static void main(String[] args) {

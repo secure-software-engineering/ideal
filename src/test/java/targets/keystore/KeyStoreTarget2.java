@@ -1,4 +1,4 @@
-package keystore;
+package targets.keystore;
 
 import java.io.IOException;
 import java.security.KeyStore;

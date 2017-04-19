@@ -12,17 +12,17 @@ public class InputStreamTests extends TypestateTestingFramework {
 
   @Test
   public void test1() {
-    expectNErrors("inputstream.InputStreamTarget1", 2);
+    expectNErrors("targets.inputstream.InputStreamTarget1", 2);
   }
 
   @Test
   public void test2() {
-    expectAtLeastOneError("inputstream.InputStreamTarget2");
+    expectAtLeastOneError("targets.inputstream.InputStreamTarget2");
   }
 
   @Test
   public void test3() {
-    expectNErrors("inputstream.InputStreamTarget3", 0);
+    expectNErrors("targets.inputstream.InputStreamTarget3", 0);
   }
 
   @Override

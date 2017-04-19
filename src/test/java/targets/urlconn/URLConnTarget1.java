@@ -1,4 +1,4 @@
-package urlconn;
+package targets.urlconn;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

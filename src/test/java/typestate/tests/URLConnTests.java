@@ -12,12 +12,12 @@ public class URLConnTests extends TypestateTestingFramework {
 
   @Test
   public void test1() {
-    expectNErrors("urlconn.URLConnTarget1", 2);
+    expectNErrors("targets.urlconn.URLConnTarget1", 2);
   }
 
   @Test
   public void test2() {
-    expectNErrors("urlconn.URLConnTarget2", 0);
+    expectNErrors("targets.urlconn.URLConnTarget2", 0);
   }
 
   @Override

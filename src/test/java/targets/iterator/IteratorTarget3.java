@@ -1,4 +1,4 @@
-package iterator;
+package targets.iterator;
 
 public class IteratorTarget3 {
   public static void main(String... args) {

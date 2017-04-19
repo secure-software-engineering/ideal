@@ -12,7 +12,7 @@ public class PrintWriterTests extends TypestateTestingFramework {
 
   @Test
   public void test1() {
-    expectAtLeastOneError("printwriter.PrintWriterTarget1");
+    expectAtLeastOneError("targets.printwriter.PrintWriterTarget1");
   }
 
   @Override

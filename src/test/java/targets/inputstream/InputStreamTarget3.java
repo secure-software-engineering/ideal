@@ -1,4 +1,4 @@
-package inputstream;
+package targets.inputstream;
 
 import java.io.FileInputStream;
 import java.io.IOException;

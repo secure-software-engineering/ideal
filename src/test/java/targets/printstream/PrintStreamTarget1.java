@@ -1,4 +1,4 @@
-package printstream;
+package targets.printstream;
 
 import java.io.IOException;
 import java.io.PrintStream;

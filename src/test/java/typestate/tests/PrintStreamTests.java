@@ -12,7 +12,7 @@ public class PrintStreamTests extends TypestateTestingFramework {
 
   @Test
   public void test1() {
-    expectAtLeastOneError("printstream.PrintStreamTarget1");
+    expectAtLeastOneError("targets.printstream.PrintStreamTarget1");
   }
 
   @Override

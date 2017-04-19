@@ -1,4 +1,4 @@
-package stack;
+package targets.stack;
 
 import java.io.IOException;
 import java.util.Stack;
