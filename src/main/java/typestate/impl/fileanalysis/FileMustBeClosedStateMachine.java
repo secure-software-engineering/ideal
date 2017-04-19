@@ -43,7 +43,7 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine{
 
   FileMustBeClosedStateMachine() {
     initialTrans =
- new MatcherTransition(States.NONE, "<file.File: void <init>\\(\\)>",Parameter.This, States.INIT,
+ new MatcherTransition(States.NONE, "<targets.file.File: void <init>\\(\\)>",Parameter.This, States.INIT,
         Type.OnCall);
     addTransition(initialTrans);
     addTransition(new MatcherTransition(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn));
