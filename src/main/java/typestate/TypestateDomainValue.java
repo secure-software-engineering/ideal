@@ -3,25 +3,25 @@ package typestate;
 import java.util.HashSet;
 import java.util.Set;
 
-import typestate.finiteautomata.Transition;
+import typestate.finiteautomata.State;
 
 public class TypestateDomainValue {
 
-  private final Set<? extends Transition> transitions;
+  private final Set<State> states;
 
-  public TypestateDomainValue(Set<? extends Transition> trans) {
-    this.transitions = trans;
+  public TypestateDomainValue(Set<State> trans) {
+    this.states = trans;
   }
 
   public TypestateDomainValue() {
-    this.transitions = new HashSet<>();
+    this.states = new HashSet<>();
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((transitions == null) ? 0 : transitions.hashCode());
+    result = prime * result + ((states == null) ? 0 : states.hashCode());
     return result;
   }
 
@@ -34,21 +34,21 @@ public class TypestateDomainValue {
     if (getClass() != obj.getClass())
       return false;
     TypestateDomainValue other = (TypestateDomainValue) obj;
-    if (transitions == null) {
-      if (other.transitions != null)
+    if (states == null) {
+      if (other.states != null)
         return false;
-    } else if (!transitions.equals(other.transitions))
+    } else if (!states.equals(other.states))
       return false;
     return true;
   }
 
-  public Set<Transition> getTransitions() {
-    return new HashSet<>(transitions);
+  public Set<State> getStates() {
+    return new HashSet<>(states);
   }
 
   public boolean endsInErrorState() {
-    for (Transition t : transitions) {
-      if (t.to().isErrorState())
+    for (State t : states) {
+      if (t.isErrorState())
         return true;
     }
     return false;
@@ -56,7 +56,7 @@ public class TypestateDomainValue {
 
   @Override
   public String toString() {
-    return transitions.toString();
+    return states.toString();
   }
 
   static final TypestateDomainValue BOTTOM = new TypestateDomainValue() {

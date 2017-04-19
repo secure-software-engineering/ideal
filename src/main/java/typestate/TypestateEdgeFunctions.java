@@ -9,6 +9,7 @@ import heros.edgefunc.EdgeIdentity;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import soot.SootMethod;
 import soot.Unit;
+import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
 
 public class TypestateEdgeFunctions implements AnalysisEdgeFunctions<TypestateDomainValue> {
@@ -70,8 +71,8 @@ public class TypestateEdgeFunctions implements AnalysisEdgeFunctions<TypestateDo
 
   @Override
   public TypestateDomainValue join(TypestateDomainValue left, TypestateDomainValue right) {
-    Set<Transition> transitions = left.getTransitions();
-    transitions.addAll(right.getTransitions());
+    Set<State> transitions = left.getStates();
+    transitions.addAll(right.getStates());
     return new TypestateDomainValue(transitions);
   }
 }

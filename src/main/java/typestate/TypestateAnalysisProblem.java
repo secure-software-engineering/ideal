@@ -23,6 +23,7 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
+import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
 
 public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomainValue> {
@@ -33,8 +34,8 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
 
 	@Override
 	public TypestateDomainValue join(TypestateDomainValue t1, TypestateDomainValue t2) {
-		Set<Transition> transitions = t1.getTransitions();
-		Set<Transition> transitions2 = t2.getTransitions();
+		Set<State> transitions = t1.getStates();
+		Set<State> transitions2 = t2.getStates();
 		transitions.addAll(transitions2);
 		return new TypestateDomainValue(transitions);
 	}});

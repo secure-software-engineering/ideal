@@ -11,25 +11,35 @@ import heros.EdgeFunction;
 import heros.edgefunc.AllBottom;
 import heros.edgefunc.AllTop;
 import heros.edgefunc.EdgeIdentity;
+import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
 
 public class TransitionFunction
  implements EdgeFunction<TypestateDomainValue> {
 
-  public final TypestateDomainValue value;
+  public final Set<Transition> value;
 
   private static Logger logger = LoggerFactory.getLogger(TransitionFunction.class);
 
   public TransitionFunction(Set<? extends Transition> trans) {
-    this.value = new TypestateDomainValue(trans);
+    this.value = new HashSet<>(trans);
   }
 
   public TransitionFunction(Transition trans) {
-    this.value = new TypestateDomainValue(new HashSet<>(Collections.singleton(trans)));
+    this.value = new HashSet<>(new HashSet<>(Collections.singleton(trans)));
   }
   @Override
   public TypestateDomainValue computeTarget(TypestateDomainValue source) {
-    return value;
+	  System.err.println(source + " "+  this );
+	  Set<State> states = new HashSet<>();
+	  for(Transition t : value){
+		  for(State sourceState : source.getStates()){
+			  if(t.from().equals(sourceState)){
+				  states.add(t.to());
+			  }
+		  }
+	  }
+    return new TypestateDomainValue(states);
   }
 
   @Override
@@ -47,10 +57,10 @@ public class TransitionFunction
     if (!(secondFunction instanceof TransitionFunction))
         throw new RuntimeException("Wrong type, is of type: " + secondFunction);
     TransitionFunction func = (TransitionFunction) secondFunction;
-    TypestateDomainValue otherTransitions = func.value;
+    Set<Transition> otherTransitions = func.value;
     Set<Transition> res = new HashSet<>();
-    for (Transition first : value.getTransitions()) {
-      for (Transition second : otherTransitions.getTransitions()) {
+    for (Transition first : value) {
+      for (Transition second : otherTransitions) {
         if (second.from().equals(IdentityTransition.ID)
             && second.to().equals(IdentityTransition.ID)) {
           res.add(first);
@@ -76,12 +86,12 @@ public class TransitionFunction
     if (otherFunction instanceof EdgeIdentity) {
       Set<Transition> transitions = new HashSet<>();
       transitions.add(new IdentityTransition());
-      transitions.addAll(value.getTransitions());
+      transitions.addAll(value);
       return new TransitionFunction(transitions);
     }
     TransitionFunction func = (TransitionFunction) otherFunction;
-    Set<Transition> transitions = func.value.getTransitions();
-    transitions.addAll(value.getTransitions());
+    Set<Transition> transitions = func.value;
+    transitions.addAll(value);
     return new TransitionFunction(transitions);
   }
 
