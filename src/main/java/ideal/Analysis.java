@@ -65,8 +65,8 @@ public class Analysis<V> {
     this.problem = problem;
     this.icfg = icfg;
     this.bwicfg = new BackwardsInfoflowCFG(icfg);
-    this.debugger = new NullDebugger<V>();
-//    this.debugger = new JSONDebugger<V>(new File("/Users/johannesspath/Documents/ideal-workspace/ideal/visualization/data.js"),icfg);
+//    this.debugger = new NullDebugger<V>();
+    this.debugger = new JSONDebugger<V>(new File("visualization/data.js"),icfg);
   }
 
   public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, IDebugger<V> debugger) {

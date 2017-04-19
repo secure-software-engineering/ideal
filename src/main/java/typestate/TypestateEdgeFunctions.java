@@ -71,8 +71,11 @@ public class TypestateEdgeFunctions implements AnalysisEdgeFunctions<TypestateDo
 
   @Override
   public TypestateDomainValue join(TypestateDomainValue left, TypestateDomainValue right) {
+	  if(left.equals(top()) || right.equals(top()))
+		  return top();
     Set<State> transitions = left.getStates();
     transitions.addAll(right.getStates());
+	  System.out.println("Join "+ left + "  " + right + "    "+ new TypestateDomainValue(transitions));
     return new TypestateDomainValue(transitions);
   }
 }

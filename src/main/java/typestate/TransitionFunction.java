@@ -31,8 +31,12 @@ public class TransitionFunction
   @Override
   public TypestateDomainValue computeTarget(TypestateDomainValue source) {
 	  System.err.println(source + " "+  this );
+		  
 	  Set<State> states = new HashSet<>();
 	  for(Transition t : value){
+		  if(source.equals(TypestateDomainValue.BOTTOM)){
+			  states.add(t.to());
+		  }
 		  for(State sourceState : source.getStates()){
 			  if(t.from().equals(sourceState)){
 				  states.add(t.to());
