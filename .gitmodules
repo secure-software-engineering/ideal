@@ -1,3 +1,0 @@
-[submodule "libs/boomerang"]
-	path = libs/boomerang
-	url = git@github.com:uasys/boomerang.git

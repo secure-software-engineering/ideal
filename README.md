@@ -26,25 +26,6 @@ The typestate analysis therefore must only specify the seed with is the accessor
 
 For examples on how to use IDE/AL have a look at the test cases. They can be found [here](tests/typestate/tests).
 
-# Instructions
-
-This project is dependent on [Boomerang](https://github.com/uasys/boomerang), which requires [Soot](https://github.com/Sable/soot), [Heros](https://github.com/Sable/heros) and [Jasmin](https://github.com/Sable/jasmin) as submodules. 
-To checkout this project use the --recursive option to allow all submodules to be initialized and cloned automatically, i.e.
-
-```
-git clone --recursive git@github.com:uasys/ideal.git
-```
-
-Once the checkout is done, there is a libs folder containing the Boomerang project. 
-Import the Boomerang project as an existing Java project into your eclipse workspace. 
-Do the same for Heros, Soot and Jasmin which are located in the libs folder of Boomerang, i.e. below
-
-```
-libs/boomerang/libs/(heros|soot|jasmin)/
-```
-
-IDE/AL does not contain compile time errors anymore and is readily set up.
-
 # Project Structure
 
 Import the project into eclipse. The project contians four different source folders:
