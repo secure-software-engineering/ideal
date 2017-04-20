@@ -58,22 +58,25 @@ public class Analysis<V> {
   protected final AnalysisProblem<V> problem;
   private final AnalysisEdgeFunctions<V> edgeFunc;
   private BackwardsInfoflowCFG bwicfg;
+  private ResultReporter<V> reporter;
 
-  public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg) {
+  public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, ResultReporter<V> reporter) {
     this.edgeFunc = problem.edgeFunctions();
     this.problem = problem;
     this.icfg = icfg;
     this.bwicfg = new BackwardsInfoflowCFG(icfg);
 //    this.debugger = new NullDebugger<V>();
     this.debugger = new JSONDebugger<V>(new File("visualization/data.js"),icfg);
+    this.reporter = reporter;
   }
 
-  public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, IDebugger<V> debugger) {
+  public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, ResultReporter<V> reporter, IDebugger<V> debugger) {
     this.edgeFunc = problem.edgeFunctions();
     this.problem = problem;
     this.icfg = icfg;
     this.bwicfg = new BackwardsInfoflowCFG(icfg);
     this.debugger = debugger;
+    this.reporter = reporter;
   }
   public void run() {
 	if(!ENABLE_STRONG_UPDATES){
@@ -87,21 +90,7 @@ public class Analysis<V> {
     else
     	System.err.println("Analysing " + initialSeeds.size() +" seeds!");
     debugger.beforeAnalysis();
-    String inclClasses = System.getProperty("application_includes");
     for (PathEdge<Unit, AccessGraph> seed : initialSeeds) {
-    	if(inclClasses != null){
-    		//TODO remove this after experiments are performed.
-    		String[] split = inclClasses.split(":");
-    		SootMethod methodOf = icfg.getMethodOf(seed.getTarget());
-    		boolean analyse = false;
-    		for(String s : split){
-    	    	if(methodOf.toString().contains(s)){
-    	    		analyse = true;
-    	    	}
-    		}
-    		if(!analyse)
-    			continue;
-    	}
       analysisForSeed(seed);
     }
     debugger.afterAnalysis();
@@ -116,7 +105,6 @@ public class Analysis<V> {
     START_TIME = Stopwatch.createStarted();
     AnalysisSolver<V> solver = new AnalysisSolver<>(context.icfg(), context, edgeFunc);
     context.setSolver(solver);
-    boolean isInErrorState = false;
     try {
       phase1(seed, solver);
       solver.destroy();
@@ -128,9 +116,7 @@ public class Analysis<V> {
       timeout = true;
       debugger.onAnalysisTimeout(seed);
     }
-    problem.onAnalysisFinished(seed,solver);
-    isInErrorState = timeout || problem.isInErrorState();
-    debugger.finishWithSeed(seed, timeout, isInErrorState, solver);
+    reporter.onSeedFinished(seed,solver);
     context.destroy();
     solver.destroy();
   }

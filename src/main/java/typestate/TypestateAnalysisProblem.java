@@ -116,7 +116,6 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
 
   @Override
   public boolean isInErrorState() {
-	  System.out.println(errorPathEdges);
     return !errorPathEdges.isEmpty();
   }
 
