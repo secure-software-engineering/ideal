@@ -15,11 +15,6 @@ import soot.Unit;
 public class NullDebugger<V> implements IDebugger<V> {
 
 	@Override
-	public void computedSeeds(Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> seedToInitivalValue) {
-
-	}
-
-	@Override
 	public void beforeAnalysis() {
 
 	}

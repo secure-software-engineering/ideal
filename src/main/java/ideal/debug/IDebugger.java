@@ -16,8 +16,6 @@ import soot.Unit;
 
 public interface IDebugger<V> extends IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
-  void computedSeeds(Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> seedToInitivalValue);
-
   void beforeAnalysis();
 
   void startWithSeed(PathEdge<Unit, AccessGraph> seed);

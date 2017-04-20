@@ -87,7 +87,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
+  public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
     boolean matches = false;
     for (SootMethod method : calledMethod) {
@@ -98,11 +98,9 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
     if (!matches)
       return Collections.emptySet();
     if (unit instanceof AssignStmt) {
-      Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();
+      Set<AccessGraph> out = new HashSet<>();
       AssignStmt stmt = (AssignStmt) unit;
-      out.add(new Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>(
-          new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()),
-          new TransitionFunction(initialTrans)));
+      out.add( new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
       return out;
     }
     return Collections.emptySet();

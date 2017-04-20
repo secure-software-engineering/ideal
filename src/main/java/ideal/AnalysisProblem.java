@@ -21,7 +21,7 @@ public interface AnalysisProblem<V> {
 	 * @param calledMethod If stmt is a call site, this set contains the set of called method for the call site.
 	 * @return
 	 */
-  Collection<Pair<AccessGraph, EdgeFunction<V>>> generate(SootMethod method, Unit stmt,
+  Collection<AccessGraph> generate(SootMethod method, Unit stmt,
       Collection<SootMethod> calledMethod);
 
   /**

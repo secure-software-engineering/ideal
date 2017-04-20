@@ -106,7 +106,7 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
 	}
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method, Unit unit,
+	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		if (unit instanceof AssignStmt) {
 			if (((AssignStmt) unit).getRightOp() instanceof NewExpr) {
@@ -114,11 +114,9 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
 				if (newExpr.getType() instanceof RefType) {
 					RefType refType = (RefType) newExpr.getType();
 					if (getImplementersOfIterator("java.util.Iterator").contains(refType.getSootClass())) {
-						Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();
+						Set<AccessGraph> out = new HashSet<>();
 						AssignStmt stmt = (AssignStmt) unit;
-						out.add(new Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>(
-								new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()),
-								new TransitionFunction(initialTrans)));
+						out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
 						return out;
 					}
 				}

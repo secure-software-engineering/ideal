@@ -80,7 +80,7 @@ public class OutputStreamStateMachine extends MatcherStateMachine implements Typ
 	}
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method, Unit unit,
+	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		return generateThisAtAnyCallSitesOf(unit,calledMethod,closeMethods(), initialTrans);
 	}

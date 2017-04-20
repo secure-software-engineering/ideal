@@ -101,7 +101,7 @@ public class TypestateAnalysisProblem implements AnalysisProblem<TypestateDomain
   }
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit stmt,
+  public Collection<AccessGraph> generate(SootMethod method, Unit stmt,
       Collection<SootMethod> optional) {
     return func.generate(method,stmt, optional);
   }

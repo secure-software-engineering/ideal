@@ -70,7 +70,7 @@ public class URLConnStateMachine extends MatcherStateMachine implements Typestat
 
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
+	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, connect(), initialTrans);
 //		for (Unit isRet : icfg.getSuccsOf(unit)) {

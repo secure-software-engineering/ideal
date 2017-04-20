@@ -52,10 +52,6 @@ public class JSONDebugger<V> implements IDebugger<V> {
 		this.icfg = icfg;
 	}
 
-	@Override
-	public void computedSeeds(Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> seedToInitivalValue) {
-
-	}
 
 	@Override
 	public void beforeAnalysis() {

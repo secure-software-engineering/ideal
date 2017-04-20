@@ -114,7 +114,7 @@ public class InputStreamStateMachine extends MatcherStateMachine implements Type
 	}
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method, Unit unit,
+	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		
 		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(), initialTrans);

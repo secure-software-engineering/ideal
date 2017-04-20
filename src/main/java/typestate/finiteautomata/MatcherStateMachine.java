@@ -107,7 +107,7 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 		return res;
 	}
 
-	protected Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateAtConstructor(Unit unit,
+	protected Collection<AccessGraph> generateAtConstructor(Unit unit,
 			Collection<SootMethod> calledMethod, MatcherTransition initialTrans) {
 		boolean matches = false;
 		for (SootMethod method : calledMethod) {
@@ -124,9 +124,8 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 					InstanceInvokeExpr iie = (InstanceInvokeExpr) stmt.getInvokeExpr();
 					if (iie.getBase() instanceof Local) {
 						Local l = (Local) iie.getBase();
-						Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();
-						out.add(new Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>(
-								new AccessGraph(l, l.getType()), new TransitionFunction(initialTrans)));
+						Set<AccessGraph> out = new HashSet<>();
+						out.add(new AccessGraph(l, l.getType()));
 						return out;
 					}
 				}
@@ -134,7 +133,7 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 		return Collections.emptySet();
 	}
 
-	protected Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateReturnValueOf(Unit unit,
+	protected Collection<AccessGraph> generateReturnValueOf(Unit unit,
 			Collection<SootMethod> calledMethod, MatcherTransition initialTrans) {
 		boolean matches = false;
 		for (SootMethod method : calledMethod) {
@@ -147,17 +146,16 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 		if (!matches)
 			return Collections.emptySet();
 		if (unit instanceof AssignStmt) {
-			Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();
+			Set<AccessGraph> out = new HashSet<>();
 			AssignStmt stmt = (AssignStmt) unit;
-			out.add(new Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>(
-					new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()),
-					new TransitionFunction(initialTrans)));
+			out.add(
+					new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
 			return out;
 		}
 		return Collections.emptySet();
 	}
 	
-	protected Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateThisAtAnyCallSitesOf(Unit unit,
+	protected Collection<AccessGraph> generateThisAtAnyCallSitesOf(Unit unit,
 			Collection<SootMethod> calledMethod, Set<SootMethod> hasToCall, MatcherTransition initialTrans) {
 		for (SootMethod callee : calledMethod) {
 			if (hasToCall.contains(callee)) {
@@ -165,9 +163,8 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 					if (((Stmt) unit).getInvokeExpr() instanceof InstanceInvokeExpr) {
 						InstanceInvokeExpr iie = (InstanceInvokeExpr) ((Stmt) unit).getInvokeExpr();
 						Local thisLocal = (Local) iie.getBase();
-						Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();
-						out.add(new Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>(
-								new AccessGraph(thisLocal, thisLocal.getType()), new TransitionFunction(initialTrans)));
+						Set<AccessGraph> out = new HashSet<>();
+						out.add(new AccessGraph(thisLocal, thisLocal.getType()));
 						return out;
 					}
 				}
@@ -177,7 +174,7 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 		return Collections.emptySet();
 	}
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit stmt,
+	public Collection<AccessGraph> generate(SootMethod method, Unit stmt,
 			Collection<SootMethod> calledMethods) {
 
 		if(Analysis.SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
@@ -185,7 +182,7 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 		return generateSeed(method, stmt, calledMethods);
 	}
 	
-	public abstract Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod method, Unit stmt,
+	public abstract Collection<AccessGraph> generateSeed(SootMethod method, Unit stmt,
 			Collection<SootMethod> calledMethods);
 }
 	

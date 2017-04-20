@@ -34,7 +34,7 @@ public class Analysis<V> {
 /**
  * Specifies the budget per seed in milliseconds.
  */
-  public static long BUDGET = 30000;
+  public static long BUDGET = 300000000;
   
   /**
    * Specifies the budget per alias query in milliseconds.
@@ -54,7 +54,6 @@ public class Analysis<V> {
   private AnalysisContext<V> context;
   private Set<PathEdge<Unit, AccessGraph>> initialSeeds = new HashSet<>();
   private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
-  private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> seedToInitivalValue = new HashMap<>();
   private final IInfoflowCFG icfg;
   protected final AnalysisProblem<V> problem;
   private final AnalysisEdgeFunctions<V> edgeFunc;
@@ -87,7 +86,6 @@ public class Analysis<V> {
     	System.err.println("No seeds found!");
     else
     	System.err.println("Analysing " + initialSeeds.size() +" seeds!");
-    debugger.computedSeeds(seedToInitivalValue);
     debugger.beforeAnalysis();
     String inclClasses = System.getProperty("application_includes");
     for (PathEdge<Unit, AccessGraph> seed : initialSeeds) {
@@ -207,9 +205,9 @@ public class Analysis<V> {
     for (Unit u : method.getActiveBody().getUnits()) {
       Collection<SootMethod> calledMethods =
           (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u) : new HashSet<SootMethod>());
-        for (Pair<AccessGraph, EdgeFunction<V>> fact : problem.generate(method,u, calledMethods)) {
+        for (AccessGraph fact : problem.generate(method,u, calledMethods)) {
           PathEdge<Unit, AccessGraph> pathEdge =
-              new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u, fact.getO1());
+              new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u, fact);
           seeds.add(pathEdge);
         }
     }

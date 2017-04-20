@@ -94,7 +94,7 @@ public class VectorStateMachine extends MatcherStateMachine implements Typestate
 
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
+	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		boolean matches = false;
 		for (SootMethod method : calledMethod) {
@@ -111,9 +111,8 @@ public class VectorStateMachine extends MatcherStateMachine implements Typestate
 					InstanceInvokeExpr iie = (InstanceInvokeExpr) stmt.getInvokeExpr();
 					if (iie.getBase() instanceof Local) {
 						Local l = (Local) iie.getBase();
-						Set<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> out = new HashSet<>();
-						out.add(new Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>(
-								new AccessGraph(l, l.getType()), new TransitionFunction(initialTrans)));
+						Set<AccessGraph> out = new HashSet<>();
+						out.add(new AccessGraph(l, l.getType()));
 						return out;
 					}
 				}

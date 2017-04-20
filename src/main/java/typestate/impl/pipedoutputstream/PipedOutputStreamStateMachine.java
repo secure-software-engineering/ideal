@@ -81,7 +81,7 @@ public class PipedOutputStreamStateMachine extends MatcherStateMachine implement
 
 
 	@Override
-	public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
+	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
 		return generateAtConstructor(unit, calledMethod, initialTrans);
 	}

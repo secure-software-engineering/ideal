@@ -15,7 +15,7 @@ public interface TypestateChangeFunction {
       SootMethod calleeMethod, Unit exitStmt, AccessGraph exitNode, Unit returnSite,
       AccessGraph retNode);
 
-  Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generate(SootMethod method, Unit stmt,
+  Collection<AccessGraph> generate(SootMethod method, Unit stmt,
       Collection<SootMethod> optional);
 
   Set<? extends Transition> getCallTransitionsFor(AccessGraph callerD1, Unit callSite,

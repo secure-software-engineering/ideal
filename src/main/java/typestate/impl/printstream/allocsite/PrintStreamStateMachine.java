@@ -92,7 +92,7 @@ public class PrintStreamStateMachine extends MatcherStateMachine
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
+  public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
     return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(), initialTrans);
   }

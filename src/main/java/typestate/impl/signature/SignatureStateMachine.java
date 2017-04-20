@@ -100,7 +100,7 @@ public class SignatureStateMachine extends MatcherStateMachine implements Typest
 
 
   @Override
-  public Collection<Pair<AccessGraph, EdgeFunction<TypestateDomainValue>>> generateSeed(SootMethod m, Unit unit,
+  public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
       Collection<SootMethod> calledMethod) {
 	  return generateReturnValueOf(unit, calledMethod, initialTrans);
   }
