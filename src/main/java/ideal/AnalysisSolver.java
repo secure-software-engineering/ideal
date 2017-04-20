@@ -14,6 +14,7 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
 import heros.InterproceduralCFG;
+import heros.edgefunc.EdgeIdentity;
 import heros.solver.IDESolver;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
@@ -40,7 +41,7 @@ public class AnalysisSolver<V>
    * @param d2
    */
   public void injectPhase1Seed(AccessGraph d1, Unit curr, AccessGraph d2) {
-    super.propagate(d1, curr, d2, allBottom, null, true);
+    super.propagate(d1, curr, d2, EdgeIdentity.<V>v(),null, true);
     runExecutorAndAwaitCompletion();
   }
 
@@ -52,10 +53,13 @@ public class AnalysisSolver<V>
   /**
    * Starts the IDE phase with the given path edge <d1>-><curr,d2> and the initial edge function
    */
-  public void injectPhase2Seed(AccessGraph d1, Unit curr, AccessGraph d2,
-      EdgeFunction<V> initialFunction, AnalysisContext<V> context) {
-    super.propagate(d1, curr, d2, initialFunction, null, true);
+  public void injectPhase2Seed(AccessGraph d1, Unit curr, AccessGraph d2, AnalysisContext<V> context) {
+	    
+    super.propagate(d1, curr, d2, EdgeIdentity.<V>v(), null, true);
     runExecutorAndAwaitCompletion();
+    for(Unit sp: icfg.getStartPointsOf(icfg.getMethodOf(curr)))
+    	this.setVal(sp, d1, bottom());
+    this.setVal(curr, d2, bottom());
   }
 
   @Override
@@ -126,7 +130,7 @@ public class AnalysisSolver<V>
   public void computeValues(PathEdge<Unit, AccessGraph> seed) {
     HashMap<Unit, Set<AccessGraph>> map = new HashMap<Unit, Set<AccessGraph>>();
     HashSet<AccessGraph> hashSet = new HashSet<>();
-    hashSet.add(seed.factAtTarget());
+    hashSet.add(seed.factAtSource());
     map.put(seed.getTarget(), hashSet);
     super.computeValues(map);
   }

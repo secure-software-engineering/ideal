@@ -8,21 +8,18 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
-import ideal.Analysis;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.Stmt;
 import typestate.TransitionFunction;
-import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 import typestate.finiteautomata.State;
-import typestate.finiteautomata.Transition;
 
 public class FileMustBeClosedStateMachine extends MatcherStateMachine{
   private MatcherTransition initialTrans;

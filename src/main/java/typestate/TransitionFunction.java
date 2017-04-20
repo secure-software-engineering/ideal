@@ -30,7 +30,7 @@ public class TransitionFunction
   }
   @Override
   public TypestateDomainValue computeTarget(TypestateDomainValue source) {
-	  System.err.println(source + " "+  this );
+//	  System.err.println(source + " "+  this );
 		  
 	  Set<State> states = new HashSet<>();
 	  for(Transition t : value){

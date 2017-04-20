@@ -170,20 +170,20 @@ public class Analysis<V> {
   private void phase2(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
     debugger.startPhase2WithSeed(s, solver);
     context.enableIDEPhase();
-    if(icfg.isExitStmt(s.getTarget())){
+    if(icfg.isExitStmt(s.getTarget()) || icfg.isCallStmt(s.getTarget())){
     	solver.injectPhase2Seed(s.factAtSource(),s.getTarget(), s.factAtTarget(),
-    	        seedToInitivalValue.get(s), context);
+    	         context);
     } else{
 	    for(Unit u : icfg.getSuccsOf(s.getTarget())){
-	    	solver.injectPhase2Seed(s.factAtSource(),u, s.factAtTarget(),
-	    	        seedToInitivalValue.get(s), context);
+	    	solver.injectPhase2Seed(s.factAtSource(),u, s.factAtTarget(),context);
 	    }
     }
-    for(Unit u : icfg.getSuccsOf(s.getTarget())){
-    	solver.injectPhase2Seed(s.factAtSource(),u, s.factAtTarget(),
-    	        seedToInitivalValue.get(s), context);
-    }
+//    for(Unit u : icfg.getSuccsOf(s.getTarget())){
+//    	solver.injectPhase2Seed(s.factAtSource(),u, s.factAtTarget(),
+//    	        seedToInitivalValue.get(s), context);
+//    }
     solver.runExecutorAndAwaitCompletion();
+    System.out.println("Start compute value phase");
     solver.computeValues(s);
     debugger.finishPhase2WithSeed(s, solver);
   }
@@ -208,11 +208,9 @@ public class Analysis<V> {
       Collection<SootMethod> calledMethods =
           (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u) : new HashSet<SootMethod>());
         for (Pair<AccessGraph, EdgeFunction<V>> fact : problem.generate(method,u, calledMethods)) {
-
           PathEdge<Unit, AccessGraph> pathEdge =
               new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u, fact.getO1());
           seeds.add(pathEdge);
-          seedToInitivalValue.put(pathEdge, fact.getO2());
         }
     }
     return seeds;
