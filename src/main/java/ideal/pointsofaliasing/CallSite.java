@@ -11,12 +11,12 @@ import heros.solver.PathEdge;
 import ideal.AnalysisContext;
 import soot.Unit;
 
-public class CallSite<V> extends PointOfAlias<V> {
+public class CallSite<V> extends AbstractPointOfAlias<V> {
 
 	private AccessGraph callerCallSiteFact;
 
-	public CallSite(AccessGraph callerD1, Unit stmt, AccessGraph callerCallSiteFact,
-			AccessGraph callerD2, Unit returnSite) {
+	public CallSite(AccessGraph callerD1, Unit stmt, AccessGraph callerCallSiteFact, AccessGraph callerD2,
+			Unit returnSite) {
 		super(callerD1, stmt, callerD2, returnSite);
 		this.callerCallSiteFact = callerCallSiteFact;
 		System.out.println(this);
@@ -26,49 +26,40 @@ public class CallSite<V> extends PointOfAlias<V> {
 	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
 		Collection<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
-		if (tsanalysis.hasEventFor(curr,d2)){
-//			System.out.println("Has Event " + curr +" " + d2);
-			res = balancedReturn(tsanalysis);
-		}
-		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)){
+		// if (tsanalysis.hasEventFor(curr,d2)){
+		// System.out.println("Has Event " + curr +" " + d2);
+		// res = balancedReturn(tsanalysis);
+		// }
+		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)) {
 			res.addAll(unbalancedReturn(tsanalysis));
 		}
 		return res;
 	}
 
-
-	private Collection<PathEdge<Unit, AccessGraph>> balancedReturn(AnalysisContext<V> tsanalysis) {
-		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
-		AliasResults results = tsanalysis.aliasesFor(d2, curr, d1);
-		for (AccessGraph mayAliasingAccessGraph : results.mayAliasSet()) {
-			res.add(new PathEdge<Unit, AccessGraph>(d1, succ,mayAliasingAccessGraph));
-		}
-		checkMustAlias(results, res, tsanalysis);
-		return res;
-	}
-
-	private Collection<PathEdge<Unit, AccessGraph>> unbalancedReturn(AnalysisContext<V> tsanalysis) {
+	public Collection<AccessGraph> getIndirectFlowTargets(AnalysisContext<V> tsanalysis) {
 		Collection<WrappedSootField> lastFields = d2.getLastField();
 		Set<AccessGraph> popLastField = d2.popLastField();
-		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
+		Set<AccessGraph> res = new HashSet<>();
 		for (AccessGraph withoutLast : popLastField) {
 			AliasResults results = tsanalysis.aliasesFor(withoutLast, curr, d1);
 			for (AccessGraph mayAliasingAccessGraph : results.mayAliasSet()) {
-				for(WrappedSootField lastField : lastFields){
+				for (WrappedSootField lastField : lastFields) {
 					AccessGraph g = mayAliasingAccessGraph.appendFields(new WrappedSootField[] { lastField });
-					res.add(new PathEdge<Unit, AccessGraph>(d1, succ,g));
+					res.add(g);
 					tsanalysis.debugger.indirectFlowAtCall(withoutLast, curr, g);
 				}
 			}
 		}
-		tsanalysis.storeComputedCallSiteFlow(this, res, false);
+		tsanalysis.storeFlowAtPointOfAlias(this, res);
 		return res;
 	}
 
-	private void checkMustAlias(AliasResults results, Set<PathEdge<Unit, AccessGraph>> res,
-			AnalysisContext<V> context) {
-		boolean isStrongUpdate = !results.queryTimedout() && results.keySet().size() == 1;
-		context.storeComputedCallSiteFlow(this, res, isStrongUpdate);
+	private Collection<PathEdge<Unit, AccessGraph>> unbalancedReturn(AnalysisContext<V> tsanalysis) {
+		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
+		for (AccessGraph g : getIndirectFlowTargets(tsanalysis)) {
+			res.add(new PathEdge<Unit, AccessGraph>(d1, succ, g));
+		}
+		return res;
 	}
 
 	public Unit getCallSite() {
@@ -104,6 +95,5 @@ public class CallSite<V> extends PointOfAlias<V> {
 			return false;
 		return true;
 	}
-
 
 }

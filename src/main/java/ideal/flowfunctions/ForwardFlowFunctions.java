@@ -18,6 +18,7 @@ import ideal.AnalysisContext;
 import ideal.pointsofaliasing.CallSite;
 import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
+import ideal.pointsofaliasing.ReturnEvent;
 import soot.Local;
 import soot.PointsToAnalysis;
 import soot.PrimType;
@@ -199,7 +200,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as,
 										lBase, newAp, succ);
 								if (context.isInIDEPhase()) {
-									out.addAll(context.instanceFieldWriteFlows(instanceFieldWrite));
+									out.addAll(context.getFlowAtPointOfAlias(instanceFieldWrite));
 								} else {
 									context.addPOA(instanceFieldWrite);
 								}
@@ -219,7 +220,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 							InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as, lBase,
 									newAp, succ);
 							if (context.isInIDEPhase()) {
-								out.addAll(context.instanceFieldWriteFlows(instanceFieldWrite));
+								out.addAll(context.getFlowAtPointOfAlias(instanceFieldWrite));
 							} else {
 								context.addPOA(instanceFieldWrite);
 							}
@@ -413,7 +414,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 										CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,deriveWithNewLocal,
 												returnSite);
 										if (context.isInIDEPhase()) {
-											out.addAll(context.callSiteFlows(callSitePOA));
+											out.addAll(context.getFlowAtPointOfAlias(callSitePOA));
 										} else {
 											context.addPOA(callSitePOA);
 										}
@@ -437,7 +438,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 									CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,possibleAccessPath,
 											returnSite);
 									if (context.isInIDEPhase()) {
-										out.addAll(context.callSiteFlows(callSitePOA));
+										out.addAll(context.getFlowAtPointOfAlias(callSitePOA));
 									} else {
 										context.addPOA(callSitePOA);
 									}
@@ -460,6 +461,13 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 							out.add(source.deriveWithNewLocal((Local) leftOp, source.getBaseType()));
 						}
 					}
+				}
+				if(context.isInIDEPhase()){
+					Set<AccessGraph> indirectFlows = new HashSet<>();
+					for(AccessGraph d3 : out){
+						indirectFlows.addAll(context.getFlowAtPointOfAlias(new ReturnEvent<V>(exitStmt, source, callSite, d3, returnSite, callerD1, null)));
+					}
+					out.addAll(indirectFlows);
 				}
 				return out;
 			}
@@ -490,7 +498,8 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		return new FlowFunction<AccessGraph>() {
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
-				
+				if(context.isStrongUpdate(callStmt, source))
+					return Collections.emptySet();
 				if(hasCallees){
 					for (int i = 0; i < invokeExpr.getArgCount(); i++) {
 						if (source.baseMatches(invokeExpr.getArg(i))) {

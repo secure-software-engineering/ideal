@@ -12,34 +12,37 @@ import ideal.AnalysisContext;
 import soot.Local;
 import soot.Unit;
 
-public class InstanceFieldWrite<V> extends PointOfAlias<V> {
+public class InstanceFieldWrite<V> extends AbstractPointOfAlias<V> {
 
-  private Local base;
+	private Local base;
 
-  public InstanceFieldWrite(AccessGraph d1, Unit stmt, Local base, AccessGraph d2, Unit succ) {
-    super(d1, stmt, d2, succ);
-    this.base = base;
-  }
+	public InstanceFieldWrite(AccessGraph d1, Unit stmt, Local base, AccessGraph d2, Unit succ) {
+		super(d1, stmt, d2, succ);
+		this.base = base;
+	}
 
-  @Override
-  public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
-    Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
+	@Override
+	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
+		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
-    AccessGraph accessGraph = new AccessGraph(base, base.getType());
-    AliasResults results = tsanalysis.aliasesFor(accessGraph, curr, d1);
+		Set<AccessGraph> outFlows = new HashSet<>();
+		for (AccessGraph mayAliasingAccessGraph : this.getIndirectFlowTargets(tsanalysis)) {
+			AccessGraph withFields = mayAliasingAccessGraph.appendGraph(d2.getFieldGraph());
+			outFlows.add(withFields);
+			tsanalysis.debugger.indirectFlowAtWrite(d2, curr, withFields);
+			res.add(new PathEdge<Unit, AccessGraph>(d1, succ, withFields));
+		}
+		tsanalysis.storeFlowAtPointOfAlias(this, outFlows);
+		return res;
+	}
 
-    Set<AccessGraph> outFlows = new HashSet<>();
-    for (AccessGraph mayAliasingAccessGraph : results.mayAliasSet()) {
-    	AccessGraph withFields = mayAliasingAccessGraph.appendGraph(d2.getFieldGraph());
-      outFlows.add(withFields);
-      tsanalysis.debugger.indirectFlowAtWrite(d2,curr,withFields);
-      res.add(new PathEdge<Unit, AccessGraph>(d1, succ, withFields));
-    }
-    tsanalysis.storeComputeInstanceFieldWrite(this, outFlows);
-    return res;
-  }
+	public Collection<AccessGraph> getIndirectFlowTargets(AnalysisContext<V> tsanalysis) {
+		AccessGraph accessGraph = new AccessGraph(base, base.getType());
+		Collection<AccessGraph> results = tsanalysis.aliasesFor(accessGraph, curr, d1).mayAliasSet();
+		return results;
+	}
 
-  public Unit getCallSite() {
-    return curr;
-  }
+	public Unit getCallSite() {
+		return curr;
+	}
 }

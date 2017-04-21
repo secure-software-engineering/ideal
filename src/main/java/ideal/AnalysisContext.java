@@ -16,10 +16,13 @@ import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
+import ideal.pointsofaliasing.AbstractPointOfAlias;
 import ideal.pointsofaliasing.CallSite;
+import ideal.pointsofaliasing.Event;
 import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
+import ideal.pointsofaliasing.ReturnEvent;
 import soot.Scene;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.BackwardsInfoflowCFG;
@@ -33,9 +36,8 @@ public class AnalysisContext<V> {
 	public final IDebugger<V> debugger;
 	private Set<PointOfAlias<V>> poas = new HashSet<>();
 	private boolean idePhase;
-	private Multimap<CallSite<V>, AccessGraph> callSiteToFlows = HashMultimap.create();
-	private Multimap<InstanceFieldWrite<V>, AccessGraph> fieldWritesToFlows = HashMultimap.create();
-	private Set<Pair<Unit, AccessGraph>> callSiteToStrongUpdates = new HashSet<>();
+	private Multimap<PointOfAlias<V>, AccessGraph> callSiteToFlows = HashMultimap.create();
+	private Multimap<Unit,AccessGraph> callSiteToStrongUpdates = HashMultimap.create();
 	private Set<Pair<Pair<Unit, Unit>, AccessGraph>> nullnessBranches = new HashSet<>();
 	private IInfoflowCFG icfg;
 	private AnalysisSolver<V> solver;
@@ -76,32 +78,13 @@ public class AnalysisContext<V> {
 		idePhase = true;
 	}
 
-	/**
-	 * This methods stores the results, the indirect flow, from alias queries for the appropriate call sites. Then, in the IDE phase, 
-	 * the flow edges can be re-created from those earlier stored flows.
-	 * @param callSitePOA
-	 * @param res
-	 * @param isStrongUpdate
-	 */
-	public void storeComputedCallSiteFlow(CallSite<V> callSitePOA, Set<PathEdge<Unit, AccessGraph>> res,
-			boolean isStrongUpdate) {
-		for (PathEdge<Unit, AccessGraph> edge : res) {
-			AccessGraph receivesUpdate = edge.factAtTarget();
-			callSiteToFlows.put(callSitePOA, receivesUpdate);
-			if (isStrongUpdate) {
-				debugger.detectedStrongUpdate(callSitePOA.getCallSite(), receivesUpdate);
-				callSiteToStrongUpdates
-						.add(new Pair<Unit, AccessGraph>(callSitePOA.getCallSite(), receivesUpdate));
-			}
-		}
-	}
 
 	/**
 	 * Retrieves for a given call site POA the flow that occured.
 	 * @param cs The call site POA object.
 	 * @return
 	 */
-	public Collection<AccessGraph> callSiteFlows(CallSite<V> cs) {
+	public Collection<AccessGraph> getFlowAtPointOfAlias(PointOfAlias<V> cs) {
 		if (!isInIDEPhase())
 			throw new RuntimeException("This can only be applied in the kill phase");
 		return callSiteToFlows.get(cs);
@@ -112,20 +95,9 @@ public class AnalysisContext<V> {
 	 * @param instanceFieldWrite
 	 * @param outFlows
 	 */
-	public void storeComputeInstanceFieldWrite(InstanceFieldWrite<V> instanceFieldWrite,
-			Set<AccessGraph> outFlows) {
-		fieldWritesToFlows.putAll(instanceFieldWrite, outFlows);
-	}
-
-	/**
-	 * Retrieve the flows at field write statements.
-	 * @param ifr
-	 * @return
-	 */
-	public Collection<AccessGraph> instanceFieldWriteFlows(InstanceFieldWrite<V> ifr) {
-		if (!isInIDEPhase())
-			throw new RuntimeException("This can only be applied in the kill phase");
-		return fieldWritesToFlows.get(ifr);
+	public void storeFlowAtPointOfAlias(PointOfAlias<V> instanceFieldWrite,
+			Collection<AccessGraph> outFlows) {
+		callSiteToFlows.putAll(instanceFieldWrite, outFlows);
 	}
 
 	/**
@@ -135,10 +107,12 @@ public class AnalysisContext<V> {
 	 * @return
 	 */
 	public boolean isStrongUpdate(Unit callSite, AccessGraph returnSideNode) {
-		Pair<Unit, AccessGraph> key = new Pair<>(callSite, returnSideNode);
-		return Analysis.ENABLE_STRONG_UPDATES && callSiteToStrongUpdates.contains(key);
+		return Analysis.ENABLE_STRONG_UPDATES && callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
 	}
 
+	public void storeStrongUpdateAtCallSite(Unit callSite, Collection<AccessGraph> mayAliasSet) {
+		callSiteToStrongUpdates.putAll(callSite, mayAliasSet);
+	}
 	
 	public boolean isNullnessBranch(Unit curr, Unit succ, AccessGraph returnSideNode) {
 		Pair<Pair<Unit, Unit>, AccessGraph> key = new Pair<>(new Pair<Unit, Unit>(curr, succ),
@@ -194,8 +168,6 @@ public class AnalysisContext<V> {
 		poas = null;
 		callSiteToFlows.clear();
 		callSiteToFlows = null;
-		fieldWritesToFlows.clear();
-		fieldWritesToFlows = null;
 		callSiteToStrongUpdates = null;
 		nullnessBranches = null;
 		icfg = null;
@@ -204,13 +176,5 @@ public class AnalysisContext<V> {
 	}
 
 
-	public void addEventFor(Unit callSite, AccessGraph returnedFact) {
-//		System.out.println("AddEvent " +  callSite + returnedFact);
-		eventAtCallSite.put(callSite,returnedFact);
-	}
-
-	public boolean hasEventFor(Unit callSite, AccessGraph returnedFact) {
-		return eventAtCallSite.get(callSite).contains(returnedFact);
-	}
 
 }

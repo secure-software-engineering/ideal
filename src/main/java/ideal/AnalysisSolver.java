@@ -40,8 +40,8 @@ public class AnalysisSolver<V>
    * @param curr
    * @param d2
    */
-  public void injectPhase1Seed(AccessGraph d1, Unit curr, AccessGraph d2) {
-    super.propagate(d1, curr, d2, EdgeIdentity.<V>v(),null, true);
+  public void injectPhase1Seed(AccessGraph d1, Unit curr, AccessGraph d2, EdgeFunction<V> func) {
+    super.propagate(d1, curr, d2, func,null, true);
     runExecutorAndAwaitCompletion();
   }
 

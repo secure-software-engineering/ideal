@@ -17,7 +17,20 @@ public class FileMustBeClosedTest extends IDEALTestingFramework {
 		file.close();
 		mustBeInAcceptingState(file);
 	}
-
+	@Test
+	public void simple0() {
+		File file = new File();
+		file.open();
+		mustBeInErrorState(file);
+	}
+	@Test
+	public void simple1() {
+		File file = new File();
+		File alias = file;
+		alias.open();
+		mustBeInErrorState(file);
+		mustBeInErrorState(alias);
+	}
 	@Test
 	public void branching() {
 		File file = new File();
@@ -93,8 +106,8 @@ public class FileMustBeClosedTest extends IDEALTestingFramework {
 		ObjectWithField a = new ObjectWithField();
 		ObjectWithField b = a;
 		flows(a, b);
-		mustBeInAcceptingState(a.field);
-		mustBeInAcceptingState(b.field);
+		mayBeInAcceptingState(a.field);
+		mayBeInAcceptingState(b.field);
 	}
 
 	private void flows(ObjectWithField a, ObjectWithField b) {

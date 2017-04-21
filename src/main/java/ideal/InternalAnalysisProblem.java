@@ -21,6 +21,7 @@ import heros.solver.IDEDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.edgefunction.ForwardEdgeFunctions;
 import ideal.flowfunctions.ForwardFlowFunctions;
+import ideal.pointsofaliasing.ReturnEvent;
 import soot.SootMethod;
 import soot.Unit;
 
@@ -131,15 +132,22 @@ public class InternalAnalysisProblem<V> implements
 	}
 
 	@Override
-	public Flow<Unit,AccessGraph> flowWrapper() {
+	public Flow<Unit,AccessGraph,V> flowWrapper() {
 		// TODO Auto-generated method stub
-		return new Flow<Unit,AccessGraph>(){
-
+		return new Flow<Unit,AccessGraph,V>(){
 
 			@Override
-			public void nonIdentityReturn(Unit callSite, AccessGraph returnedFact) {
-				context.addEventFor(callSite,returnedFact);
+			public void nonIdentityCallToReturnFlow( AccessGraph d2,Unit callSite, AccessGraph d3, Unit returnSite,
+					AccessGraph d1, EdgeFunction<V> func) {
+				// TODO Auto-generated method stub
 				
+			}
+
+			@Override
+			public void nonIdentityReturnFlow(Unit exitStmt,AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite,
+					AccessGraph d1, EdgeFunction<V> func) {
+				System.out.println("Add eevent" + callSite +" " + d3);
+				context.addPOA(new ReturnEvent<V>(exitStmt,d2, callSite, d3, returnSite, d1, func));
 			}};
 	}
 }
