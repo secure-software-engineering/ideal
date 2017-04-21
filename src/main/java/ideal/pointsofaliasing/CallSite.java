@@ -19,6 +19,7 @@ public class CallSite<V> extends PointOfAlias<V> {
 			AccessGraph callerD2, Unit returnSite) {
 		super(callerD1, stmt, callerD2, returnSite);
 		this.callerCallSiteFact = callerCallSiteFact;
+		System.out.println(this);
 	}
 
 	@Override
@@ -26,6 +27,7 @@ public class CallSite<V> extends PointOfAlias<V> {
 		Collection<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
 		if (tsanalysis.hasEventFor(curr,d2)){
+//			System.out.println("Has Event " + curr +" " + d2);
 			res = balancedReturn(tsanalysis);
 		}
 		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)){

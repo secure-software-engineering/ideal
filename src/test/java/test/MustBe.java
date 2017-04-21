@@ -17,6 +17,7 @@ public class MustBe extends ExpectedResults {
 
 	@Override
 	public void computedResults(TypestateDomainValue results) {
+		System.out.println(this + " " + results);
 		if(results.getStates().size() > 1)
 			return;
 		for(typestate.finiteautomata.State s : results.getStates()){

@@ -205,7 +205,8 @@ public class AnalysisContext<V> {
 
 
 	public void addEventFor(Unit callSite, AccessGraph returnedFact) {
-		eventAtCallSite .put(callSite,returnedFact);
+//		System.out.println("AddEvent " +  callSite + returnedFact);
+		eventAtCallSite.put(callSite,returnedFact);
 	}
 
 	public boolean hasEventFor(Unit callSite, AccessGraph returnedFact) {

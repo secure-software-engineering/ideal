@@ -167,7 +167,6 @@ public class Analysis<V> {
 //    	        seedToInitivalValue.get(s), context);
 //    }
     solver.runExecutorAndAwaitCompletion();
-    System.out.println("Start compute value phase");
     solver.computeValues(s);
     debugger.finishPhase2WithSeed(s, solver);
   }
