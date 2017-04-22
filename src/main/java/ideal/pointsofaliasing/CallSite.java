@@ -19,17 +19,12 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 			Unit returnSite) {
 		super(callerD1, stmt, callerD2, returnSite);
 		this.callerCallSiteFact = callerCallSiteFact;
-		System.out.println(this);
 	}
 
 	@Override
 	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
 		Collection<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
-		// if (tsanalysis.hasEventFor(curr,d2)){
-		// System.out.println("Has Event " + curr +" " + d2);
-		// res = balancedReturn(tsanalysis);
-		// }
 		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)) {
 			res.addAll(unbalancedReturn(tsanalysis));
 		}

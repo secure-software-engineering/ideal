@@ -11,103 +11,99 @@ import heros.EdgeFunction;
 import heros.edgefunc.AllBottom;
 import heros.edgefunc.AllTop;
 import heros.edgefunc.EdgeIdentity;
+import typestate.finiteautomata.ITransition;
+import typestate.finiteautomata.IdentityTransition;
 import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
 
-public class TransitionFunction
- implements EdgeFunction<TypestateDomainValue> {
+public class TransitionFunction implements EdgeFunction<TypestateDomainValue> {
 
-  public final Set<Transition> value;
+	private final Set<ITransition> value;
 
-  private static Logger logger = LoggerFactory.getLogger(TransitionFunction.class);
+	private static Logger logger = LoggerFactory.getLogger(TransitionFunction.class);
 
-  public TransitionFunction(Set<? extends Transition> trans) {
-    this.value = new HashSet<>(trans);
-  }
+	public TransitionFunction(Set<? extends ITransition> trans) {
+		this.value = new HashSet<>(trans);
+	}
 
-  public TransitionFunction(Transition trans) {
-    this.value = new HashSet<>(new HashSet<>(Collections.singleton(trans)));
-  }
-  @Override
-  public TypestateDomainValue computeTarget(TypestateDomainValue source) {
-//	  System.err.println(source + " "+  this );
-		  
-	  Set<State> states = new HashSet<>();
-	  for(Transition t : value){
-		  if(source.equals(TypestateDomainValue.BOTTOM)){
-			  states.add(t.to());
-		  }
-		  for(State sourceState : source.getStates()){
-			  if(t.from().equals(sourceState)){
-				  states.add(t.to());
-			  }
-		  }
-	  }
-    return new TypestateDomainValue(states);
-  }
+	public TransitionFunction(ITransition trans) {
+		this(new HashSet<>(Collections.singleton(trans)));
+	}
 
-  @Override
-  public EdgeFunction<TypestateDomainValue> composeWith(
-      EdgeFunction<TypestateDomainValue> secondFunction) {
-    if (secondFunction instanceof AllTop)
-      return secondFunction;
+	@Override
+	public TypestateDomainValue computeTarget(TypestateDomainValue source) {
+		Set<State> states = new HashSet<>();
+		for (ITransition t : value) {
+			if (t instanceof IdentityTransition) {
+				states.addAll(source.getStates());
+				continue;
+			}
+			for (State sourceState : source.getStates()) {
+				if (t.from().equals(sourceState)) {
+					states.add(t.to());
+				}
+			}
+		}
+		return new TypestateDomainValue(states);
+	}
 
-    if (secondFunction instanceof AllBottom)
-      return this;
+	@Override
+	public EdgeFunction<TypestateDomainValue> composeWith(EdgeFunction<TypestateDomainValue> secondFunction) {
+		if (secondFunction instanceof AllTop)
+			return secondFunction;
 
-    if (secondFunction instanceof EdgeIdentity){
-      return this;
-    }
-    if (!(secondFunction instanceof TransitionFunction))
-        throw new RuntimeException("Wrong type, is of type: " + secondFunction);
-    TransitionFunction func = (TransitionFunction) secondFunction;
-    Set<Transition> otherTransitions = func.value;
-    Set<Transition> res = new HashSet<>();
-    for (Transition first : value) {
-      for (Transition second : otherTransitions) {
-        if (second.from().equals(IdentityTransition.ID)
-            && second.to().equals(IdentityTransition.ID)) {
-          res.add(first);
-        } else if (first.to().equals(second.from()) || first.to().equals(IdentityTransition.ID)
-            || second.from().equals(IdentityTransition.ID))
-          res.add(new Transition(first.from(), second.to()));
-        // else
-        // res.add(first);
-      }
-    }
-    logger.debug("ComposeWith: {} with {} -> {}", this, secondFunction,
-        new TransitionFunction(res));
-    return new TransitionFunction(res);
-  }
+		if (secondFunction instanceof AllBottom)
+			return this;
 
-  @Override
-  public EdgeFunction<TypestateDomainValue> joinWith(
-      EdgeFunction<TypestateDomainValue> otherFunction) {
-    if (otherFunction instanceof AllTop)
-      return this;
-    if (otherFunction instanceof AllBottom)
-      return otherFunction;
-    if (otherFunction instanceof EdgeIdentity) {
-      Set<Transition> transitions = new HashSet<>();
-      transitions.add(new IdentityTransition());
-      transitions.addAll(value);
-      return new TransitionFunction(transitions);
-    }
-    TransitionFunction func = (TransitionFunction) otherFunction;
-    Set<Transition> transitions = func.value;
-    transitions.addAll(value);
-    return new TransitionFunction(transitions);
-  }
+		if (secondFunction instanceof EdgeIdentity) {
+			return this;
+		}
+		if (!(secondFunction instanceof TransitionFunction))
+			throw new RuntimeException("Wrong type, is of type: " + secondFunction);
+		TransitionFunction func = (TransitionFunction) secondFunction;
+		Set<ITransition> otherTransitions = func.value;
+		Set<ITransition> res = new HashSet<>();
+		for (ITransition first : value) {
+			for (ITransition second : otherTransitions) {
+				if (second instanceof IdentityTransition) {
+					res.add(first);
+				} else if (first instanceof IdentityTransition) {
+					res.add(second);
+				} else if (first.to().equals(second.from()))
+					res.add(new Transition(first.from(), second.to()));
+			}
+		}
+		logger.debug("ComposeWith: {} with {} -> {}", this, secondFunction, new TransitionFunction(res));
+		return new TransitionFunction(res);
 
-  @Override
-  public boolean equalTo(EdgeFunction<TypestateDomainValue> other) {
-    if(!(other instanceof TransitionFunction))
-        return false;
-    TransitionFunction func = (TransitionFunction) other;
-    return func.value.equals(value);
-  }
+	}
 
-  public String toString() {
-    return "{Func:" + value.toString() + "}";
-  };
+	@Override
+	public EdgeFunction<TypestateDomainValue> joinWith(EdgeFunction<TypestateDomainValue> otherFunction) {
+		if (otherFunction instanceof AllTop)
+			return this;
+		if (otherFunction instanceof AllBottom)
+			return otherFunction;
+		if (otherFunction instanceof EdgeIdentity) {
+			Set<ITransition> transitions = new HashSet<>(value);
+			transitions.add(new IdentityTransition());
+			return new TransitionFunction(transitions);
+		}
+		TransitionFunction func = (TransitionFunction) otherFunction;
+		Set<ITransition> transitions =  new HashSet<>(func.value);
+		transitions.addAll(value);
+		return new TransitionFunction(transitions);
+	}
+
+	@Override
+	public boolean equalTo(EdgeFunction<TypestateDomainValue> other) {
+		if (!(other instanceof TransitionFunction))
+			return false;
+		TransitionFunction func = (TransitionFunction) other;
+		return func.value.equals(value);
+	}
+
+	public String toString() {
+		return "{Func:" + value.toString() + "}";
+	};
 }

@@ -14,11 +14,9 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
-import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
 import ideal.debug.JSONDebugger;
-import ideal.debug.NullDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
@@ -60,7 +58,7 @@ public class Analysis<V> {
 	private BackwardsInfoflowCFG bwicfg;
 	private ResultReporter<V> reporter;
 
-	private Map<PathEdge<Unit,AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
+	private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
 
 	public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, ResultReporter<V> reporter) {
 		this.edgeFunc = problem.edgeFunctions();
@@ -126,44 +124,44 @@ public class Analysis<V> {
 	}
 
 	private void phase1(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver) {
-    debugger.startPhase1WithSeed(seed, solver);
-    Set<PathEdge<Unit, AccessGraph>> worklist = new HashSet<>();
-    if(icfg.isExitStmt(seed.getTarget()) || icfg.isCallStmt(seed.getTarget())){
-    	worklist.add(seed);
-    } else{
-	    for(Unit u : icfg.getSuccsOf(seed.getTarget())){
-	    	worklist.add(new PathEdge<Unit, AccessGraph>(seed.factAtSource(),u,seed.factAtTarget()));
-	    }
-    }
-    while (!worklist.isEmpty()) {
-      debugger.startForwardPhase(worklist);
-      for (PathEdge<Unit, AccessGraph> s : worklist) {
-    	  EdgeFunction<V> func = pathEdgeToEdgeFunc.get(s);
-    	  if(func == null)
-    		  func = EdgeIdentity.v();
-        solver.injectPhase1Seed(s.factAtSource(), s.getTarget(), s.factAtTarget(),func);
-      }
-      worklist.clear();
-      Set<PointOfAlias<V>> pointsOfAlias = context.getAndClearPOA();
-      debugger.startAliasPhase(pointsOfAlias);
-      for (PointOfAlias<V> p : pointsOfAlias) {
-        if (seenPOA.contains(p))
-          continue;
-        seenPOA.add(p);
-        debugger.solvePOA(p);
-        Collection<PathEdge<Unit, AccessGraph>> edges = p.getPathEdges(context);
-        worklist.addAll(edges);
-        if(p instanceof ReturnEvent){
-			ReturnEvent<V> returnEvent = (ReturnEvent) p;
-			for(PathEdge<Unit, AccessGraph> edge : edges){
-				pathEdgeToEdgeFunc.put(edge,returnEvent.getEdgeFunction());
+		debugger.startPhase1WithSeed(seed, solver);
+		Set<PathEdge<Unit, AccessGraph>> worklist = new HashSet<>();
+		if (icfg.isExitStmt(seed.getTarget()) || icfg.isCallStmt(seed.getTarget())) {
+			worklist.add(seed);
+		} else {
+			for (Unit u : icfg.getSuccsOf(seed.getTarget())) {
+				worklist.add(new PathEdge<Unit, AccessGraph>(seed.factAtSource(), u, seed.factAtTarget()));
 			}
 		}
-        Analysis.checkTimeout();
-      }
-    }
-    debugger.finishPhase1WithSeed(seed, solver);
-  }
+		while (!worklist.isEmpty()) {
+			debugger.startForwardPhase(worklist);
+			for (PathEdge<Unit, AccessGraph> s : worklist) {
+				EdgeFunction<V> func = pathEdgeToEdgeFunc.get(s);
+				if (func == null)
+					func = EdgeIdentity.v();
+				solver.injectPhase1Seed(s.factAtSource(), s.getTarget(), s.factAtTarget(), func);
+			}
+			worklist.clear();
+			Set<PointOfAlias<V>> pointsOfAlias = context.getAndClearPOA();
+			debugger.startAliasPhase(pointsOfAlias);
+			for (PointOfAlias<V> p : pointsOfAlias) {
+				if (seenPOA.contains(p))
+					continue;
+				seenPOA.add(p);
+				debugger.solvePOA(p);
+				Collection<PathEdge<Unit, AccessGraph>> edges = p.getPathEdges(context);
+				worklist.addAll(edges);
+				if (p instanceof ReturnEvent) {
+					ReturnEvent<V> returnEvent = (ReturnEvent) p;
+					for (PathEdge<Unit, AccessGraph> edge : edges) {
+						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
+					}
+				}
+				Analysis.checkTimeout();
+			}
+		}
+		debugger.finishPhase1WithSeed(seed, solver);
+	}
 
 	private void phase2(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
 		debugger.startPhase2WithSeed(s, solver);

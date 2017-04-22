@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 
 import boomerang.AliasResults;
@@ -47,6 +48,10 @@ public class JSONDebugger<V> implements IDebugger<V> {
 			@Override
 			public String getShortLabel(Unit u) {
 				return JSONDebugger.this.getShortLabel(u);
+			}
+			@Override
+			public List<Unit> getListOfStmts(SootMethod method) {
+				return Lists.newLinkedList(method.getActiveBody().getUnits());
 			}
 		};
 		this.icfg = icfg;

@@ -7,6 +7,7 @@ import ideal.ResultReporter;
 import test.IDEALTestingFramework;
 import typestate.TypestateDomainValue;
 import typestate.impl.fileanalysis.FileMustBeClosedAnalysis;
+
 @SuppressWarnings("deprecation")
 public class FileMustBeClosedTest extends IDEALTestingFramework {
 	@Test
@@ -17,12 +18,14 @@ public class FileMustBeClosedTest extends IDEALTestingFramework {
 		file.close();
 		mustBeInAcceptingState(file);
 	}
+
 	@Test
 	public void simple0() {
 		File file = new File();
 		file.open();
 		mustBeInErrorState(file);
 	}
+
 	@Test
 	public void simple1() {
 		File file = new File();
@@ -31,6 +34,7 @@ public class FileMustBeClosedTest extends IDEALTestingFramework {
 		mustBeInErrorState(file);
 		mustBeInErrorState(alias);
 	}
+
 	@Test
 	public void branching() {
 		File file = new File();
@@ -283,19 +287,49 @@ public class FileMustBeClosedTest extends IDEALTestingFramework {
 	@Test
 	public void multipleStates() {
 		File file = new File();
-//		if(staticallyUnknown()){
-			file.open();
-			mustBeInErrorState(file);
-			int x = 1;
-			System.out.println(x);
-			mustBeInErrorState(file);
-			file.close();
-			mustBeInAcceptingState(file);
-			x = 1;
-			System.out.println(x);
-			mustBeInAcceptingState(file);
-//		}
+		file.open();
+		mustBeInErrorState(file);
+		int x = 1;
+		System.out.println(x);
+		mustBeInErrorState(file);
+		file.close();
+		mustBeInAcceptingState(file);
+		x = 1;
+		System.out.println(x);
+		mustBeInAcceptingState(file);
 	}
+
+	@Test
+	public void doubleBranching() {
+		File file = new File();
+		if (staticallyUnknown()) {
+			file.open();
+			if (staticallyUnknown())
+				file.close();
+		} else if (staticallyUnknown())
+			file.close();
+		else {
+			System.out.println(2);
+		}
+		mayBeInErrorState(file);
+	}
+	@Test
+	public void whileLoopBranching() {
+		File file = new File();
+		while(staticallyUnknown()){
+			if (staticallyUnknown()) {
+				file.open();
+				if (staticallyUnknown())
+					file.close();
+			} else if (staticallyUnknown())
+				file.close();
+			else {
+				System.out.println(2);
+			}
+		}
+		mayBeInErrorState(file);
+	}
+
 	@Override
 	protected Analysis<TypestateDomainValue> createAnalysis(ResultReporter<TypestateDomainValue> reporter) {
 		return new FileMustBeClosedAnalysis(reporter);

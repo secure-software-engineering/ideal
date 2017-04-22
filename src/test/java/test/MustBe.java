@@ -17,7 +17,6 @@ public class MustBe extends ExpectedResults {
 
 	@Override
 	public void computedResults(TypestateDomainValue results) {
-		System.out.println(this + " " + results);
 		for(typestate.finiteautomata.State s : results.getStates()){
 			if(state == State.ACCEPTING){
 				satisfied |= !s.isErrorState();
