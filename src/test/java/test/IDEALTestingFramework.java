@@ -8,10 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Detainted;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+
+import com.google.common.collect.Lists;
 
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
@@ -56,7 +60,7 @@ import soot.options.Options;
 import test.ExpectedResults.State;
 import typestate.TypestateDomainValue;
 import typestate.tests.base.TestingFramework;
-
+@SuppressWarnings( "deprecation" )
 public abstract class IDEALTestingFramework {
 	private IInfoflowCFG icfg;
 	@Rule
@@ -89,15 +93,22 @@ public abstract class IDEALTestingFramework {
 				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
 				Set<ExpectedResults> expectedResults = parseExpectedQueryResults(sootTestMethod);
 		        IDEALTestingFramework.this.getAnalysis(new TestingResultReporter(expectedResults)).run();
-		        boolean fail = false;
+		        List<ExpectedResults> unsound = Lists.newLinkedList();
+		        List<ExpectedResults> imprecise = Lists.newLinkedList();
 		        for(ExpectedResults r : expectedResults){
 		        	if(!r.satisfied){
-		        		System.out.println("Not satisfied: " + r);
-		        		fail = true;
+		        		unsound.add(r);
 		        	}
 		        }
-		        if(fail)
-		        	Assert.fail();
+		        for(ExpectedResults r : expectedResults){
+		        	if(r.imprecise){
+		        		imprecise.add(r);
+		        	}
+		        }
+		        if(!unsound.isEmpty())
+		        	throw new RuntimeException("Unsound results: " + unsound);
+		        if(!imprecise.isEmpty())
+		        	Assert.fail("Imprecise results: " + imprecise);
 				try {
 //					compareQuery(expectedResults, TestFramework.this.getAnalysis().getResults());
 				} catch (AssertionError e) {
@@ -254,7 +265,7 @@ public abstract class IDEALTestingFramework {
 	}
 
 	protected boolean includeJDK() {
-		return false;
+		return true;
 	}
 
 	public List<String> excludedPackages() {
@@ -277,19 +288,22 @@ public abstract class IDEALTestingFramework {
 	 * Code.
 	 */
 
-	protected void mayBeInErrorState(Object variable) {
+	@Deprecated
+	protected static void mayBeInErrorState(Object variable) {
 
 	}
 
-	protected void mustBeInErrorState(Object variable) {
+	@Deprecated
+	protected static void mustBeInErrorState(Object variable) {
 
 	}
 
-	protected void mayBeInAcceptingState(Object variable) {
+	@Deprecated
+	protected static void mayBeInAcceptingState(Object variable) {
 
 	}
 
-
+	@Deprecated
 	protected void mustBeInAcceptingState(Object variable) {
 
 	}

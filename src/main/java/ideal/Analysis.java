@@ -175,12 +175,14 @@ public class Analysis<V> {
 				solver.injectPhase2Seed(s.factAtSource(), u, s.factAtTarget(), context);
 			}
 		}
-		// for(Unit u : icfg.getSuccsOf(s.getTarget())){
-		// solver.injectPhase2Seed(s.factAtSource(),u, s.factAtTarget(),
-		// seedToInitivalValue.get(s), context);
-		// }
 		solver.runExecutorAndAwaitCompletion();
-		solver.computeValues(s);
+		HashMap<Unit, Set<AccessGraph>> map = new HashMap<Unit, Set<AccessGraph>>();
+		HashSet<AccessGraph> hashSet = new HashSet<>();
+		hashSet.add(s.factAtSource());
+		for (Unit sp : icfg.getStartPointsOf(icfg.getMethodOf(s.getTarget()))) {
+			map.put(sp, hashSet);
+		}
+		solver.computeValues(map);
 		debugger.finishPhase2WithSeed(s, solver);
 	}
 

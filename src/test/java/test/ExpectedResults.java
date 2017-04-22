@@ -9,6 +9,7 @@ public abstract class ExpectedResults {
 	final AccessGraph accessGraph;
 	final State state;
 	protected boolean satisfied;
+	protected boolean imprecise;
 
 	enum State{
 		ERROR, ACCEPTING
@@ -20,6 +21,10 @@ public abstract class ExpectedResults {
 	}
 	public boolean isSatisfied(){
 		return satisfied;
+	}
+	
+	public boolean isImprecise(){
+		return imprecise;
 	}
 	public abstract void computedResults(TypestateDomainValue results);
 	

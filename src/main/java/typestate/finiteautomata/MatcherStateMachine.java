@@ -18,8 +18,10 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;
@@ -169,6 +171,23 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 					}
 				}
 
+			}
+		}
+		return Collections.emptySet();
+	}
+	
+
+	protected Collection<AccessGraph> generateAtAllocationSiteOf(Unit unit, String allocationSuperType) {
+		if(unit instanceof AssignStmt){
+			AssignStmt assignStmt = (AssignStmt) unit;
+			if(assignStmt.getRightOp() instanceof NewExpr){
+				NewExpr newExpr = (NewExpr) assignStmt.getRightOp();
+				Value leftOp = assignStmt.getLeftOp();
+				soot.Type type = newExpr.getType();
+				if(Scene.v().getOrMakeFastHierarchy().canStoreType(type, Scene.v().getType(allocationSuperType))){
+//					System.out.println(icfg.getMethodOf(unit));
+					return Collections.singleton(new AccessGraph((Local)leftOp,leftOp.getType()));
+				}
 			}
 		}
 		return Collections.emptySet();

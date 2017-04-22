@@ -7,7 +7,7 @@ import ideal.ResultReporter;
 import test.IDEALTestingFramework;
 import typestate.TypestateDomainValue;
 import typestate.impl.fileanalysis.FileMustBeClosedAnalysis;
-
+@SuppressWarnings("deprecation")
 public class FileMustBeClosedTest extends IDEALTestingFramework {
 	@Test
 	public void simple() {
@@ -195,7 +195,13 @@ public class FileMustBeClosedTest extends IDEALTestingFramework {
 	}
 
 	@Test
-	public void unbalancedReturn() {
+	public void unbalancedReturn1() {
+		File second = createOpenedFile();
+		mustBeInErrorState(second);
+	}
+
+	@Test
+	public void unbalancedReturn2() {
 		File first = createOpenedFile();
 		clse(first);
 		mustBeInAcceptingState(first);
@@ -274,6 +280,22 @@ public class FileMustBeClosedTest extends IDEALTestingFramework {
 		mustBeInAcceptingState(file);
 	}
 
+	@Test
+	public void multipleStates() {
+		File file = new File();
+//		if(staticallyUnknown()){
+			file.open();
+			mustBeInErrorState(file);
+			int x = 1;
+			System.out.println(x);
+			mustBeInErrorState(file);
+			file.close();
+			mustBeInAcceptingState(file);
+			x = 1;
+			System.out.println(x);
+			mustBeInAcceptingState(file);
+//		}
+	}
 	@Override
 	protected Analysis<TypestateDomainValue> createAnalysis(ResultReporter<TypestateDomainValue> reporter) {
 		return new FileMustBeClosedAnalysis(reporter);

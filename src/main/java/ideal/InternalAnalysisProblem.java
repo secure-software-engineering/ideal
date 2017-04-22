@@ -133,7 +133,6 @@ public class InternalAnalysisProblem<V> implements
 
 	@Override
 	public Flow<Unit,AccessGraph,V> flowWrapper() {
-		// TODO Auto-generated method stub
 		return new Flow<Unit,AccessGraph,V>(){
 
 			@Override
@@ -146,8 +145,8 @@ public class InternalAnalysisProblem<V> implements
 			@Override
 			public void nonIdentityReturnFlow(Unit exitStmt,AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite,
 					AccessGraph d1, EdgeFunction<V> func) {
-				System.out.println("Add eevent" + callSite +" " + d3);
-				context.addPOA(new ReturnEvent<V>(exitStmt,d2, callSite, d3, returnSite, d1, func));
+				if(!context.isInIDEPhase())
+					context.addPOA(new ReturnEvent<V>(exitStmt,d2, callSite, d3, returnSite, d1, func));
 			}};
 	}
 }

@@ -7,7 +7,7 @@ import ideal.ResultReporter;
 import test.IDEALTestingFramework;
 import typestate.TypestateDomainValue;
 import typestate.impl.fileanalysis.FileMustBeClosedAnalysis;
-
+@SuppressWarnings("deprecation")
 public class FileMustBeClosedInterfaceTest extends IDEALTestingFramework {
 	@Test
 	public void main() {

@@ -57,9 +57,6 @@ public class AnalysisSolver<V>
 	    
     super.propagate(d1, curr, d2, EdgeIdentity.<V>v(), null, true);
     runExecutorAndAwaitCompletion();
-    for(Unit sp: icfg.getStartPointsOf(icfg.getMethodOf(curr)))
-    	this.setVal(sp, d1, bottom());
-    this.setVal(curr, d2, bottom());
   }
 
   @Override
@@ -127,13 +124,7 @@ public class AnalysisSolver<V>
 	public boolean isEntryPointMethod(SootMethod method) {
 		return false;
 	}}
-  public void computeValues(PathEdge<Unit, AccessGraph> seed) {
-    HashMap<Unit, Set<AccessGraph>> map = new HashMap<Unit, Set<AccessGraph>>();
-    HashSet<AccessGraph> hashSet = new HashSet<>();
-    hashSet.add(seed.factAtSource());
-    map.put(seed.getTarget(), hashSet);
-    super.computeValues(map);
-  }
+
 
   public void destroy() {
     jumpFn.clear();

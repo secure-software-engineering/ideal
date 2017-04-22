@@ -8,6 +8,7 @@ import test.IDEALTestingFramework;
 import typestate.TypestateDomainValue;
 import typestate.impl.fileanalysis.FileMustBeClosedAnalysis;
 
+@SuppressWarnings("deprecation")
 public class FileMustBeClosedNullPOATest extends IDEALTestingFramework {
 
 	@Test

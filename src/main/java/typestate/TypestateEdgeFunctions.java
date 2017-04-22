@@ -60,7 +60,7 @@ public class TypestateEdgeFunctions implements AnalysisEdgeFunctions<TypestateDo
 
 	@Override
 	public TypestateDomainValue bottom() {
-		return TypestateDomainValue.BOTTOM;
+		return func.getBottomElement();
 	}
 
 	@Override

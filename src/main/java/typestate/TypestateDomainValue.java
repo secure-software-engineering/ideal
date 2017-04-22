@@ -13,6 +13,10 @@ public class TypestateDomainValue {
     this.states = trans;
   }
 
+  public TypestateDomainValue(State trans) {
+	  this();
+    this.states.add(trans);
+  }
   public TypestateDomainValue() {
     this.states = new HashSet<>();
   }
