@@ -6,8 +6,10 @@ import java.util.Set;
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
+import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
+import ideal.FactAtStatement;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;
@@ -20,27 +22,7 @@ public class NullDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void startWithSeed(PathEdge<Unit, AccessGraph> seed) {
-
-	}
-
-	@Override
-	public void startPhase1WithSeed(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver) {
-
-	}
-
-	@Override
-	public void startPhase2WithSeed(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
-	}
-
-	@Override
-	public void finishPhase1WithSeed(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver) {
-
-	}
-
-	@Override
-	public void finishPhase2WithSeed(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
-
+	public void startPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
 	}
 
 	@Override
@@ -91,7 +73,7 @@ public class NullDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void onAnalysisTimeout(PathEdge<Unit, AccessGraph> seed) {
+	public void onAnalysisTimeout(FactAtStatement seed) {
 
 	}
 
@@ -137,13 +119,30 @@ public class NullDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void indirectFlowAtCall(AccessGraph source, Unit curr, AccessGraph target) {
-		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void startWithSeed(FactAtStatement seed) {
+		
+	}
+
+	@Override
+	public void startPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
+	}
+
+	@Override
+	public void finishPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
+		
+	}
+
+	@Override
+	public void finishPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
 		
 	}
 

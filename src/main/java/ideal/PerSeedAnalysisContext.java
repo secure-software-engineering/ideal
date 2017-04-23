@@ -1,6 +1,7 @@
 package ideal;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -45,11 +46,11 @@ public class PerSeedAnalysisContext<V> {
 	private AliasFinder boomerang;
 	private IDEALAnalysisDefinition<V> analysisDefinition;
 	private Stopwatch startTime;
-	private PathEdge<Unit, AccessGraph> seed;
+	private FactAtStatement seed;
 	private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
 	private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
 
-	public PerSeedAnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition, PathEdge<Unit, AccessGraph> seed) {
+	public PerSeedAnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition, FactAtStatement seed) {
 		this.seed = seed;
 		this.analysisDefinition = analysisDefinition;
 	}
@@ -202,10 +203,8 @@ public class PerSeedAnalysisContext<V> {
 	}
 
 	public void run() {
-		boolean timeout = false;
 		debugger().startWithSeed(seed);
 		startTime = Stopwatch.createStarted();
-		timeout = false;
 		AnalysisSolver<V> solver = new AnalysisSolver<>(analysisDefinition, this);
 		setSolver(solver);
 		try {
@@ -218,7 +217,6 @@ public class PerSeedAnalysisContext<V> {
 			setSolver(solver);
 		} catch (IDEALTimeoutException e) {
 			System.out.println("Timeout of IDEAL");
-			timeout = true;
 			debugger().onAnalysisTimeout(seed);
 		}
 		reporter().onSeedFinished(seed, solver);
@@ -233,11 +231,11 @@ public class PerSeedAnalysisContext<V> {
 	private void phase1(AnalysisSolver<V> solver) {
 		debugger().startPhase1WithSeed(seed, solver);
 		Set<PathEdge<Unit, AccessGraph>> worklist = new HashSet<>();
-		if (icfg().isExitStmt(seed.getTarget()) || icfg().isCallStmt(seed.getTarget())) {
-			worklist.add(seed);
+		if (icfg().isExitStmt(seed.getStmt()) || icfg().isCallStmt(seed.getStmt())) {
+			worklist.add(new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact()));
 		} else {
-			for (Unit u : icfg().getSuccsOf(seed.getTarget())) {
-				worklist.add(new PathEdge<Unit, AccessGraph>(seed.factAtSource(), u, seed.factAtTarget()));
+			for (Unit u : icfg().getSuccsOf(seed.getStmt())) {
+				worklist.add(new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u, seed.getFact()));
 			}
 		}
 		while (!worklist.isEmpty()) {
@@ -272,19 +270,17 @@ public class PerSeedAnalysisContext<V> {
 	private void phase2(AnalysisSolver<V> solver) {
 		debugger().startPhase2WithSeed(seed, solver);
 		enableIDEPhase();
-		if (icfg().isExitStmt(seed.getTarget()) || icfg().isCallStmt(seed.getTarget())) {
-			solver.injectPhase1Seed(seed.factAtSource(), seed.getTarget(), seed.factAtTarget(), EdgeIdentity.<V>v());
+		if (icfg().isExitStmt(seed.getStmt()) || icfg().isCallStmt(seed.getStmt())) {
+			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact(), EdgeIdentity.<V>v());
 		} else {
-			for (Unit u : icfg().getSuccsOf(seed.getTarget())) {
-				solver.injectPhase1Seed(seed.factAtSource(), u, seed.factAtTarget(), EdgeIdentity.<V>v());
+			for (Unit u : icfg().getSuccsOf(seed.getStmt())) {
+				solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, u, seed.getFact(), EdgeIdentity.<V>v());
 			}
 		}
 		solver.runExecutorAndAwaitCompletion();
 		HashMap<Unit, Set<AccessGraph>> map = new HashMap<Unit, Set<AccessGraph>>();
-		HashSet<AccessGraph> hashSet = new HashSet<>();
-		hashSet.add(seed.factAtSource());
-		for (Unit sp : icfg().getStartPointsOf(icfg().getMethodOf(seed.getTarget()))) {
-			map.put(sp, hashSet);
+		for (Unit sp : icfg().getStartPointsOf(icfg().getMethodOf(seed.getStmt()))) {
+			map.put(sp, Collections.singleton(InternalAnalysisProblem.ZERO));
 		}
 		solver.computeValues(map);
 		debugger().finishPhase2WithSeed(seed, solver);

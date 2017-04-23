@@ -3,16 +3,15 @@ package typestate.impl.statemachines;
 import java.util.Collection;
 
 import boomerang.accessgraph.AccessGraph;
-import heros.solver.Pair;
 import soot.SootMethod;
 import soot.Unit;
-import targets.file.File;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 import typestate.finiteautomata.State;
+import typestate.test.helper.File;
 
 public class FileMustBeClosedStateMachine extends MatcherStateMachine{
 

@@ -31,7 +31,11 @@ public class InternalAnalysisProblem<V> implements
   private InterproceduralCFG<Unit, SootMethod> icfg;
   private PerSeedAnalysisContext<V> context;
   private AnalysisEdgeFunctions<V> edgeFunctions;
-  public final static AccessGraph ZERO = new AccessGraph(null, null);
+  public final static AccessGraph ZERO = new AccessGraph(null, null){
+	  public String toString(){
+		  return "{ZERO}";
+	  }
+  };
 
   InternalAnalysisProblem(IDEALAnalysisDefinition<V> analysisDefinition, PerSeedAnalysisContext<V> context) {
     this.icfg = analysisDefinition.icfg();

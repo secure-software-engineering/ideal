@@ -8,57 +8,57 @@ import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.InterproceduralCFG;
 import heros.solver.IDEDebugger;
+import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
+import ideal.FactAtStatement;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;
 
-public interface IDebugger<V> extends IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
+public interface IDebugger<V>
+		extends IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
-  void beforeAnalysis();
+	void beforeAnalysis();
 
-  void startWithSeed(PathEdge<Unit, AccessGraph> seed);
+	void startWithSeed(FactAtStatement seed);
 
-  void startPhase1WithSeed(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver);
+	void startPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
 
+	void startPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
 
-  void startPhase2WithSeed(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver);
+	void finishPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
 
-  void finishPhase1WithSeed(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver);
+	void finishPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
 
-  void finishPhase2WithSeed(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver);
-
-  void finishWithSeed(PathEdge<Unit, AccessGraph> seed, boolean timeout, boolean isInErrorState,
+	void finishWithSeed(PathEdge<Unit, AccessGraph> seed, boolean timeout, boolean isInErrorState,
 			AnalysisSolver<V> solver);
 
-  void afterAnalysis();
+	void afterAnalysis();
 
-  void startAliasPhase(Set<PointOfAlias<V>> pointsOfAlias);
+	void startAliasPhase(Set<PointOfAlias<V>> pointsOfAlias);
 
-  void startForwardPhase(Set<PathEdge<Unit, AccessGraph>> worklist);
+	void startForwardPhase(Set<PathEdge<Unit, AccessGraph>> worklist);
 
-  void onAliasesComputed(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1,
-      AliasResults res);
+	void onAliasesComputed(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1, AliasResults res);
 
-  void onAliasTimeout(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1);
+	void onAliasTimeout(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1);
 
-  void beforeAlias(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1);
+	void beforeAlias(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1);
 
-  void killAsOfStrongUpdate(AccessGraph d1, Unit callSite, AccessGraph callNode, Unit returnSite,
-      AccessGraph returnSideNode2);
+	void killAsOfStrongUpdate(AccessGraph d1, Unit callSite, AccessGraph callNode, Unit returnSite,
+			AccessGraph returnSideNode2);
 
-  void detectedStrongUpdate(Unit callSite, AccessGraph receivesUpdate);
+	void detectedStrongUpdate(Unit callSite, AccessGraph receivesUpdate);
 
-  void onAnalysisTimeout(PathEdge<Unit, AccessGraph> seed);
+	void onAnalysisTimeout(FactAtStatement seed);
 
-  void solvePOA(PointOfAlias<V> p);
+	void solvePOA(PointOfAlias<V> p);
 
 	void onNormalPropagation(AccessGraph d1, Unit curr, Unit succ, AccessGraph source);
 
 	void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target);
 
 	void indirectFlowAtCall(AccessGraph source, Unit curr, AccessGraph target);
-
 
 }

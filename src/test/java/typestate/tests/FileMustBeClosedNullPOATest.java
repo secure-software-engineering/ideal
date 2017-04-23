@@ -2,11 +2,11 @@ package typestate.tests;
 
 import org.junit.Test;
 
-import targets.file.File;
-import targets.file.ObjectWithField;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
 import typestate.impl.statemachines.FileMustBeClosedStateMachine;
+import typestate.test.helper.File;
+import typestate.test.helper.ObjectWithField;
 
 @SuppressWarnings("deprecation")
 public class FileMustBeClosedNullPOATest extends IDEALTestingFramework {

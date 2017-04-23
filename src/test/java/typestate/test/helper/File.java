@@ -1,4 +1,4 @@
-package targets.file;
+package typestate.test.helper;
 public class File {
   public void open() {
 

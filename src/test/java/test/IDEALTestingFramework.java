@@ -1,6 +1,10 @@
 package test;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,8 +23,8 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.preanalysis.PreparationTransformer;
 import ideal.Analysis;
 import ideal.ResultReporter;
+import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
-import ideal.debug.JSONDebugger;
 import soot.ArrayType;
 import soot.Body;
 import soot.G;
@@ -65,8 +69,9 @@ public abstract class IDEALTestingFramework {
 		org.junit.Assume.assumeTrue(false);
 	}
 
-	private Analysis<TypestateDomainValue> analysis;
 	protected long analysisTime;
+	private File vizFile;
+	private IDEVizDebugger<TypestateDomainValue> debugger;
 
 	protected abstract TypestateChangeFunction createTypestateChangeFunction();
 
@@ -95,7 +100,9 @@ public abstract class IDEALTestingFramework {
 	}
 
 	protected IDebugger<TypestateDomainValue> getDebugger() {
-		return new JSONDebugger<>(new File("visualization/data.js"), icfg);
+		if(debugger == null)
+			debugger = new IDEVizDebugger<>(getOrCreateVizFile(), icfg);
+		return debugger;
 	}
 
 	private void analyze(final String methodName) {
@@ -119,23 +126,46 @@ public abstract class IDEALTestingFramework {
 				}
 				if (!unsound.isEmpty())
 					throw new RuntimeException("Unsound results: " + unsound);
-				if (!imprecise.isEmpty())
+				IDEALTestingFramework.this.removeVizFile();
+				if (!imprecise.isEmpty()) {
 					Assert.fail("Imprecise results: " + imprecise);
-				try {
-					// compareQuery(expectedResults,
-					// TestFramework.this.getAnalysis().getResults());
-				} catch (AssertionError e) {
-					// TestFramework.this.options.removeVizFile();
-					throw e;
 				}
-				// TestFramework.this.options.removeVizFile();
 			}
-
 		});
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		PackManager.v().getPack("wjtp").add(transform);
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
+	}
+
+	private File getOrCreateVizFile() {
+		vizFile = new File("target/IDEViz/" + this.getClass().getName() + "/IDEViz-" + name.getMethodName() + ".json");
+		if (!vizFile.getParentFile().exists()) {
+			try {
+				Files.createDirectories(vizFile.getParentFile().toPath());
+			} catch (IOException e) {
+				throw new RuntimeException("Was not able to create directories for IDEViz output!");
+			}
+		}
+		return vizFile;
+	}
+
+	public void removeVizFile() {
+		File parentFile = getOrCreateVizFile().getParentFile();
+		if (vizFile.exists())
+			vizFile.delete();
+		try {
+			if (isDirEmpty(parentFile.toPath()))
+				parentFile.delete();
+		} catch (IOException e) {
+			throw new RuntimeException("Was not able to delete directories for IDEViz output!");
+		}
+	}
+
+	private static boolean isDirEmpty(final Path directory) throws IOException {
+		try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory)) {
+			return !dirStream.iterator().hasNext();
+		}
 	}
 
 	private Set<ExpectedResults> parseExpectedQueryResults(SootMethod sootTestMethod) {

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
+import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
 import soot.MethodOrMethodContext;
@@ -36,13 +37,13 @@ public class Analysis<V> {
 		printOptions();
 		WrappedSootField.TRACK_TYPE = false;
 		WrappedSootField.TRACK_STMT = false;
-		Set<PathEdge<Unit, AccessGraph>> initialSeeds = computeSeeds();
+		Set<FactAtStatement> initialSeeds = computeSeeds();
 		if (initialSeeds.isEmpty())
 			System.err.println("No seeds found!");
 		else
 			System.err.println("Analysing " + initialSeeds.size() + " seeds!");
 		debugger.beforeAnalysis();
-		for (PathEdge<Unit, AccessGraph> seed : initialSeeds) {
+		for (FactAtStatement seed : initialSeeds) {
 			new PerSeedAnalysisContext<>(analysisDefinition, seed).run();
 		}
 		debugger.afterAnalysis();
@@ -52,8 +53,8 @@ public class Analysis<V> {
 		System.out.println(analysisDefinition);
 	}
 
-	private Set<PathEdge<Unit, AccessGraph>> computeSeeds() {
-		Set<PathEdge<Unit, AccessGraph>> seeds = new HashSet<>();
+	private Set<FactAtStatement> computeSeeds() {
+		Set<FactAtStatement> seeds = new HashSet<>();
 		ReachableMethods rm = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = rm.listener();
 		while (listener.hasNext()) {
@@ -63,8 +64,8 @@ public class Analysis<V> {
 		return seeds;
 	}
 
-	private Collection<? extends PathEdge<Unit, AccessGraph>> computeSeeds(SootMethod method) {
-		Set<PathEdge<Unit, AccessGraph>> seeds = new HashSet<>();
+	private Collection<FactAtStatement> computeSeeds(SootMethod method) {
+		Set<FactAtStatement> seeds = new HashSet<>();
 		if (!method.hasActiveBody())
 			return seeds;
 		if (SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
@@ -73,13 +74,10 @@ public class Analysis<V> {
 			Collection<SootMethod> calledMethods = (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u)
 					: new HashSet<SootMethod>());
 			for (AccessGraph fact : analysisDefinition.generate(method, u, calledMethods)) {
-				PathEdge<Unit, AccessGraph> pathEdge = new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u,
-						fact);
-				seeds.add(pathEdge);
+				seeds.add(new FactAtStatement(u,fact));
 			}
 		}
 		return seeds;
-
 	}
 
 }

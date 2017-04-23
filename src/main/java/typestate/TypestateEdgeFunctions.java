@@ -78,4 +78,9 @@ public class TypestateEdgeFunctions implements AnalysisEdgeFunctions<TypestateDo
 		transitions.addAll(right.getStates());
 		return new TypestateDomainValue(transitions);
 	}
+	
+	@Override
+	public String toString() {
+		return func.toString();
+	}
 }

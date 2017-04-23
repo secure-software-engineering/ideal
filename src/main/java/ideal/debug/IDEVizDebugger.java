@@ -27,6 +27,7 @@ import heros.debug.visualization.IDEToJSON.Direction;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
+import ideal.FactAtStatement;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;
@@ -38,16 +39,16 @@ import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
-public class JSONDebugger<V> implements IDebugger<V> {
+public class IDEVizDebugger<V> implements IDebugger<V> {
 
 	private IDEToJSON<SootMethod, Unit, AccessGraph, V, IInfoflowCFG> ideToJSON;
 	private IInfoflowCFG icfg;
 
-	public JSONDebugger(File file, IInfoflowCFG icfg) {
+	public IDEVizDebugger(File file, IInfoflowCFG icfg) {
 		this.ideToJSON = new IDEToJSON<SootMethod, Unit, AccessGraph, V, IInfoflowCFG>(file, icfg){
 			@Override
 			public String getShortLabel(Unit u) {
-				return JSONDebugger.this.getShortLabel(u);
+				return IDEVizDebugger.this.getShortLabel(u);
 			}
 			@Override
 			public List<Unit> getListOfStmts(SootMethod method) {
@@ -75,6 +76,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void normalFlow(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
+		System.out.println("NORMALFLOW");
 		getESG(start).normalFlow(start, startFact, target, targetFact);
 	}
 
@@ -125,26 +127,26 @@ public class JSONDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void startWithSeed(PathEdge<Unit, AccessGraph> seed) {
+	public void startWithSeed(FactAtStatement seed) {
 
 	}
 
 	@Override
-	public void startPhase1WithSeed(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver) {
+	public void startPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
 
 	}
 
 	@Override
-	public void startPhase2WithSeed(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
+	public void startPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
 	}
 
 	@Override
-	public void finishPhase1WithSeed(PathEdge<Unit, AccessGraph> seed, AnalysisSolver<V> solver) {
+	public void finishPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
 
 	}
 
 	@Override
-	public void finishPhase2WithSeed(PathEdge<Unit, AccessGraph> s, AnalysisSolver<V> solver) {
+	public void finishPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
 
 	}
 
@@ -190,7 +192,7 @@ public class JSONDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void onAnalysisTimeout(PathEdge<Unit, AccessGraph> seed) {
+	public void onAnalysisTimeout(FactAtStatement seed) {
 
 	}
 
