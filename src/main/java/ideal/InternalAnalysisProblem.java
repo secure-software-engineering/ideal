@@ -3,10 +3,6 @@ package ideal;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.EdgeFunctions;
@@ -15,9 +11,10 @@ import heros.FlowFunctions;
 import heros.IDETabulationProblem;
 import heros.InterproceduralCFG;
 import heros.JoinLattice;
-import heros.edgefunc.AllBottom;
 import heros.edgefunc.AllTop;
 import heros.solver.IDEDebugger;
+import heros.solver.IPropagationController;
+import heros.solver.Scheduler;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.edgefunction.ForwardEdgeFunctions;
 import ideal.flowfunctions.ForwardFlowFunctions;
@@ -31,6 +28,7 @@ public class InternalAnalysisProblem<V> implements
   private InterproceduralCFG<Unit, SootMethod> icfg;
   private PerSeedAnalysisContext<V> context;
   private AnalysisEdgeFunctions<V> edgeFunctions;
+private IPropagationController<Unit, AccessGraph> propagationController;
   public final static AccessGraph ZERO = new AccessGraph(null, null){
 	  public String toString(){
 		  return "{ZERO}";
@@ -40,6 +38,7 @@ public class InternalAnalysisProblem<V> implements
   InternalAnalysisProblem(IDEALAnalysisDefinition<V> analysisDefinition, PerSeedAnalysisContext<V> context) {
     this.icfg = analysisDefinition.icfg();
     this.edgeFunctions = analysisDefinition.edgeFunctions();
+    this.propagationController = analysisDefinition.propagationController();
     this.context = context;
   }
 
@@ -120,10 +119,6 @@ public class InternalAnalysisProblem<V> implements
     return new AllTop<V>(edgeFunctions.top());
   }
 
-  public EdgeFunction<V> allBottomFunction() {
-    return new AllBottom<V>(edgeFunctions.top());
-  }
-
 	@Override
 	public boolean recordEdges() {
 		return false;
@@ -152,4 +147,15 @@ public class InternalAnalysisProblem<V> implements
 					context.addPOA(new ReturnEvent<V>(exitStmt,d2, callSite, d3, returnSite, d1, func));
 			}};
 	}
+
+	@Override
+	public Scheduler getScheduler() {
+		return context.scheduler;
+	}
+
+	@Override
+	public IPropagationController<Unit, AccessGraph> propagationController() {
+		return propagationController;
+	}
+
 }

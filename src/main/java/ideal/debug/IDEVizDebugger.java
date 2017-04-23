@@ -76,7 +76,6 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void normalFlow(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
-		System.out.println("NORMALFLOW");
 		getESG(start).normalFlow(start, startFact, target, targetFact);
 	}
 

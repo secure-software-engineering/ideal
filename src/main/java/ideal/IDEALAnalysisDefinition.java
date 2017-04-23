@@ -4,6 +4,8 @@ import java.util.Collection;
 
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
+import heros.solver.IPropagationController;
+import heros.solver.Scheduler;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import soot.SootMethod;
@@ -43,16 +45,20 @@ public abstract class IDEALAnalysisDefinition<V> {
 	public abstract IDebugger<V> debugger();
 
 	public abstract BoomerangOptions boomerangOptions();
-	
+
 	public abstract boolean enableAliasing();
-	
+
 	public abstract long analysisBudgetInSeconds();
-	
+
 	public abstract boolean enableNullPointOfAlias();
-	
+
 	public abstract boolean enableStrongUpdates();
-	
-	public String toString(){
+
+	public abstract IDEALScheduler<V> getScheduler();
+
+	public abstract IPropagationController<Unit, AccessGraph> propagationController();
+
+	public String toString() {
 		String str = "====== IDEal Analysis Options ======";
 		str += "\nEdge Functions:\t\t" + edgeFunctions();
 		str += "\nDebugger Class:\t\t" + debugger();
@@ -60,7 +66,9 @@ public abstract class IDEALAnalysisDefinition<V> {
 		str += "\nStrong Updates:\t\t" + (enableStrongUpdates() ? "ENABLED" : "DISABLED");
 		str += "\nAliasing:\t\t" + (enableAliasing() ? "ENABLED" : "DISABLED");
 		str += "\nNull POAs:\t\t" + (enableNullPointOfAlias() ? "ENABLED" : "DISABLED");
-		str += "\n"+boomerangOptions();
+		str += "\n" + boomerangOptions();
 		return str;
 	}
+
+
 }

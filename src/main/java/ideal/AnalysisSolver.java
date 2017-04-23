@@ -15,6 +15,8 @@ import heros.EdgeFunction;
 import heros.InterproceduralCFG;
 import heros.solver.IDESolver;
 import heros.solver.Pair;
+import heros.solver.PathEdge;
+import heros.solver.IDESolver.PathEdgeProcessingTask;
 import soot.SootMethod;
 import soot.Unit;
 
@@ -41,15 +43,11 @@ public class AnalysisSolver<V>
 	}
 
 	@Override
-	public void runExecutorAndAwaitCompletion() {
-		while (!worklist.isEmpty()) {
-			Runnable pop = worklist.pop();
-			if (propagationCount % 1000 == 0) {
-				context.checkTimeout();
-			}
-			pop.run();
-		}
+	protected void scheduleEdgeProcessing(PathEdge<Unit, AccessGraph> edge) {
+		worklist.add(new PathEdgeProcessingTask(edge));
+		propagationCount++;
 	}
+
 
 	@Override
 	protected void scheduleValueProcessing(ValuePropagationTask vpt) {

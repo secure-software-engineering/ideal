@@ -56,11 +56,11 @@ import typestate.TypestateDomainValue;
 
 @SuppressWarnings("deprecation")
 public abstract class IDEALTestingFramework {
-	private IInfoflowCFG icfg;
 	@Rule
 	public TestName name = new TestName();
-	private SootMethod sootTestMethod;
-
+	protected SootMethod sootTestMethod;
+	protected IInfoflowCFG icfg;
+	
 	@Before
 	public void performQuery() {
 		initializeSootWithEntryPoint(name.getMethodName());
@@ -72,14 +72,15 @@ public abstract class IDEALTestingFramework {
 	protected long analysisTime;
 	private File vizFile;
 	private IDEVizDebugger<TypestateDomainValue> debugger;
+	protected TestingResultReporter testingResultReporter;
 
 	protected abstract TypestateChangeFunction createTypestateChangeFunction();
 
-	protected Analysis<TypestateDomainValue> createAnalysis(final ResultReporter<TypestateDomainValue> reporter) {
+	protected Analysis<TypestateDomainValue> createAnalysis() {
 		return new Analysis<TypestateDomainValue>(new TypestateAnalysisProblem() {
 			@Override
 			public ResultReporter<TypestateDomainValue> resultReporter() {
-				return reporter;
+				return IDEALTestingFramework.this.testingResultReporter;
 			}
 
 			@Override
@@ -111,7 +112,9 @@ public abstract class IDEALTestingFramework {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
 				Set<ExpectedResults> expectedResults = parseExpectedQueryResults(sootTestMethod);
-				IDEALTestingFramework.this.createAnalysis(new TestingResultReporter(expectedResults)).run();
+				testingResultReporter = new TestingResultReporter(expectedResults);
+				
+				executeAnalysis();
 				List<ExpectedResults> unsound = Lists.newLinkedList();
 				List<ExpectedResults> imprecise = Lists.newLinkedList();
 				for (ExpectedResults r : expectedResults) {
@@ -136,6 +139,10 @@ public abstract class IDEALTestingFramework {
 		PackManager.v().getPack("wjtp").add(transform);
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
+	}
+
+	protected void executeAnalysis() {
+		IDEALTestingFramework.this.createAnalysis().run();
 	}
 
 	private File getOrCreateVizFile() {

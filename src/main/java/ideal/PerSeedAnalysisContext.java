@@ -21,6 +21,7 @@ import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
+import heros.solver.Scheduler;
 import heros.utilities.DefaultValueMap;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
@@ -53,6 +54,8 @@ public class PerSeedAnalysisContext<V> {
 	public PerSeedAnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition, FactAtStatement seed) {
 		this.seed = seed;
 		this.analysisDefinition = analysisDefinition;
+		this.scheduler = this.analysisDefinition.getScheduler();
+		this.scheduler.setContext(this);
 	}
 
 	public void setSolver(AnalysisSolver<V> solver) {
@@ -148,7 +151,6 @@ public class PerSeedAnalysisContext<V> {
 		protected AliasResults createItem(PerSeedAnalysisContext<V>.BoomerangQuery key) {
 			try {
 				boomerang.startQuery();
-				System.out.println(key);
 				AliasResults res = boomerang
 						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, key.getStmt()))
 						.withoutNullAllocationSites();
@@ -165,6 +167,7 @@ public class PerSeedAnalysisContext<V> {
 			}
 		}
 	};
+	public final IDEALScheduler<V> scheduler;
 
 	private class BoomerangQuery extends Query {
 
@@ -208,11 +211,11 @@ public class PerSeedAnalysisContext<V> {
 		AnalysisSolver<V> solver = new AnalysisSolver<>(analysisDefinition, this);
 		setSolver(solver);
 		try {
-			System.out.println("================== STARTING PHASE 1 ==================");
+//			System.out.println("================== STARTING PHASE 1 ==================");
 			phase1(solver);
 			solver.destroy();
 			solver = new AnalysisSolver<>(analysisDefinition, this);
-			System.out.println("================== STARTING PHASE 2 ==================");
+//			System.out.println("================== STARTING PHASE 2 ==================");
 			phase2(solver);
 			setSolver(solver);
 		} catch (IDEALTimeoutException e) {

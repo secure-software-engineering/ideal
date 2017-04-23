@@ -1,6 +1,9 @@
 package ideal;
 
 import boomerang.BoomerangOptions;
+import boomerang.accessgraph.AccessGraph;
+import heros.solver.IPropagationController;
+import soot.Unit;
 
 public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDefinition<V> {
 	@Override
@@ -29,5 +32,20 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 	@Override
 	public long analysisBudgetInSeconds() {
 		return 30;
+	}
+	
+	@Override
+	public IDEALScheduler<V> getScheduler() {
+		return new IDEALScheduler<>();
+	}
+	
+	@Override
+	public IPropagationController<Unit, AccessGraph> propagationController() {
+		return new IPropagationController<Unit,AccessGraph>(){
+
+			@Override
+			public boolean continuePropagate(AccessGraph d1, Unit n, AccessGraph d2) {
+				return true;
+			}};
 	}
 }

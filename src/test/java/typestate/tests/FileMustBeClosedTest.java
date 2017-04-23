@@ -3,13 +3,14 @@ package typestate.tests;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
+import test.slowmethod.SlowMethodDetector;
 import typestate.TypestateChangeFunction;
 import typestate.impl.statemachines.FileMustBeClosedStateMachine;
 import typestate.test.helper.File;
 import typestate.test.helper.ObjectWithField;
 
 @SuppressWarnings("deprecation")
-public class FileMustBeClosedTest extends IDEALTestingFramework {
+public class FileMustBeClosedTest extends IDEALTestingFramework{
 	@Test
 	public void simple() {
 		File file = new File();
