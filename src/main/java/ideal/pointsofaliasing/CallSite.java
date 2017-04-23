@@ -8,7 +8,7 @@ import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import heros.solver.PathEdge;
-import ideal.AnalysisContext;
+import ideal.PerSeedAnalysisContext;
 import soot.Unit;
 
 public class CallSite<V> extends AbstractPointOfAlias<V> {
@@ -22,7 +22,7 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 	}
 
 	@Override
-	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
+	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
 		Collection<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
 		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)) {
@@ -31,7 +31,7 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 		return res;
 	}
 
-	public Collection<AccessGraph> getIndirectFlowTargets(AnalysisContext<V> tsanalysis) {
+	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
 		Collection<WrappedSootField> lastFields = d2.getLastField();
 		Set<AccessGraph> popLastField = d2.popLastField();
 		Set<AccessGraph> res = new HashSet<>();
@@ -49,7 +49,7 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 		return res;
 	}
 
-	private Collection<PathEdge<Unit, AccessGraph>> unbalancedReturn(AnalysisContext<V> tsanalysis) {
+	private Collection<PathEdge<Unit, AccessGraph>> unbalancedReturn(PerSeedAnalysisContext<V> tsanalysis) {
 		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 		for (AccessGraph g : getIndirectFlowTargets(tsanalysis)) {
 			res.add(new PathEdge<Unit, AccessGraph>(d1, succ, g));

@@ -1,6 +1,6 @@
 package ideal;
 
-public class AnalysisTimeoutException extends RuntimeException {
+public class IDEALTimeoutException extends RuntimeException {
 
   /**
    * 

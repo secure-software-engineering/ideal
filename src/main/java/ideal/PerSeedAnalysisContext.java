@@ -1,7 +1,9 @@
 package ideal;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -14,38 +16,41 @@ import boomerang.AliasResults;
 import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.context.IContextRequester;
-import heros.InterproceduralCFG;
-import heros.solver.IDEDebugger;
+import heros.EdgeFunction;
+import heros.edgefunc.EdgeIdentity;
 import heros.solver.Pair;
+import heros.solver.PathEdge;
 import heros.utilities.DefaultValueMap;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
+import ideal.pointsofaliasing.ReturnEvent;
 import soot.Scene;
-import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
-public class AnalysisContext<V> {
+public class PerSeedAnalysisContext<V> {
 
-  /**
-   * Global debugger object.
-   */
+	/**
+	 * Global debugger object.
+	 */
 	private Set<PointOfAlias<V>> poas = new HashSet<>();
 	private boolean idePhase;
 	private Multimap<PointOfAlias<V>, AccessGraph> callSiteToFlows = HashMultimap.create();
-	private Multimap<Unit,AccessGraph> callSiteToStrongUpdates = HashMultimap.create();
+	private Multimap<Unit, AccessGraph> callSiteToStrongUpdates = HashMultimap.create();
 	private Set<Pair<Pair<Unit, Unit>, AccessGraph>> nullnessBranches = new HashSet<>();
 	private AnalysisSolver<V> solver;
 	private Multimap<Unit, AccessGraph> eventAtCallSite = HashMultimap.create();
 	private AliasFinder boomerang;
 	private IDEALAnalysisDefinition<V> analysisDefinition;
 	private Stopwatch startTime;
+	private PathEdge<Unit, AccessGraph> seed;
+	private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
+	private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
 
-
-	public AnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition) {
-		startTime = Stopwatch.createStarted();
+	public PerSeedAnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition, PathEdge<Unit, AccessGraph> seed) {
+		this.seed = seed;
 		this.analysisDefinition = analysisDefinition;
 	}
 
@@ -75,10 +80,11 @@ public class AnalysisContext<V> {
 		idePhase = true;
 	}
 
-
 	/**
 	 * Retrieves for a given call site POA the flow that occured.
-	 * @param cs The call site POA object.
+	 * 
+	 * @param cs
+	 *            The call site POA object.
 	 * @return
 	 */
 	public Collection<AccessGraph> getFlowAtPointOfAlias(PointOfAlias<V> cs) {
@@ -88,32 +94,35 @@ public class AnalysisContext<V> {
 	}
 
 	/**
-	 * At a field write statement all indirect flows are stored by calling that function.
+	 * At a field write statement all indirect flows are stored by calling that
+	 * function.
+	 * 
 	 * @param instanceFieldWrite
 	 * @param outFlows
 	 */
-	public void storeFlowAtPointOfAlias(PointOfAlias<V> instanceFieldWrite,
-			Collection<AccessGraph> outFlows) {
+	public void storeFlowAtPointOfAlias(PointOfAlias<V> instanceFieldWrite, Collection<AccessGraph> outFlows) {
 		callSiteToFlows.putAll(instanceFieldWrite, outFlows);
 	}
 
 	/**
-	 * For a given callSite check is a strong update can be performed for the returnSideNode.
+	 * For a given callSite check is a strong update can be performed for the
+	 * returnSideNode.
+	 * 
 	 * @param callSite
 	 * @param returnSideNode
 	 * @return
 	 */
 	public boolean isStrongUpdate(Unit callSite, AccessGraph returnSideNode) {
-		return analysisDefinition.enableStrongUpdates() && callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
+		return analysisDefinition.enableStrongUpdates()
+				&& callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
 	}
 
 	public void storeStrongUpdateAtCallSite(Unit callSite, Collection<AccessGraph> mayAliasSet) {
 		callSiteToStrongUpdates.putAll(callSite, mayAliasSet);
 	}
-	
+
 	public boolean isNullnessBranch(Unit curr, Unit succ, AccessGraph returnSideNode) {
-		Pair<Pair<Unit, Unit>, AccessGraph> key = new Pair<>(new Pair<Unit, Unit>(curr, succ),
-				returnSideNode);
+		Pair<Pair<Unit, Unit>, AccessGraph> key = new Pair<>(new Pair<Unit, Unit>(curr, succ), returnSideNode);
 		return nullnessBranches.contains(key);
 	}
 
@@ -131,18 +140,19 @@ public class AnalysisContext<V> {
 	public IContextRequester getContextRequestorFor(final AccessGraph d1, final Unit stmt) {
 		return solver.getContextRequestorFor(d1, stmt);
 	}
-	
+
 	private DefaultValueMap<BoomerangQuery, AliasResults> queryToResult = new DefaultValueMap<BoomerangQuery, AliasResults>() {
 
 		@Override
-		protected AliasResults createItem(AnalysisContext<V>.BoomerangQuery key) {
+		protected AliasResults createItem(PerSeedAnalysisContext<V>.BoomerangQuery key) {
 			try {
 				boomerang.startQuery();
 				System.out.println(key);
-				AliasResults res = boomerang.findAliasAtStmt(key.getAp(), key.getStmt(),
-						getContextRequestorFor(key.d1, key.getStmt())).withoutNullAllocationSites();
+				AliasResults res = boomerang
+						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, key.getStmt()))
+						.withoutNullAllocationSites();
 				analysisDefinition.debugger().onAliasesComputed(key.getAp(), key.getStmt(), key.d1, res);
-				if(res.queryTimedout()){
+				if (res.queryTimedout()) {
 					analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
 				}
 				return res;
@@ -154,8 +164,8 @@ public class AnalysisContext<V> {
 			}
 		}
 	};
-	
-	private class BoomerangQuery extends Query{
+
+	private class BoomerangQuery extends Query {
 
 		private AccessGraph d1;
 
@@ -189,18 +199,107 @@ public class AnalysisContext<V> {
 			return true;
 		}
 
-		
+	}
+
+	public void run() {
+		boolean timeout = false;
+		debugger().startWithSeed(seed);
+		startTime = Stopwatch.createStarted();
+		timeout = false;
+		AnalysisSolver<V> solver = new AnalysisSolver<>(analysisDefinition, this);
+		setSolver(solver);
+		try {
+			System.out.println("================== STARTING PHASE 1 ==================");
+			phase1(solver);
+			solver.destroy();
+			solver = new AnalysisSolver<>(analysisDefinition, this);
+			System.out.println("================== STARTING PHASE 2 ==================");
+			phase2(solver);
+			setSolver(solver);
+		} catch (IDEALTimeoutException e) {
+			System.out.println("Timeout of IDEAL");
+			timeout = true;
+			debugger().onAnalysisTimeout(seed);
+		}
+		reporter().onSeedFinished(seed, solver);
+		destroy();
+		solver.destroy();
+	}
+
+	private ResultReporter<V> reporter() {
+		return analysisDefinition.resultReporter();
+	}
+
+	private void phase1(AnalysisSolver<V> solver) {
+		debugger().startPhase1WithSeed(seed, solver);
+		Set<PathEdge<Unit, AccessGraph>> worklist = new HashSet<>();
+		if (icfg().isExitStmt(seed.getTarget()) || icfg().isCallStmt(seed.getTarget())) {
+			worklist.add(seed);
+		} else {
+			for (Unit u : icfg().getSuccsOf(seed.getTarget())) {
+				worklist.add(new PathEdge<Unit, AccessGraph>(seed.factAtSource(), u, seed.factAtTarget()));
+			}
+		}
+		while (!worklist.isEmpty()) {
+			debugger().startForwardPhase(worklist);
+			for (PathEdge<Unit, AccessGraph> s : worklist) {
+				EdgeFunction<V> func = pathEdgeToEdgeFunc.get(s);
+				if (func == null)
+					func = EdgeIdentity.v();
+				solver.injectPhase1Seed(s.factAtSource(), s.getTarget(), s.factAtTarget(), func);
+			}
+			worklist.clear();
+			Set<PointOfAlias<V>> pointsOfAlias = getAndClearPOA();
+			debugger().startAliasPhase(pointsOfAlias);
+			for (PointOfAlias<V> p : pointsOfAlias) {
+				if (seenPOA.contains(p))
+					continue;
+				seenPOA.add(p);
+				debugger().solvePOA(p);
+				Collection<PathEdge<Unit, AccessGraph>> edges = p.getPathEdges(this);
+				worklist.addAll(edges);
+				if (p instanceof ReturnEvent) {
+					ReturnEvent<V> returnEvent = (ReturnEvent) p;
+					for (PathEdge<Unit, AccessGraph> edge : edges) {
+						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
+					}
+				}
+			}
+		}
+		debugger().finishPhase1WithSeed(seed, solver);
+	}
+
+	private void phase2(AnalysisSolver<V> solver) {
+		debugger().startPhase2WithSeed(seed, solver);
+		enableIDEPhase();
+		if (icfg().isExitStmt(seed.getTarget()) || icfg().isCallStmt(seed.getTarget())) {
+			solver.injectPhase1Seed(seed.factAtSource(), seed.getTarget(), seed.factAtTarget(), EdgeIdentity.<V>v());
+		} else {
+			for (Unit u : icfg().getSuccsOf(seed.getTarget())) {
+				solver.injectPhase1Seed(seed.factAtSource(), u, seed.factAtTarget(), EdgeIdentity.<V>v());
+			}
+		}
+		solver.runExecutorAndAwaitCompletion();
+		HashMap<Unit, Set<AccessGraph>> map = new HashMap<Unit, Set<AccessGraph>>();
+		HashSet<AccessGraph> hashSet = new HashSet<>();
+		hashSet.add(seed.factAtSource());
+		for (Unit sp : icfg().getStartPointsOf(icfg().getMethodOf(seed.getTarget()))) {
+			map.put(sp, hashSet);
+		}
+		solver.computeValues(map);
+		debugger().finishPhase2WithSeed(seed, solver);
 	}
 
 	public AliasResults aliasesFor(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
-		if(!analysisDefinition.enableAliasing())
+		if (!analysisDefinition.enableAliasing())
 			return new AliasResults();
 		checkTimeout();
-		if(boomerang == null)
-			boomerang = new AliasFinder(icfg(),analysisDefinition.boomerangOptions());
-		if(!boomerangAccessGraph.isStatic() && Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
+		if (boomerang == null)
+			boomerang = new AliasFinder(icfg(), analysisDefinition.boomerangOptions());
+		if (!boomerangAccessGraph.isStatic()
+				&& Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
 			return new AliasResults();
-		
+
 		analysisDefinition.debugger().beforeAlias(boomerangAccessGraph, curr, d1);
 		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph, curr, d1));
 	}
@@ -217,7 +316,7 @@ public class AnalysisContext<V> {
 
 	public void checkTimeout() {
 		if (startTime.elapsed(TimeUnit.SECONDS) > analysisDefinition.analysisBudgetInSeconds())
-			throw new AnalysisTimeoutException();
+			throw new IDEALTimeoutException();
 	}
 
 	public IDebugger<V> debugger() {
@@ -227,6 +326,5 @@ public class AnalysisContext<V> {
 	public boolean enableNullPointAlias() {
 		return analysisDefinition.enableNullPointOfAlias();
 	}
-
 
 }

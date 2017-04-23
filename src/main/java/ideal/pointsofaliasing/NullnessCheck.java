@@ -6,7 +6,7 @@ import java.util.Collections;
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import heros.solver.PathEdge;
-import ideal.AnalysisContext;
+import ideal.PerSeedAnalysisContext;
 import soot.Unit;
 
 public class NullnessCheck<V> extends AbstractPointOfAlias<V> {
@@ -15,7 +15,7 @@ public class NullnessCheck<V> extends AbstractPointOfAlias<V> {
 	}
 
 	@Override
-	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
+	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
 		AliasResults results = tsanalysis.aliasesFor(d2, curr, d1);
 		if (results.withoutNullAllocationSites().keySet().size() <= 1) {
 			tsanalysis.storeComputedNullnessFlow(this, results.withoutNullAllocationSites());
@@ -37,7 +37,7 @@ public class NullnessCheck<V> extends AbstractPointOfAlias<V> {
 	}
 
 	@Override
-	public Collection<AccessGraph> getIndirectFlowTargets(AnalysisContext<V> tsanalysis) {
+	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
 		return Collections.emptySet();
 	}
 

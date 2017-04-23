@@ -1,7 +1,6 @@
 package ideal;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -17,8 +16,6 @@ import heros.InterproceduralCFG;
 import heros.edgefunc.EdgeIdentity;
 import heros.solver.IDESolver;
 import heros.solver.Pair;
-import heros.solver.PathEdge;
-import ideal.edgefunction.AnalysisEdgeFunctions;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
@@ -26,14 +23,12 @@ import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 public class AnalysisSolver<V>
     extends IDESolver<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
-  private AnalysisEdgeFunctions<V> edgeFn2;
-private AnalysisContext<V> context;
+private PerSeedAnalysisContext<V> context;
 
-  public AnalysisSolver(InterproceduralCFG<Unit, SootMethod> icfg,
-      AnalysisContext<V> context, AnalysisEdgeFunctions<V> edgeFn) {
-    super(new InternalAnalysisProblem<V>(icfg, context, edgeFn));
+  public AnalysisSolver(IDEALAnalysisDefinition<V> analysisDefinition,
+      PerSeedAnalysisContext<V> context) {
+    super(new InternalAnalysisProblem<V>(analysisDefinition, context));
 	this.context = context;
-    edgeFn2 = edgeFn;
   }
 
   /**
@@ -50,17 +45,7 @@ private AnalysisContext<V> context;
   public IInfoflowCFG icfg() {
     return (IInfoflowCFG) icfg;
   }
-
   
-  /**
-   * Starts the IDE phase with the given path edge <d1>-><curr,d2> and the initial edge function
-   */
-  public void injectPhase2Seed(AccessGraph d1, Unit curr, AccessGraph d2, AnalysisContext<V> context) {
-	    
-    super.propagate(d1, curr, d2, EdgeIdentity.<V>v(), null, true);
-    runExecutorAndAwaitCompletion();
-  }
-
   @Override
   public void runExecutorAndAwaitCompletion() {
     while (!worklist.isEmpty()) {
@@ -133,10 +118,6 @@ private AnalysisContext<V> context;
     incoming.clear();
     endSummary.clear();
     incoming.clear();
-  }
-
-  public V bottom(){
-    return edgeFn2.bottom();
   }
   
   public Set<Cell<AccessGraph, AccessGraph, EdgeFunction<V>>> getPathEdgesAt(Unit statement) {

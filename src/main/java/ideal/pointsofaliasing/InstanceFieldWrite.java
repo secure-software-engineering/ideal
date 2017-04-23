@@ -8,7 +8,7 @@ import boomerang.AliasFinder;
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import heros.solver.PathEdge;
-import ideal.AnalysisContext;
+import ideal.PerSeedAnalysisContext;
 import soot.Local;
 import soot.Unit;
 
@@ -22,7 +22,7 @@ public class InstanceFieldWrite<V> extends AbstractPointOfAlias<V> {
 	}
 
 	@Override
-	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
+	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
 		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 
 		Set<AccessGraph> outFlows = new HashSet<>();
@@ -36,7 +36,7 @@ public class InstanceFieldWrite<V> extends AbstractPointOfAlias<V> {
 		return res;
 	}
 
-	public Collection<AccessGraph> getIndirectFlowTargets(AnalysisContext<V> tsanalysis) {
+	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
 		AccessGraph accessGraph = new AccessGraph(base, base.getType());
 		Collection<AccessGraph> results = tsanalysis.aliasesFor(accessGraph, curr, d1).mayAliasSet();
 		return results;

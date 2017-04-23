@@ -14,7 +14,7 @@ import heros.FlowFunctions;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import ideal.Analysis;
-import ideal.AnalysisContext;
+import ideal.PerSeedAnalysisContext;
 import ideal.pointsofaliasing.CallSite;
 import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
@@ -53,8 +53,8 @@ import soot.jimple.Stmt;
  */
 public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 		implements FlowFunctions<Unit, AccessGraph, SootMethod> {
-	private AnalysisContext<V> context;
-	public ForwardFlowFunctions(AnalysisContext<V> context) {
+	private PerSeedAnalysisContext<V> context;
+	public ForwardFlowFunctions(PerSeedAnalysisContext<V> context) {
 		this.context = context;
 	}
 

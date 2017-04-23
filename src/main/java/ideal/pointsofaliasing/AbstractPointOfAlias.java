@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import boomerang.accessgraph.AccessGraph;
 import heros.solver.PathEdge;
-import ideal.AnalysisContext;
+import ideal.PerSeedAnalysisContext;
 import soot.Unit;
 
 public abstract class AbstractPointOfAlias<V> implements PointOfAlias<V>{

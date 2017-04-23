@@ -8,7 +8,7 @@ import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.PathEdge;
-import ideal.AnalysisContext;
+import ideal.PerSeedAnalysisContext;
 import soot.Unit;
 
 public class ReturnEvent<V> extends Event<V> {
@@ -82,7 +82,7 @@ public class ReturnEvent<V> extends Event<V> {
 	}
 
 	@Override
-	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(AnalysisContext<V> tsanalysis) {
+	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
 		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
 		for (AccessGraph mayAliasingAccessGraph : getIndirectFlowTargets(tsanalysis)) {
 			res.add(new PathEdge<Unit, AccessGraph>(d1, returnSite,mayAliasingAccessGraph));
@@ -91,7 +91,7 @@ public class ReturnEvent<V> extends Event<V> {
 	}
 
 	@Override
-	public Collection<AccessGraph> getIndirectFlowTargets(AnalysisContext<V> tsanalysis) {
+	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
 		AliasResults results = tsanalysis.aliasesFor(d3, callSite, d1);
 		checkMustAlias(results,tsanalysis);
 		Collection<AccessGraph> mayAliasSet = results.mayAliasSet();
@@ -100,7 +100,7 @@ public class ReturnEvent<V> extends Event<V> {
 	}
 
 	private void checkMustAlias(AliasResults results,
-			AnalysisContext<V> context) {
+			PerSeedAnalysisContext<V> context) {
 		boolean isStrongUpdate = !results.queryTimedout() && results.keySet().size() == 1;
 		if(isStrongUpdate)
 			context.storeStrongUpdateAtCallSite(callSite, results.mayAliasSet());

@@ -6,17 +6,17 @@ import heros.EdgeFunctions;
 import heros.edgefunc.AllBottom;
 import heros.edgefunc.AllTop;
 import heros.edgefunc.EdgeIdentity;
-import ideal.AnalysisContext;
+import ideal.PerSeedAnalysisContext;
 import soot.SootMethod;
 import soot.Unit;
 
 public class ForwardEdgeFunctions<V> implements EdgeFunctions<Unit, AccessGraph, SootMethod, V> {
 
-  private AnalysisContext<V> context;
+  private PerSeedAnalysisContext<V> context;
   private final EdgeFunction<V> ALL_TOP;
   private final AnalysisEdgeFunctions<V> edgeFunctions;
 
-  public ForwardEdgeFunctions(AnalysisContext<V> context,
+  public ForwardEdgeFunctions(PerSeedAnalysisContext<V> context,
       AnalysisEdgeFunctions<V> edgeFunctions) {
     this.context = context;
     this.edgeFunctions = edgeFunctions;

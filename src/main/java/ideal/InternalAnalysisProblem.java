@@ -29,15 +29,14 @@ public class InternalAnalysisProblem<V> implements
     IDETabulationProblem<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
   private InterproceduralCFG<Unit, SootMethod> icfg;
-  private AnalysisContext<V> context;
+  private PerSeedAnalysisContext<V> context;
   private AnalysisEdgeFunctions<V> edgeFunctions;
   public final static AccessGraph ZERO = new AccessGraph(null, null);
 
-  InternalAnalysisProblem(InterproceduralCFG<Unit, SootMethod> icfg, AnalysisContext<V> context,
-      AnalysisEdgeFunctions<V> edgeFunctions) {
-    this.icfg = icfg;
+  InternalAnalysisProblem(IDEALAnalysisDefinition<V> analysisDefinition, PerSeedAnalysisContext<V> context) {
+    this.icfg = analysisDefinition.icfg();
+    this.edgeFunctions = analysisDefinition.edgeFunctions();
     this.context = context;
-    this.edgeFunctions = edgeFunctions;
   }
 
   @Override
