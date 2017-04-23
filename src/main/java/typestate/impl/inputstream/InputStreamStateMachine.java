@@ -10,6 +10,7 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
+import ideal.Analysis;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -32,7 +33,6 @@ import typestate.finiteautomata.Transition;
 
 public class InputStreamStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
-	private MatcherTransition initialTrans;
 	private InfoflowCFG icfg;
 
 	public static enum States implements State {
@@ -51,8 +51,7 @@ public class InputStreamStateMachine extends MatcherStateMachine implements Type
 
 	InputStreamStateMachine(InfoflowCFG icfg) {
 		this.icfg = icfg;
-		initialTrans = new MatcherTransition(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn);
-		addTransition(initialTrans);
+		addTransition(new MatcherTransition(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(
 				new MatcherTransition(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(new MatcherTransition(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
@@ -83,6 +82,10 @@ public class InputStreamStateMachine extends MatcherStateMachine implements Type
 	@Override
 	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), initialTrans);
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
+	}
+	@Override
+	public TypestateDomainValue getBottomElement() {
+		return new TypestateDomainValue(States.NONE);
 	}
 }

@@ -105,7 +105,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 							} else if (leftOp instanceof NullConstant && rightOp.equals(source.getBase())) {
 								nullnessCheck = true;
 							}
-							if (nullnessCheck) {
+							if (nullnessCheck && Analysis.ENABLE_NULL_POAS) {
 								context.addPOA(new NullnessCheck<V>(sourceFact, curr, source, ifStmt.getTarget()));
 							}
 						}

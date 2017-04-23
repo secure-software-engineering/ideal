@@ -28,57 +28,54 @@ import typestate.finiteautomata.MatcherTransition.Type;
 import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
 
-public class PrintStreamStateMachine extends MatcherStateMachine
-    implements TypestateChangeFunction {
+public class PrintStreamStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
-  private MatcherTransition initialTrans;
-  private InfoflowCFG icfg;
+	private InfoflowCFG icfg;
 
-  public static enum States implements State {
-    NONE, CLOSED, ERROR;
+	public static enum States implements State {
+		NONE, CLOSED, ERROR;
 
-    @Override
-    public boolean isErrorState() {
-      return this == ERROR;
-    }
+		@Override
+		public boolean isErrorState() {
+			return this == ERROR;
+		}
 
-    @Override
-    public boolean isInitialState() {
-      return this == CLOSED;
-    }
-  }
+		@Override
+		public boolean isInitialState() {
+			return this == CLOSED;
+		}
+	}
 
-  PrintStreamStateMachine(InfoflowCFG icfg) {
-    this.icfg = icfg;
-    initialTrans = new MatcherTransition(States.NONE, closeMethods(),Parameter.This, States.CLOSED, Type.OnReturn);
-    addTransition(initialTrans);
-    addTransition(
-        new MatcherTransition(States.CLOSED, closeMethods(),Parameter.This, States.CLOSED, Type.OnReturn));
-    addTransition(new MatcherTransition(States.CLOSED, readMethods(),Parameter.This, States.ERROR, Type.OnReturn));
-  }
+	PrintStreamStateMachine(InfoflowCFG icfg) {
+		this.icfg = icfg;
+		addTransition(
+				new MatcherTransition(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+		addTransition(new MatcherTransition(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+	}
 
-  private Set<SootMethod> closeMethods() {
-    return selectMethodByName(getSubclassesOf("java.io.PrintStream"), "close");
-  }
+	private Set<SootMethod> closeMethods() {
+		return selectMethodByName(getSubclassesOf("java.io.PrintStream"), "close");
+	}
 
-  private Set<SootMethod> readMethods() {
-    List<SootClass> subclasses = getSubclassesOf("java.io.PrintStream");
-    Set<SootMethod> closeMethods = closeMethods();
-    Set<SootMethod> out = new HashSet<>();
-    for (SootClass c : subclasses) {
-      for (SootMethod m : c.getMethods())
-        if (m.isPublic() && !closeMethods.contains(m) && !m.isStatic())
-          out.add(m);
-    }
-    return out;
-  }
+	private Set<SootMethod> readMethods() {
+		List<SootClass> subclasses = getSubclassesOf("java.io.PrintStream");
+		Set<SootMethod> closeMethods = closeMethods();
+		Set<SootMethod> out = new HashSet<>();
+		for (SootClass c : subclasses) {
+			for (SootMethod m : c.getMethods())
+				if (m.isPublic() && !closeMethods.contains(m) && !m.isStatic())
+					out.add(m);
+		}
+		return out;
+	}
 
+	@Override
+	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit, Collection<SootMethod> calledMethod) {
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
+	}
 
-  @Override
-  public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
-      Collection<SootMethod> calledMethod) {
-    return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), initialTrans);
-  }
-
+	@Override
+	public TypestateDomainValue getBottomElement() {
+		return new TypestateDomainValue(States.CLOSED);
+	}
 }
-

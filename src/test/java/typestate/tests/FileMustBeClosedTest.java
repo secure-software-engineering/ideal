@@ -1,9 +1,11 @@
-package targets.file;
+package typestate.tests;
 
 import org.junit.Test;
 
 import ideal.Analysis;
 import ideal.ResultReporter;
+import targets.file.File;
+import targets.file.ObjectWithField;
 import test.IDEALTestingFramework;
 import typestate.TypestateDomainValue;
 import typestate.impl.fileanalysis.FileMustBeClosedAnalysis;

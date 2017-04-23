@@ -29,82 +29,77 @@ import typestate.finiteautomata.Transition;
 
 public class KeyStoreStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
-  private MatcherTransition initialTrans;
+	public static enum States implements State {
+		NONE, INIT, LOADED, ERROR;
 
-  public static enum States implements State {
-    NONE, INIT, LOADED, ERROR;
+		@Override
+		public boolean isErrorState() {
+			return this == ERROR;
+		}
 
-    @Override
-    public boolean isErrorState() {
-      return this == ERROR;
-    }
+		@Override
+		public boolean isInitialState() {
+			return this == INIT;
+		}
+	}
 
-    @Override
-    public boolean isInitialState() {
-      return this == INIT;
-    }
-  }
+	KeyStoreStateMachine() {
+		// addTransition(new MatcherTransition(States.NONE,
+		// keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn));
+		addTransition(new MatcherTransition(States.INIT, loadMethods(), Parameter.This, States.LOADED, Type.OnReturn));
 
-  KeyStoreStateMachine() {
-    initialTrans =
-        new MatcherTransition(States.NONE, keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn);
-    addTransition(initialTrans);
-    addTransition(new MatcherTransition(States.INIT, loadMethods(),Parameter.This, States.LOADED, Type.OnReturn));
+		addTransition(new MatcherTransition(States.INIT, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
+				Type.OnReturn));
+		addTransition(new MatcherTransition(States.ERROR, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
+				Type.OnReturn));
 
-    addTransition(
-        new MatcherTransition(States.INIT, anyMethodOtherThanLoad(),Parameter.This, States.ERROR, Type.OnReturn));
-    addTransition(
-        new MatcherTransition(States.ERROR, anyMethodOtherThanLoad(),Parameter.This, States.ERROR, Type.OnReturn));
+	}
 
-  }
-  private Set<SootMethod> anyMethodOtherThanLoad() {
-    List<SootClass> subclasses = getSubclassesOf("java.security.KeyStore");
-    Set<SootMethod> loadMethods = loadMethods();
-    Set<SootMethod> out = new HashSet<>();
-    for (SootClass c : subclasses) {
-      for (SootMethod m : c.getMethods())
-        if (m.isPublic() && !loadMethods.contains(m) && !m.isStatic())
-          out.add(m);
-    }
-    return out;
-  }
+	private Set<SootMethod> anyMethodOtherThanLoad() {
+		List<SootClass> subclasses = getSubclassesOf("java.security.KeyStore");
+		Set<SootMethod> loadMethods = loadMethods();
+		Set<SootMethod> out = new HashSet<>();
+		for (SootClass c : subclasses) {
+			for (SootMethod m : c.getMethods())
+				if (m.isPublic() && !loadMethods.contains(m) && !m.isStatic())
+					out.add(m);
+		}
+		return out;
+	}
 
-  private Set<SootMethod> loadMethods() {
-    return selectMethodByName(getSubclassesOf("java.security.KeyStore"), "load");
-  }
+	private Set<SootMethod> loadMethods() {
+		return selectMethodByName(getSubclassesOf("java.security.KeyStore"), "load");
+	}
 
+	private Set<SootMethod> keyStoreConstructor() {
+		List<SootClass> subclasses = getSubclassesOf("java.security.KeyStore");
+		Set<SootMethod> out = new HashSet<>();
+		for (SootClass c : subclasses) {
+			for (SootMethod m : c.getMethods())
+				if (m.getName().equals("getInstance") && m.isStatic())
+					out.add(m);
+		}
+		return out;
+	}
 
-  private Set<SootMethod> keyStoreConstructor() {
-    List<SootClass> subclasses = getSubclassesOf("java.security.KeyStore");
-    Set<SootMethod> out = new HashSet<>();
-    for (SootClass c : subclasses) {
-      for (SootMethod m : c.getMethods())
-        if (m.getName().equals("getInstance") && m.isStatic())
-          out.add(m);
-    }
-    return out;
-  }
+	@Override
+	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit, Collection<SootMethod> calledMethod) {
+		if (unit instanceof AssignStmt) {
+			AssignStmt stmt = (AssignStmt) unit;
+			if(stmt.containsInvokeExpr()){
+				if(keyStoreConstructor().contains(stmt.getInvokeExpr().getMethod())){
+					Set<AccessGraph> out = new HashSet<>();
+					out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+					return out;
+				}
+			}
+		}
+		return Collections.emptySet();
+	}
 
-
-  @Override
-  public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
-      Collection<SootMethod> calledMethod) {
-    boolean matches = false;
-    for (SootMethod method : calledMethod) {
-      if (initialTrans.matches(method)) {
-        matches = true;
-      }
-    }
-    if (!matches)
-      return Collections.emptySet();
-    if (unit instanceof AssignStmt) {
-      Set<AccessGraph> out = new HashSet<>();
-      AssignStmt stmt = (AssignStmt) unit;
-      out.add( new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
-      return out;
-    }
-    return Collections.emptySet();
-  }
+	@Override
+	public TypestateDomainValue getBottomElement() {
+		return new TypestateDomainValue(States.INIT);
+	}
 
 }
-

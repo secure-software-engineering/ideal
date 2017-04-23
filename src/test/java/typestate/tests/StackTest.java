@@ -10,7 +10,6 @@ import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import test.IDEALTestingFramework;
 import typestate.TypestateDomainValue;
 import typestate.impl.vector.VectorAnalysis;
-import typestate.tests.base.TypestateTestingFramework;
 
 @SuppressWarnings("deprecation")
 public class StackTest extends IDEALTestingFramework {

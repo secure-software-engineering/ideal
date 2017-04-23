@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Detainted;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,19 +15,9 @@ import org.junit.rules.TestName;
 
 import com.google.common.collect.Lists;
 
-import boomerang.AliasFinder;
-import boomerang.AliasResults;
-import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.accessgraph.WrappedSootField;
-import boomerang.context.AllCallersRequester;
-import boomerang.context.IContextRequester;
-import boomerang.context.NoContextRequester;
 import boomerang.preanalysis.PreparationTransformer;
-import heros.solver.Pair;
-import heros.solver.PathEdge;
 import ideal.Analysis;
-import ideal.AnalysisSolver;
 import ideal.ResultReporter;
 import soot.ArrayType;
 import soot.Body;
@@ -47,11 +35,9 @@ import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.VoidType;
-import soot.jimple.AssignStmt;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Jimple;
 import soot.jimple.JimpleBody;
-import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
@@ -59,7 +45,6 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
 import test.ExpectedResults.State;
 import typestate.TypestateDomainValue;
-import typestate.tests.base.TestingFramework;
 @SuppressWarnings( "deprecation" )
 public abstract class IDEALTestingFramework {
 	private IInfoflowCFG icfg;
@@ -187,6 +172,7 @@ public abstract class IDEALTestingFramework {
 			if (javaHome == null || javaHome.equals(""))
 				throw new RuntimeException("Could not get property java.home!");
 			sootCp += File.pathSeparator + javaHome + "/lib/rt.jar";
+			sootCp += File.pathSeparator + javaHome + "/lib/jce.jar";
 			System.out.println(sootCp);
 			Options.v().setPhaseOption("cg", "trim-clinit:false");
 			Options.v().set_no_bodies_for_excluded(true);

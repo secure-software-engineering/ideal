@@ -158,7 +158,7 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 	}
 	
 	protected Collection<AccessGraph> generateThisAtAnyCallSitesOf(Unit unit,
-			Collection<SootMethod> calledMethod, Set<SootMethod> hasToCall, MatcherTransition initialTrans) {
+			Collection<SootMethod> calledMethod, Set<SootMethod> hasToCall) {
 		for (SootMethod callee : calledMethod) {
 			if (hasToCall.contains(callee)) {
 				if (unit instanceof Stmt) {
@@ -168,6 +168,7 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 						Set<AccessGraph> out = new HashSet<>();
 						out.add(new AccessGraph(thisLocal, thisLocal.getType()));
 						return out;
+						
 					}
 				}
 

@@ -24,7 +24,6 @@ import typestate.finiteautomata.State;
 
 public class PrintWriterStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
-	private MatcherTransition initialTrans;
 	private InfoflowCFG icfg;
 
 	public static enum States implements State {
@@ -43,8 +42,7 @@ public class PrintWriterStateMachine extends MatcherStateMachine implements Type
 
 	PrintWriterStateMachine(InfoflowCFG icfg) {
 		this.icfg = icfg;
-		initialTrans = new MatcherTransition(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn);
-		addTransition(initialTrans);
+		addTransition(new MatcherTransition(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(
 				new MatcherTransition(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(new MatcherTransition(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
@@ -71,7 +69,12 @@ public class PrintWriterStateMachine extends MatcherStateMachine implements Type
 	@Override
 	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
 			Collection<SootMethod> calledMethod) {
-		return generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), initialTrans);
+		return generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
+	}
+
+	@Override
+	public TypestateDomainValue getBottomElement() {
+		return new TypestateDomainValue(States.CLOSED);
 	}
 
 }

@@ -17,6 +17,7 @@ import heros.edgefunc.EdgeIdentity;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
 import ideal.debug.JSONDebugger;
+import ideal.debug.NullDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
@@ -44,6 +45,7 @@ public class Analysis<V> {
 	public static boolean ENABLE_STRONG_UPDATES = true;
 	public static boolean ALIASING = true;
 	public static boolean ALIASING_FOR_STATIC_FIELDS = false;
+	public static boolean ENABLE_NULL_POAS = false;
 	public static boolean SEED_IN_APPLICATION_CLASS_METHOD = false;
 
 	private final IDebugger<V> debugger;
@@ -65,7 +67,7 @@ public class Analysis<V> {
 		this.problem = problem;
 		this.icfg = icfg;
 		this.bwicfg = new BackwardsInfoflowCFG(icfg);
-		// this.debugger = new NullDebugger<V>();
+//		 this.debugger = new NullDebugger<V>();
 		this.debugger = new JSONDebugger<V>(new File("visualization/data.js"), icfg);
 		this.reporter = reporter;
 	}
@@ -199,6 +201,8 @@ public class Analysis<V> {
 		Set<PathEdge<Unit, AccessGraph>> seeds = new HashSet<>();
 
 		if (!method.hasActiveBody())
+			return seeds;
+		if(SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
 			return seeds;
 		for (Unit u : method.getActiveBody().getUnits()) {
 			Collection<SootMethod> calledMethods = (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u)

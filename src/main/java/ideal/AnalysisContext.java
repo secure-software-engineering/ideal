@@ -10,10 +10,12 @@ import com.google.common.collect.Multimap;
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
 import boomerang.BoomerangOptions;
+import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.context.IContextRequester;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
+import heros.utilities.DefaultValueMap;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.pointsofaliasing.AbstractPointOfAlias;
@@ -43,6 +45,7 @@ public class AnalysisContext<V> {
 	private AnalysisSolver<V> solver;
 	private AnalysisEdgeFunctions<V> edgeFunc;
 	private Multimap<Unit, AccessGraph> eventAtCallSite = HashMultimap.create();
+	private AliasFinder boomerang;
 
 
 	public AnalysisContext(IInfoflowCFG icfg, BackwardsInfoflowCFG bwicfg, AnalysisEdgeFunctions<V> edgeFunc,
@@ -134,6 +137,66 @@ public class AnalysisContext<V> {
 	public IContextRequester getContextRequestorFor(final AccessGraph d1, final Unit stmt) {
 		return solver.getContextRequestorFor(d1, stmt);
 	}
+	
+	private DefaultValueMap<BoomerangQuery, AliasResults> queryToResult = new DefaultValueMap<BoomerangQuery, AliasResults>() {
+
+		@Override
+		protected AliasResults createItem(AnalysisContext<V>.BoomerangQuery key) {
+			try {
+				boomerang.startQuery();
+				System.out.println(key);
+				AliasResults res = boomerang.findAliasAtStmt(key.getAp(), key.getStmt(),
+						getContextRequestorFor(key.d1, key.getStmt())).withoutNullAllocationSites();
+				debugger.onAliasesComputed(key.getAp(), key.getStmt(), key.d1, res);
+				if(res.queryTimedout()){
+					debugger.onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
+				}
+				return res;
+			} catch (Exception e) {
+				e.printStackTrace();
+				debugger.onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
+				Analysis.checkTimeout();
+				return new AliasResults();
+			}
+		}
+	};
+	
+	private class BoomerangQuery extends Query{
+
+		private AccessGraph d1;
+
+		public BoomerangQuery(AccessGraph accessPath, Unit stmt, AccessGraph d1) {
+			super(accessPath, stmt);
+			this.d1 = d1;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + ((d1 == null) ? 0 : d1.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			BoomerangQuery other = (BoomerangQuery) obj;
+			if (d1 == null) {
+				if (other.d1 != null)
+					return false;
+			} else if (!d1.equals(other.d1))
+				return false;
+			return true;
+		}
+
+		
+	}
 
 	public AliasResults aliasesFor(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
 		if(!Analysis.ALIASING)
@@ -142,26 +205,13 @@ public class AnalysisContext<V> {
 		BoomerangOptions opts = new BoomerangOptions();
 		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
 		opts.setTrackStaticFields(Analysis.ALIASING_FOR_STATIC_FIELDS);
-			AliasFinder boomerang = new AliasFinder(icfg(),opts);
+		if(boomerang == null)
+			boomerang = new AliasFinder(icfg(),opts);
 		if(!boomerangAccessGraph.isStatic() && Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
 			return new AliasResults();
+		
 		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
-		try {
-			boomerang.startQuery();
-			AliasResults res = boomerang.findAliasAtStmt(boomerangAccessGraph, curr,
-					getContextRequestorFor(d1, curr)).withoutNullAllocationSites();
-			debugger.onAliasesComputed(boomerangAccessGraph, curr, d1, res);
-			if(res.queryTimedout()){
-				System.out.println("TIMOEUT");
-				debugger.onAliasTimeout(boomerangAccessGraph, curr, d1);
-			}
-			return res;
-		} catch (Exception e) {
-			e.printStackTrace();
-			debugger.onAliasTimeout(boomerangAccessGraph, curr, d1);
-			Analysis.checkTimeout();
-			return new AliasResults();
-		}
+		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph, curr, d1));
 	}
 
 	public void destroy() {

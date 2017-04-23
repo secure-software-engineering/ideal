@@ -1,6 +1,5 @@
 package typestate.tests;
 
-import java.util.Stack;
 import java.util.Vector;
 
 import org.junit.Test;
@@ -11,7 +10,6 @@ import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import test.IDEALTestingFramework;
 import typestate.TypestateDomainValue;
 import typestate.impl.vector.VectorAnalysis;
-import typestate.tests.base.TypestateTestingFramework;
 
 @SuppressWarnings("deprecation")
 public class VectorTest extends IDEALTestingFramework {

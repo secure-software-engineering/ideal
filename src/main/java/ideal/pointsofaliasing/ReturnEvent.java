@@ -95,7 +95,6 @@ public class ReturnEvent<V> extends Event<V> {
 		AliasResults results = tsanalysis.aliasesFor(d3, callSite, d1);
 		checkMustAlias(results,tsanalysis);
 		Collection<AccessGraph> mayAliasSet = results.mayAliasSet();
-		System.out.println("SOLVED EVETN " + d3 + " "+ callSite + " ma" + mayAliasSet);
 		tsanalysis.storeFlowAtPointOfAlias(this, mayAliasSet);
 		return mayAliasSet;
 	}
