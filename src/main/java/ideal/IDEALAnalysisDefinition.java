@@ -2,15 +2,15 @@ package ideal;
 
 import java.util.Collection;
 
+import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
-public interface IDEALAnalysisDefinition<V> {
+public abstract class IDEALAnalysisDefinition<V> {
 
 	/**
 	 * This function generates the seed. Each (reachable) statement of the
@@ -26,7 +26,7 @@ public interface IDEALAnalysisDefinition<V> {
 	 *            method for the call site.
 	 * @return
 	 */
-	Collection<AccessGraph> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod);
+	public abstract Collection<AccessGraph> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod);
 
 	/**
 	 * This function must generate and return the AnalysisEdgeFunctions that are
@@ -34,12 +34,33 @@ public interface IDEALAnalysisDefinition<V> {
 	 * for normal-, call-, return- and call-to-return flows have to be
 	 * specified.
 	 */
-	AnalysisEdgeFunctions<V> edgeFunctions();
+	public abstract AnalysisEdgeFunctions<V> edgeFunctions();
 
-	ResultReporter<V> resultReporter();
+	public abstract ResultReporter<V> resultReporter();
 
-	IInfoflowCFG icfg();
+	public abstract IInfoflowCFG icfg();
 
-	IDebugger<V> debugger();
+	public abstract IDebugger<V> debugger();
 
+	public abstract BoomerangOptions boomerangOptions();
+	
+	public abstract boolean enableAliasing();
+	
+	public abstract long analysisBudgetInSeconds();
+	
+	public abstract boolean enableNullPointOfAlias();
+	
+	public abstract boolean enableStrongUpdates();
+	
+	public String toString(){
+		String str = "====== IDEal Analysis Options ======";
+		str += "\nEdge Functions:\t\t" + edgeFunctions();
+		str += "\nDebugger Class:\t\t" + debugger();
+		str += "\nAnalysisBudget(sec):\t" + (analysisBudgetInSeconds());
+		str += "\nStrong Updates:\t\t" + (enableStrongUpdates() ? "ENABLED" : "DISABLED");
+		str += "\nAliasing:\t\t" + (enableAliasing() ? "ENABLED" : "DISABLED");
+		str += "\nNull POAs:\t\t" + (enableNullPointOfAlias() ? "ENABLED" : "DISABLED");
+		str += "\n"+boomerangOptions();
+		return str;
+	}
 }

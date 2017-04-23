@@ -3,31 +3,28 @@ package ideal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
-import boomerang.BoomerangOptions;
 import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.context.IContextRequester;
+import heros.InterproceduralCFG;
+import heros.solver.IDEDebugger;
 import heros.solver.Pair;
-import heros.solver.PathEdge;
 import heros.utilities.DefaultValueMap;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
-import ideal.pointsofaliasing.AbstractPointOfAlias;
-import ideal.pointsofaliasing.CallSite;
-import ideal.pointsofaliasing.Event;
-import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
-import ideal.pointsofaliasing.ReturnEvent;
 import soot.Scene;
+import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.BackwardsInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public class AnalysisContext<V> {
@@ -35,24 +32,21 @@ public class AnalysisContext<V> {
   /**
    * Global debugger object.
    */
-	public final IDebugger<V> debugger;
 	private Set<PointOfAlias<V>> poas = new HashSet<>();
 	private boolean idePhase;
 	private Multimap<PointOfAlias<V>, AccessGraph> callSiteToFlows = HashMultimap.create();
 	private Multimap<Unit,AccessGraph> callSiteToStrongUpdates = HashMultimap.create();
 	private Set<Pair<Pair<Unit, Unit>, AccessGraph>> nullnessBranches = new HashSet<>();
-	private IInfoflowCFG icfg;
 	private AnalysisSolver<V> solver;
-	private AnalysisEdgeFunctions<V> edgeFunc;
 	private Multimap<Unit, AccessGraph> eventAtCallSite = HashMultimap.create();
 	private AliasFinder boomerang;
+	private IDEALAnalysisDefinition<V> analysisDefinition;
+	private Stopwatch startTime;
 
 
-	public AnalysisContext(IInfoflowCFG icfg, BackwardsInfoflowCFG bwicfg, AnalysisEdgeFunctions<V> edgeFunc,
-			IDebugger<V> debugger) {
-		this.icfg = icfg;
-		this.debugger = debugger;
-		this.edgeFunc = edgeFunc;
+	public AnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition) {
+		startTime = Stopwatch.createStarted();
+		this.analysisDefinition = analysisDefinition;
 	}
 
 	public void setSolver(AnalysisSolver<V> solver) {
@@ -60,7 +54,7 @@ public class AnalysisContext<V> {
 	}
 
 	public AnalysisEdgeFunctions<V> getEdgeFunctions() {
-		return edgeFunc;
+		return analysisDefinition.edgeFunctions();
 	}
 
 	public boolean addPOA(PointOfAlias<V> poa) {
@@ -110,7 +104,7 @@ public class AnalysisContext<V> {
 	 * @return
 	 */
 	public boolean isStrongUpdate(Unit callSite, AccessGraph returnSideNode) {
-		return Analysis.ENABLE_STRONG_UPDATES && callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
+		return analysisDefinition.enableStrongUpdates() && callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
 	}
 
 	public void storeStrongUpdateAtCallSite(Unit callSite, Collection<AccessGraph> mayAliasSet) {
@@ -131,7 +125,7 @@ public class AnalysisContext<V> {
 	}
 
 	public IInfoflowCFG icfg() {
-		return icfg;
+		return analysisDefinition.icfg();
 	}
 
 	public IContextRequester getContextRequestorFor(final AccessGraph d1, final Unit stmt) {
@@ -147,15 +141,15 @@ public class AnalysisContext<V> {
 				System.out.println(key);
 				AliasResults res = boomerang.findAliasAtStmt(key.getAp(), key.getStmt(),
 						getContextRequestorFor(key.d1, key.getStmt())).withoutNullAllocationSites();
-				debugger.onAliasesComputed(key.getAp(), key.getStmt(), key.d1, res);
+				analysisDefinition.debugger().onAliasesComputed(key.getAp(), key.getStmt(), key.d1, res);
 				if(res.queryTimedout()){
-					debugger.onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
+					analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
 				}
 				return res;
 			} catch (Exception e) {
 				e.printStackTrace();
-				debugger.onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
-				Analysis.checkTimeout();
+				analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
+				checkTimeout();
 				return new AliasResults();
 			}
 		}
@@ -199,18 +193,15 @@ public class AnalysisContext<V> {
 	}
 
 	public AliasResults aliasesFor(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
-		if(!Analysis.ALIASING)
+		if(!analysisDefinition.enableAliasing())
 			return new AliasResults();
-		Analysis.checkTimeout();
-		BoomerangOptions opts = new BoomerangOptions();
-		opts.setQueryBudget(Analysis.ALIAS_BUDGET);
-		opts.setTrackStaticFields(Analysis.ALIASING_FOR_STATIC_FIELDS);
+		checkTimeout();
 		if(boomerang == null)
-			boomerang = new AliasFinder(icfg(),opts);
+			boomerang = new AliasFinder(icfg(),analysisDefinition.boomerangOptions());
 		if(!boomerangAccessGraph.isStatic() && Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
 			return new AliasResults();
 		
-		debugger.beforeAlias(boomerangAccessGraph, curr, d1);
+		analysisDefinition.debugger().beforeAlias(boomerangAccessGraph, curr, d1);
 		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph, curr, d1));
 	}
 
@@ -220,11 +211,22 @@ public class AnalysisContext<V> {
 		callSiteToFlows = null;
 		callSiteToStrongUpdates = null;
 		nullnessBranches = null;
-		icfg = null;
-		solver = null;
 		eventAtCallSite.clear();
+		analysisDefinition = null;
 	}
 
+	public void checkTimeout() {
+		if (startTime.elapsed(TimeUnit.SECONDS) > analysisDefinition.analysisBudgetInSeconds())
+			throw new AnalysisTimeoutException();
+	}
+
+	public IDebugger<V> debugger() {
+		return analysisDefinition.debugger();
+	}
+
+	public boolean enableNullPointAlias() {
+		return analysisDefinition.enableNullPointOfAlias();
+	}
 
 
 }

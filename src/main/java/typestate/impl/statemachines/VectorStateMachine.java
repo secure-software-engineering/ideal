@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Pattern;
 
 import boomerang.accessgraph.AccessGraph;
@@ -90,7 +91,7 @@ public class VectorStateMachine extends MatcherStateMachine implements Typestate
 			Collection<SootMethod> calledMethod) {
 		if(m.toString().contains("<clinit>"))
 			return Collections.emptySet();
-		return generateAtAllocationSiteOf(unit,"java.util.Vector");
+		return generateAtAllocationSiteOf(unit,Vector.class);
 	}
 	
 	@Override

@@ -6,6 +6,7 @@ import boomerang.accessgraph.AccessGraph;
 import heros.solver.Pair;
 import soot.SootMethod;
 import soot.Unit;
+import targets.file.File;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
@@ -40,7 +41,7 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine{
   @Override
   public Collection<AccessGraph> generateSeed(SootMethod method,Unit unit,
       Collection<SootMethod> calledMethod) {
-    return generateAtAllocationSiteOf(unit, "targets.file.File");
+    return generateAtAllocationSiteOf(unit, File.class);
   }
 
 

@@ -29,7 +29,7 @@ public class InstanceFieldWrite<V> extends AbstractPointOfAlias<V> {
 		for (AccessGraph mayAliasingAccessGraph : this.getIndirectFlowTargets(tsanalysis)) {
 			AccessGraph withFields = mayAliasingAccessGraph.appendGraph(d2.getFieldGraph());
 			outFlows.add(withFields);
-			tsanalysis.debugger.indirectFlowAtWrite(d2, curr, withFields);
+			tsanalysis.debugger().indirectFlowAtWrite(d2, curr, withFields);
 			res.add(new PathEdge<Unit, AccessGraph>(d1, succ, withFields));
 		}
 		tsanalysis.storeFlowAtPointOfAlias(this, outFlows);

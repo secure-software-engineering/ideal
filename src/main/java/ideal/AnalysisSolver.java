@@ -27,10 +27,12 @@ public class AnalysisSolver<V>
     extends IDESolver<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
   private AnalysisEdgeFunctions<V> edgeFn2;
+private AnalysisContext<V> context;
 
   public AnalysisSolver(InterproceduralCFG<Unit, SootMethod> icfg,
       AnalysisContext<V> context, AnalysisEdgeFunctions<V> edgeFn) {
     super(new InternalAnalysisProblem<V>(icfg, context, edgeFn));
+	this.context = context;
     edgeFn2 = edgeFn;
   }
 
@@ -64,7 +66,7 @@ public class AnalysisSolver<V>
     while (!worklist.isEmpty()) {
       Runnable pop = worklist.pop();
       if (propagationCount % 1000 == 0) {
-        Analysis.checkTimeout();
+        context.checkTimeout();
       }
       pop.run();
     }
@@ -73,13 +75,13 @@ public class AnalysisSolver<V>
 
   @Override
   protected void scheduleValueProcessing(ValuePropagationTask vpt) {
-    Analysis.checkTimeout();
+    context.checkTimeout();
     super.scheduleValueProcessing(vpt);
   }
 
   @Override
   protected void scheduleValueComputationTask(ValueComputationTask task) {
-      Analysis.checkTimeout();
+      context.checkTimeout();
     super.scheduleValueComputationTask(task);
   }
 

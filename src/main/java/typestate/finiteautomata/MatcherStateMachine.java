@@ -172,14 +172,14 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 	}
 	
 
-	protected Collection<AccessGraph> generateAtAllocationSiteOf(Unit unit, String allocationSuperType) {
+	protected Collection<AccessGraph> generateAtAllocationSiteOf(Unit unit, Class allocationSuperType) {
 		if(unit instanceof AssignStmt){
 			AssignStmt assignStmt = (AssignStmt) unit;
 			if(assignStmt.getRightOp() instanceof NewExpr){
 				NewExpr newExpr = (NewExpr) assignStmt.getRightOp();
 				Value leftOp = assignStmt.getLeftOp();
 				soot.Type type = newExpr.getType();
-				if(Scene.v().getOrMakeFastHierarchy().canStoreType(type, Scene.v().getType(allocationSuperType))){
+				if(Scene.v().getOrMakeFastHierarchy().canStoreType(type, Scene.v().getType(allocationSuperType.getName()))){
 					return Collections.singleton(new AccessGraph((Local)leftOp,leftOp.getType()));
 				}
 			}

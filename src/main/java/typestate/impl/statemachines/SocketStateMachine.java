@@ -1,5 +1,6 @@
 package typestate.impl.statemachines;
 
+import java.net.Socket;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -70,7 +71,7 @@ public class SocketStateMachine extends MatcherStateMachine implements Typestate
 
 	@Override
 	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit, Collection<SootMethod> calledMethod) {
-		return generateAtAllocationSiteOf(unit, "java.net.Socket");
+		return generateAtAllocationSiteOf(unit, Socket.class);
 	}
 
 	@Override

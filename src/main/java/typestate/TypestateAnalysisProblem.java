@@ -3,12 +3,13 @@ package typestate;
 import java.util.Collection;
 
 import boomerang.accessgraph.AccessGraph;
+import ideal.DefaultIDEALAnalysisDefinition;
 import ideal.IDEALAnalysisDefinition;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import soot.SootMethod;
 import soot.Unit;
 
-public abstract class TypestateAnalysisProblem implements IDEALAnalysisDefinition<TypestateDomainValue> {
+public abstract class TypestateAnalysisProblem extends DefaultIDEALAnalysisDefinition<TypestateDomainValue> {
 	private TypestateChangeFunction func;
 
 	@Override

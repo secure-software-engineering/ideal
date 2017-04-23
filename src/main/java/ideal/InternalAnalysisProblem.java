@@ -128,7 +128,7 @@ public class InternalAnalysisProblem<V> implements
 
 	@Override
 	public IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> getDebugger() {
-		return context.debugger;
+		return context.debugger();
 	}
 
 	@Override

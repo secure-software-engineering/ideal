@@ -71,7 +71,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 					if (identityStmt.getRightOp() instanceof CaughtExceptionRef)
 						return Collections.emptySet();
 				}
-				context.debugger.onNormalPropagation(sourceFact, curr, succ, source);
+				context.debugger().onNormalPropagation(sourceFact, curr, succ, source);
 				if (AliasFinder.HANDLE_EXCEPTION_FLOW && !source.isStatic() && curr instanceof IdentityStmt) {
 					IdentityStmt identityStmt = (IdentityStmt) curr;
 					if (identityStmt.getRightOp() instanceof CaughtExceptionRef
@@ -105,7 +105,7 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 							} else if (leftOp instanceof NullConstant && rightOp.equals(source.getBase())) {
 								nullnessCheck = true;
 							}
-							if (nullnessCheck && Analysis.ENABLE_NULL_POAS) {
+							if (nullnessCheck && context.enableNullPointAlias()) {
 								context.addPOA(new NullnessCheck<V>(sourceFact, curr, source, ifStmt.getTarget()));
 							}
 						}

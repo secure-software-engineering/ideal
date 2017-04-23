@@ -41,7 +41,7 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 				for (WrappedSootField lastField : lastFields) {
 					AccessGraph g = mayAliasingAccessGraph.appendFields(new WrappedSootField[] { lastField });
 					res.add(g);
-					tsanalysis.debugger.indirectFlowAtCall(withoutLast, curr, g);
+					tsanalysis.debugger().indirectFlowAtCall(withoutLast, curr, g);
 				}
 			}
 		}

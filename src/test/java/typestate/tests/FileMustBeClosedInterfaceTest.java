@@ -19,7 +19,6 @@ public class FileMustBeClosedInterfaceTest extends IDEALTestingFramework {
 	}
 
 	public class ImplFlow1 implements Flow {
-
 		@Override
 		public void flow(File file) {
 			file.open();

@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import com.google.common.base.Stopwatch;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
@@ -22,56 +19,39 @@ import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.BackwardsInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 
 public class Analysis<V> {
 
-	/**
-	 * Specifies the budget per seed in milliseconds.
-	 */
-	public static long BUDGET = 300000000;
-
-	/**
-	 * Specifies the budget per alias query in milliseconds.
-	 */
-	public static long ALIAS_BUDGET = 500;
 	public static boolean ENABLE_STATIC_FIELDS = true;
-	public static boolean ENABLE_STRONG_UPDATES = true;
-	public static boolean ALIASING = true;
 	public static boolean ALIASING_FOR_STATIC_FIELDS = false;
-	public static boolean ENABLE_NULL_POAS = false;
 	public static boolean SEED_IN_APPLICATION_CLASS_METHOD = false;
 
 	private final IDebugger<V> debugger;
-	private static Stopwatch START_TIME;
+	
 
 	private AnalysisContext<V> context;
 	private Set<PathEdge<Unit, AccessGraph>> initialSeeds = new HashSet<>();
 	private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
 	private final IInfoflowCFG icfg;
-	protected final IDEALAnalysisDefinition<V> problem;
+	protected final IDEALAnalysisDefinition<V> analysisDefinition;
 	private final AnalysisEdgeFunctions<V> edgeFunc;
-	private BackwardsInfoflowCFG bwicfg;
 	private ResultReporter<V> reporter;
 
 	private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
 
 	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {
 		this.edgeFunc = analysisDefinition.edgeFunctions();
-		this.problem = analysisDefinition;
+		this.analysisDefinition = analysisDefinition;
 		this.icfg = analysisDefinition.icfg();
-		this.bwicfg = new BackwardsInfoflowCFG(icfg);
 		this.debugger = analysisDefinition.debugger();
 		this.reporter = analysisDefinition.resultReporter();
+		System.out.println(analysisDefinition);
 	}
 
 	public void run() {
-		if (!ENABLE_STRONG_UPDATES) {
-			System.err.println("Strong updates are disabled.");
-		}
 		WrappedSootField.TRACK_TYPE = false;
 		WrappedSootField.TRACK_STMT = false;
 		initialSeeds = computeSeeds();
@@ -90,8 +70,7 @@ public class Analysis<V> {
 		boolean timeout = false;
 		debugger.startWithSeed(seed);
 		timeout = false;
-		context = new AnalysisContext<>(icfg, bwicfg, edgeFunc, debugger);
-		START_TIME = Stopwatch.createStarted();
+		context = new AnalysisContext<>(analysisDefinition);
 		AnalysisSolver<V> solver = new AnalysisSolver<>(context.icfg(), context, edgeFunc);
 		context.setSolver(solver);
 		try {
@@ -146,7 +125,6 @@ public class Analysis<V> {
 						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
 					}
 				}
-				Analysis.checkTimeout();
 			}
 		}
 		debugger.finishPhase1WithSeed(seed, solver);
@@ -186,7 +164,6 @@ public class Analysis<V> {
 
 	private Collection<? extends PathEdge<Unit, AccessGraph>> computeSeeds(SootMethod method) {
 		Set<PathEdge<Unit, AccessGraph>> seeds = new HashSet<>();
-
 		if (!method.hasActiveBody())
 			return seeds;
 		if (SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
@@ -194,7 +171,7 @@ public class Analysis<V> {
 		for (Unit u : method.getActiveBody().getUnits()) {
 			Collection<SootMethod> calledMethods = (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u)
 					: new HashSet<SootMethod>());
-			for (AccessGraph fact : problem.generate(method, u, calledMethods)) {
+			for (AccessGraph fact : analysisDefinition.generate(method, u, calledMethods)) {
 				PathEdge<Unit, AccessGraph> pathEdge = new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u,
 						fact);
 				seeds.add(pathEdge);
@@ -204,8 +181,4 @@ public class Analysis<V> {
 
 	}
 
-	public static void checkTimeout() {
-		if ((Analysis.START_TIME.elapsed(TimeUnit.MILLISECONDS)) > Analysis.BUDGET)
-			throw new AnalysisTimeoutException();
-	}
 }
