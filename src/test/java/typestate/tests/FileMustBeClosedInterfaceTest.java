@@ -2,12 +2,10 @@ package typestate.tests;
 
 import org.junit.Test;
 
-import ideal.Analysis;
-import ideal.ResultReporter;
 import targets.file.File;
 import test.IDEALTestingFramework;
-import typestate.TypestateDomainValue;
-import typestate.impl.fileanalysis.FileMustBeClosedAnalysis;
+import typestate.TypestateChangeFunction;
+import typestate.impl.statemachines.FileMustBeClosedStateMachine;
 @SuppressWarnings("deprecation")
 public class FileMustBeClosedInterfaceTest extends IDEALTestingFramework {
 	@Test
@@ -41,9 +39,9 @@ public class FileMustBeClosedInterfaceTest extends IDEALTestingFramework {
 	private interface Flow {
 		void flow(File file);
 	}
-
+	
 	@Override
-	protected Analysis<TypestateDomainValue> createAnalysis(ResultReporter<TypestateDomainValue> reporter) {
-		return new FileMustBeClosedAnalysis(reporter);
+	protected TypestateChangeFunction createTypestateChangeFunction() {
+		return new FileMustBeClosedStateMachine();
 	}
 }

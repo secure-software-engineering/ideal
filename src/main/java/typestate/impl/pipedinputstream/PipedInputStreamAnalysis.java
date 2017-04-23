@@ -2,10 +2,10 @@ package typestate.impl.pipedinputstream;
 
 import ideal.debug.IDebugger;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
-import typestate.TypestateAnalysis;
+import typestate.AbstractTypestateAnalysis;
 import typestate.TypestateDomainValue;
 
-public class PipedInputStreamAnalysis extends TypestateAnalysis {
+public class PipedInputStreamAnalysis extends AbstractTypestateAnalysis {
 
   public PipedInputStreamAnalysis(InfoflowCFG icfg) {
     super(new PipedInputStreamStateMachine(icfg), icfg);

@@ -1,6 +1,5 @@
 package ideal;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,8 +15,6 @@ import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
-import ideal.debug.JSONDebugger;
-import ideal.debug.NullDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
@@ -55,30 +52,20 @@ public class Analysis<V> {
 	private Set<PathEdge<Unit, AccessGraph>> initialSeeds = new HashSet<>();
 	private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
 	private final IInfoflowCFG icfg;
-	protected final AnalysisProblem<V> problem;
+	protected final IDEALAnalysisDefinition<V> problem;
 	private final AnalysisEdgeFunctions<V> edgeFunc;
 	private BackwardsInfoflowCFG bwicfg;
 	private ResultReporter<V> reporter;
 
 	private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
 
-	public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, ResultReporter<V> reporter) {
-		this.edgeFunc = problem.edgeFunctions();
-		this.problem = problem;
-		this.icfg = icfg;
+	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {
+		this.edgeFunc = analysisDefinition.edgeFunctions();
+		this.problem = analysisDefinition;
+		this.icfg = analysisDefinition.icfg();
 		this.bwicfg = new BackwardsInfoflowCFG(icfg);
-//		 this.debugger = new NullDebugger<V>();
-		this.debugger = new JSONDebugger<V>(new File("visualization/data.js"), icfg);
-		this.reporter = reporter;
-	}
-
-	public Analysis(AnalysisProblem<V> problem, IInfoflowCFG icfg, ResultReporter<V> reporter, IDebugger<V> debugger) {
-		this.edgeFunc = problem.edgeFunctions();
-		this.problem = problem;
-		this.icfg = icfg;
-		this.bwicfg = new BackwardsInfoflowCFG(icfg);
-		this.debugger = debugger;
-		this.reporter = reporter;
+		this.debugger = analysisDefinition.debugger();
+		this.reporter = analysisDefinition.resultReporter();
 	}
 
 	public void run() {
@@ -202,7 +189,7 @@ public class Analysis<V> {
 
 		if (!method.hasActiveBody())
 			return seeds;
-		if(SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
+		if (SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
 			return seeds;
 		for (Unit u : method.getActiveBody().getUnits()) {
 			Collection<SootMethod> calledMethods = (icfg.isCallStmt(u) ? icfg.getCalleesOfCallAt(u)

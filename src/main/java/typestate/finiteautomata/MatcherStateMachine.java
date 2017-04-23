@@ -10,9 +10,6 @@ import java.util.regex.Pattern;
 
 import boomerang.BoomerangContext;
 import boomerang.accessgraph.AccessGraph;
-import heros.EdgeFunction;
-import heros.solver.Pair;
-import ideal.Analysis;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -23,9 +20,7 @@ import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
-import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;
-import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 
@@ -70,7 +65,6 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 		Set<Transition> res = new HashSet<>();
 		if (node.getFieldCount() == 0) {
 			for (MatcherTransition trans : transition) {
-
 				if (trans.matches(method) && trans.getType().equals(type)) {
 					Parameter param = trans.getParam();
 					if (param.equals(Parameter.This) && BoomerangContext.isThisValue(method, node.getBase()))
@@ -186,7 +180,6 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 				Value leftOp = assignStmt.getLeftOp();
 				soot.Type type = newExpr.getType();
 				if(Scene.v().getOrMakeFastHierarchy().canStoreType(type, Scene.v().getType(allocationSuperType))){
-//					System.out.println(icfg.getMethodOf(unit));
 					return Collections.singleton(new AccessGraph((Local)leftOp,leftOp.getType()));
 				}
 			}
@@ -196,9 +189,6 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 	@Override
 	public Collection<AccessGraph> generate(SootMethod method, Unit stmt,
 			Collection<SootMethod> calledMethods) {
-
-		if(Analysis.SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
-			return Collections.emptySet();
 		return generateSeed(method, stmt, calledMethods);
 	}
 	

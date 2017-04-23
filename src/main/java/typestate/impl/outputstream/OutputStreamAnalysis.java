@@ -2,10 +2,10 @@ package typestate.impl.outputstream;
 
 import ideal.debug.IDebugger;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
-import typestate.TypestateAnalysis;
+import typestate.AbstractTypestateAnalysis;
 import typestate.TypestateDomainValue;
 
-public class OutputStreamAnalysis extends TypestateAnalysis {
+public class OutputStreamAnalysis extends AbstractTypestateAnalysis {
 
   public OutputStreamAnalysis(InfoflowCFG icfg) {
     super(new OutputStreamStateMachine(icfg), icfg);

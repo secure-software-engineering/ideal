@@ -1,4 +1,4 @@
-package typestate.impl.urlconn;
+package typestate.impl.statemachines;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,8 +19,6 @@ import typestate.finiteautomata.State;
 
 public class URLConnStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
-	private InfoflowCFG icfg;
-
 	public static enum States implements State {
 		NONE, INIT, CONNECTED, ERROR;
 
@@ -35,8 +33,7 @@ public class URLConnStateMachine extends MatcherStateMachine implements Typestat
 		}
 	}
 
-	URLConnStateMachine(InfoflowCFG icfg) {
-		this.icfg = icfg;
+	public URLConnStateMachine() {
 		addTransition(new MatcherTransition(States.CONNECTED, illegalOpertaion(), Parameter.This, States.ERROR,
 				Type.OnReturn));
 		addTransition(

@@ -1,4 +1,4 @@
-package typestate.impl.keystore;
+package typestate.impl.statemachines;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
 		}
 	}
 
-	KeyStoreStateMachine() {
+	public KeyStoreStateMachine() {
 		// addTransition(new MatcherTransition(States.NONE,
 		// keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn));
 		addTransition(new MatcherTransition(States.INIT, loadMethods(), Parameter.This, States.LOADED, Type.OnReturn));

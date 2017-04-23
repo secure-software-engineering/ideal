@@ -1,4 +1,4 @@
-package typestate.impl.fileanalysis;
+package typestate.impl.statemachines;
 
 import java.util.Collection;
 
@@ -29,7 +29,7 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine{
     }
   }
 
-  FileMustBeClosedStateMachine() {
+  public FileMustBeClosedStateMachine() {
     addTransition(new MatcherTransition(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn));
     addTransition(new MatcherTransition(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn));
     addTransition(new MatcherTransition(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn));

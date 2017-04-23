@@ -1,4 +1,4 @@
-package typestate.impl.vector;
+package typestate.impl.statemachines;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,8 +35,6 @@ import typestate.finiteautomata.Transition;
 
 public class VectorStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
-	private InfoflowCFG icfg;
-
 	public static enum States implements State {
 		INIT, NOT_EMPTY, ACCESSED_EMPTY;
 
@@ -51,8 +49,7 @@ public class VectorStateMachine extends MatcherStateMachine implements Typestate
 		}
 	}
 
-	VectorStateMachine(InfoflowCFG icfg) {
-		this.icfg = icfg;
+	public VectorStateMachine() {
 		addTransition(
 				new MatcherTransition(States.INIT, addElement(), Parameter.This, States.NOT_EMPTY, Type.OnReturn));
 		addTransition(new MatcherTransition(States.INIT, accessElement(), Parameter.This, States.ACCESSED_EMPTY,

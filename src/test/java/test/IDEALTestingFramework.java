@@ -19,6 +19,8 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.preanalysis.PreparationTransformer;
 import ideal.Analysis;
 import ideal.ResultReporter;
+import ideal.debug.IDebugger;
+import ideal.debug.JSONDebugger;
 import soot.ArrayType;
 import soot.Body;
 import soot.G;
@@ -44,8 +46,11 @@ import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
 import test.ExpectedResults.State;
+import typestate.TypestateAnalysisProblem;
+import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
-@SuppressWarnings( "deprecation" )
+
+@SuppressWarnings("deprecation")
 public abstract class IDEALTestingFramework {
 	private IInfoflowCFG icfg;
 	@Rule
@@ -60,16 +65,38 @@ public abstract class IDEALTestingFramework {
 		org.junit.Assume.assumeTrue(false);
 	}
 
-	  private Analysis<TypestateDomainValue> analysis;
-	  protected long analysisTime;
+	private Analysis<TypestateDomainValue> analysis;
+	protected long analysisTime;
 
-	  protected abstract Analysis<TypestateDomainValue> createAnalysis(ResultReporter<TypestateDomainValue> reporter);
+	protected abstract TypestateChangeFunction createTypestateChangeFunction();
 
-	  protected Analysis<TypestateDomainValue> getAnalysis(ResultReporter<TypestateDomainValue> reporter) {
-	    if (analysis == null)
-	      analysis = createAnalysis(reporter);
-	    return analysis;
-	  }
+	protected Analysis<TypestateDomainValue> createAnalysis(final ResultReporter<TypestateDomainValue> reporter) {
+		return new Analysis<TypestateDomainValue>(new TypestateAnalysisProblem() {
+			@Override
+			public ResultReporter<TypestateDomainValue> resultReporter() {
+				return reporter;
+			}
+
+			@Override
+			public IInfoflowCFG icfg() {
+				return icfg;
+			}
+
+			@Override
+			public IDebugger<TypestateDomainValue> debugger() {
+				return IDEALTestingFramework.this.getDebugger();
+			}
+
+			@Override
+			public TypestateChangeFunction createTypestateChangeFunction() {
+				return IDEALTestingFramework.this.createTypestateChangeFunction();
+			}
+		});
+	}
+
+	protected IDebugger<TypestateDomainValue> getDebugger() {
+		return new JSONDebugger<>(new File("visualization/data.js"), icfg);
+	}
 
 	private void analyze(final String methodName) {
 		Transform transform = new Transform("wjtp.ifds", new SceneTransformer() {
@@ -77,32 +104,32 @@ public abstract class IDEALTestingFramework {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
 				Set<ExpectedResults> expectedResults = parseExpectedQueryResults(sootTestMethod);
-		        IDEALTestingFramework.this.getAnalysis(new TestingResultReporter(expectedResults)).run();
-		        List<ExpectedResults> unsound = Lists.newLinkedList();
-		        List<ExpectedResults> imprecise = Lists.newLinkedList();
-		        for(ExpectedResults r : expectedResults){
-		        	if(!r.satisfied){
-		        		unsound.add(r);
-		        	}
-		        }
-		        for(ExpectedResults r : expectedResults){
-		        	if(r.imprecise){
-		        		imprecise.add(r);
-		        	}
-		        }
-		        if(!unsound.isEmpty())
-		        	throw new RuntimeException("Unsound results: " + unsound);
-		        if(!imprecise.isEmpty())
-		        	Assert.fail("Imprecise results: " + imprecise);
+				IDEALTestingFramework.this.createAnalysis(new TestingResultReporter(expectedResults)).run();
+				List<ExpectedResults> unsound = Lists.newLinkedList();
+				List<ExpectedResults> imprecise = Lists.newLinkedList();
+				for (ExpectedResults r : expectedResults) {
+					if (!r.satisfied) {
+						unsound.add(r);
+					}
+				}
+				for (ExpectedResults r : expectedResults) {
+					if (r.imprecise) {
+						imprecise.add(r);
+					}
+				}
+				if (!unsound.isEmpty())
+					throw new RuntimeException("Unsound results: " + unsound);
+				if (!imprecise.isEmpty())
+					Assert.fail("Imprecise results: " + imprecise);
 				try {
-//					compareQuery(expectedResults, TestFramework.this.getAnalysis().getResults());
+					// compareQuery(expectedResults,
+					// TestFramework.this.getAnalysis().getResults());
 				} catch (AssertionError e) {
-//					TestFramework.this.options.removeVizFile();
+					// TestFramework.this.options.removeVizFile();
 					throw e;
 				}
-//				TestFramework.this.options.removeVizFile();
+				// TestFramework.this.options.removeVizFile();
 			}
-
 
 		});
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
@@ -111,10 +138,9 @@ public abstract class IDEALTestingFramework {
 		PackManager.v().getPack("wjtp").apply();
 	}
 
-
 	private Set<ExpectedResults> parseExpectedQueryResults(SootMethod sootTestMethod) {
 		Set<ExpectedResults> results = new HashSet<>();
-		parseExpectedQueryResults(sootTestMethod,results,new HashSet<SootMethod>());
+		parseExpectedQueryResults(sootTestMethod, results, new HashSet<SootMethod>());
 		return results;
 	}
 
@@ -143,16 +169,16 @@ public abstract class IDEALTestingFramework {
 				continue;
 			Local queryVar = (Local) param;
 			AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
-			if(invocationName.startsWith("mayBeIn")){
-				if(invocationName.contains("Error"))
-					queries.add(new MayBe(stmt,val,State.ERROR));
+			if (invocationName.startsWith("mayBeIn")) {
+				if (invocationName.contains("Error"))
+					queries.add(new MayBe(stmt, val, State.ERROR));
 				else
-					queries.add(new MayBe(stmt,val,State.ACCEPTING));
-			} else if(invocationName.startsWith("mustBeIn")){
-				if(invocationName.contains("Error"))
-					queries.add(new MustBe(stmt,val,State.ERROR));
+					queries.add(new MayBe(stmt, val, State.ACCEPTING));
+			} else if (invocationName.startsWith("mustBeIn")) {
+				if (invocationName.contains("Error"))
+					queries.add(new MustBe(stmt, val, State.ERROR));
 				else
-					queries.add(new MustBe(stmt,val,State.ACCEPTING));
+					queries.add(new MustBe(stmt, val, State.ACCEPTING));
 			}
 		}
 	}
@@ -186,15 +212,8 @@ public abstract class IDEALTestingFramework {
 			includeList.add("java.net.*");
 			includeList.add("javax.servlet.*");
 			includeList.add("javax.crypto.*");
+			includeList.add("javax.security.*");
 
-			includeList.add("android.*");
-			includeList.add("org.apache.http.*");
-
-			includeList.add("de.test.*");
-			includeList.add("soot.*");
-			includeList.add("com.example.*");
-			includeList.add("libcore.icu.*");
-			includeList.add("securibench.*");
 			Options.v().set_include(includeList);
 
 		} else {
@@ -303,6 +322,5 @@ public abstract class IDEALTestingFramework {
 	protected boolean staticallyUnknown() {
 		return true;
 	}
-	
-	
+
 }

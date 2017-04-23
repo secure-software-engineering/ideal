@@ -1,4 +1,4 @@
-package typestate.impl.iteratoranalysis;
+package typestate.impl.statemachines;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +27,6 @@ import typestate.finiteautomata.Transition;
 
 public class HasNextStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
-	private InfoflowCFG icfg;
 	private Set<SootMethod> hasNextMethods;
 
 	public static enum States implements State {
@@ -44,8 +43,7 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
 		}
 	}
 
-	HasNextStateMachine(InfoflowCFG cfg) {
-		this.icfg = cfg;
+	public HasNextStateMachine() {
 		addTransition(new MatcherTransition(States.NONE, retrieveIteratorConstructors(), Parameter.This, States.INIT,
 				Type.None));
 		addTransition(
@@ -117,10 +115,10 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
 	@Override
 	public Set<Transition> getReturnTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod calleeMethod,
 			Unit exitStmt, AccessGraph exitNode, Unit returnSite, AccessGraph retNode) {
-		if (retrieveHasNextMethods().contains(calleeMethod)) {
-			if (icfg.getMethodOf(callSite).getSignature().contains("java.lang.Object next()"))
-				return Collections.emptySet();
-		}
+//		if (retrieveHasNextMethods().contains(calleeMethod)) {
+//			if (icfg.getMethodOf(callSite).getSignature().contains("java.lang.Object next()"))
+//				return Collections.emptySet();
+//		}
 
 		return super.getReturnTransitionsFor(callerD1, callSite, calleeMethod, exitStmt, exitNode, returnSite, retNode);
 	}

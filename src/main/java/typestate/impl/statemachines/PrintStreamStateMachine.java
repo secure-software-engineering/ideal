@@ -1,8 +1,9 @@
-package typestate.impl.printwriter;
+package typestate.impl.statemachines;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -10,10 +11,14 @@ import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.Pair;
 import ideal.Analysis;
+import soot.Local;
+import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.ReturnVoidStmt;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
+import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
@@ -21,10 +26,10 @@ import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 import typestate.finiteautomata.State;
+import typestate.finiteautomata.Transition;
 
-public class PrintWriterStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
+public class PrintStreamStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
-	private InfoflowCFG icfg;
 
 	public static enum States implements State {
 		NONE, CLOSED, ERROR;
@@ -40,22 +45,18 @@ public class PrintWriterStateMachine extends MatcherStateMachine implements Type
 		}
 	}
 
-	PrintWriterStateMachine(InfoflowCFG icfg) {
-		this.icfg = icfg;
-		addTransition(new MatcherTransition(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+	public PrintStreamStateMachine() {
 		addTransition(
 				new MatcherTransition(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(new MatcherTransition(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition(States.ERROR, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-
 	}
 
 	private Set<SootMethod> closeMethods() {
-		return selectMethodByName(getSubclassesOf("java.io.PrintWriter"), "close");
+		return selectMethodByName(getSubclassesOf("java.io.PrintStream"), "close");
 	}
 
 	private Set<SootMethod> readMethods() {
-		List<SootClass> subclasses = getSubclassesOf("java.io.PrintWriter");
+		List<SootClass> subclasses = getSubclassesOf("java.io.PrintStream");
 		Set<SootMethod> closeMethods = closeMethods();
 		Set<SootMethod> out = new HashSet<>();
 		for (SootClass c : subclasses) {
@@ -67,14 +68,12 @@ public class PrintWriterStateMachine extends MatcherStateMachine implements Type
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
-			Collection<SootMethod> calledMethod) {
-		return generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
+	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit, Collection<SootMethod> calledMethod) {
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
 	}
 
 	@Override
 	public TypestateDomainValue getBottomElement() {
 		return new TypestateDomainValue(States.CLOSED);
 	}
-
 }

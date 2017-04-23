@@ -1,25 +1,14 @@
-package typestate.impl.socket;
+package typestate.impl.statemachines;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import heros.EdgeFunction;
-import heros.solver.Pair;
-import ideal.Analysis;
-import soot.Local;
-import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.InstanceInvokeExpr;
-import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
-import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
@@ -27,7 +16,6 @@ import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 import typestate.finiteautomata.State;
-import typestate.finiteautomata.Transition;
 
 public class SocketStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
 
@@ -45,7 +33,7 @@ public class SocketStateMachine extends MatcherStateMachine implements Typestate
 		}
 	}
 
-	SocketStateMachine(InfoflowCFG icfg) {
+	public SocketStateMachine() {
 		addTransition(
 				new MatcherTransition(States.NONE, socketConstructor(), Parameter.This, States.INIT, Type.OnReturn));
 		addTransition(new MatcherTransition(States.INIT, connect(), Parameter.This, States.CONNECTED, Type.OnReturn));

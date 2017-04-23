@@ -9,12 +9,12 @@ import java.util.LinkedList;
 
 import org.junit.Test;
 
-import ideal.Analysis;
-import ideal.ResultReporter;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
+import ideal.debug.IDebugger;
+import ideal.debug.NullDebugger;
 import test.IDEALTestingFramework;
+import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
-import typestate.impl.socket.SocketAnalysis;
+import typestate.impl.statemachines.SocketStateMachine;
 
 public class SocketTest extends IDEALTestingFramework {
 
@@ -70,8 +70,12 @@ public class SocketTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected Analysis<TypestateDomainValue> createAnalysis(ResultReporter<TypestateDomainValue> reporter) {
-		return new SocketAnalysis(new InfoflowCFG(), reporter);
+	protected TypestateChangeFunction createTypestateChangeFunction() {
+		return new SocketStateMachine();
 	}
 
+	@Override
+	protected IDebugger<TypestateDomainValue> getDebugger() {
+		return new NullDebugger<>();
+	}
 }

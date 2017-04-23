@@ -8,12 +8,9 @@ import java.security.cert.CertificateException;
 
 import org.junit.Test;
 
-import ideal.Analysis;
-import ideal.ResultReporter;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import test.IDEALTestingFramework;
-import typestate.TypestateDomainValue;
-import typestate.impl.keystore.KeyStoreAnalysis;
+import typestate.TypestateChangeFunction;
+import typestate.impl.statemachines.KeyStoreStateMachine;
 
 public class KeystoreTest extends IDEALTestingFramework {
 
@@ -41,7 +38,7 @@ public class KeystoreTest extends IDEALTestingFramework {
 	}
 
 	@Test
-	public void test3() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException  {
+	public void test3() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 
 		java.io.FileInputStream fis = null;
@@ -58,8 +55,7 @@ public class KeystoreTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected Analysis<TypestateDomainValue> createAnalysis(ResultReporter<TypestateDomainValue> reporter) {
-		return new KeyStoreAnalysis(new InfoflowCFG(), reporter);
+	protected TypestateChangeFunction createTypestateChangeFunction() {
+		return new KeyStoreStateMachine();
 	}
-
 }

@@ -76,7 +76,6 @@ public class TypestateEdgeFunctions implements AnalysisEdgeFunctions<TypestateDo
 			return left;
 		Set<State> transitions = left.getStates();
 		transitions.addAll(right.getStates());
-//		System.out.println("Join " + left + "  " + right + "    " + new TypestateDomainValue(transitions));
 		return new TypestateDomainValue(transitions);
 	}
 }
