@@ -22,6 +22,7 @@ import ideal.debug.IDebugger;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
+import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateAnalysisProblem;
 import typestate.TypestateChangeFunction;
@@ -71,10 +72,10 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 		return contains;
 	}
 
-	protected Analysis<TypestateDomainValue> createAnalysis() {
-		return new Analysis<TypestateDomainValue>(new TypestateAnalysisProblem() {
+	protected Analysis<TypestateDomainValue<ConcreteState>> createAnalysis() {
+		return new Analysis<TypestateDomainValue<ConcreteState>>(new TypestateAnalysisProblem<ConcreteState>() {
 			@Override
-			public ResultReporter<TypestateDomainValue> resultReporter() {
+			public ResultReporter<TypestateDomainValue<ConcreteState>> resultReporter() {
 				return SlowMethodDetector.this.testingResultReporter;
 			}
 
@@ -84,12 +85,12 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 			}
 
 			@Override
-			public IDebugger<TypestateDomainValue> debugger() {
+			public IDebugger<TypestateDomainValue<ConcreteState>> debugger() {
 				return SlowMethodDetector.this.getDebugger();
 			}
 
 			@Override
-			public TypestateChangeFunction createTypestateChangeFunction() {
+			public TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 				return SlowMethodDetector.this.createTypestateChangeFunction();
 			}
 
