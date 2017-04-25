@@ -1,76 +1,38 @@
 package test;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
-
 import com.google.common.collect.Lists;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.preanalysis.PreparationTransformer;
 import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
-import soot.ArrayType;
 import soot.Body;
-import soot.G;
 import soot.Local;
-import soot.Modifier;
-import soot.PackManager;
-import soot.RefType;
-import soot.Scene;
 import soot.SceneTransformer;
-import soot.SootClass;
 import soot.SootMethod;
-import soot.Transform;
-import soot.Type;
 import soot.Unit;
 import soot.Value;
-import soot.VoidType;
 import soot.jimple.InvokeExpr;
-import soot.jimple.Jimple;
-import soot.jimple.JimpleBody;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
-import soot.options.Options;
 import test.ExpectedResults.State;
+import test.core.selfrunning.AbstractTestingFramework;
+import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateAnalysisProblem;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 
-@SuppressWarnings("deprecation")
-public abstract class IDEALTestingFramework {
-	@Rule
-	public TestName name = new TestName();
-	protected SootMethod sootTestMethod;
+public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 	protected IInfoflowCFG icfg;
-	
-	@Before
-	public void performQuery() {
-		initializeSootWithEntryPoint(name.getMethodName());
-		analyze(name.getMethodName());
-		// To never execute the @Test method...
-		org.junit.Assume.assumeTrue(false);
-	}
-
 	protected long analysisTime;
-	private File vizFile;
 	private IDEVizDebugger<TypestateDomainValue> debugger;
 	protected TestingResultReporter testingResultReporter;
 
@@ -102,13 +64,13 @@ public abstract class IDEALTestingFramework {
 
 	protected IDebugger<TypestateDomainValue> getDebugger() {
 		if(debugger == null)
-			debugger = new IDEVizDebugger<>(getOrCreateVizFile(), icfg);
+			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
 		return debugger;
 	}
 
-	private void analyze(final String methodName) {
-		Transform transform = new Transform("wjtp.ifds", new SceneTransformer() {
-
+	@Override
+	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
+		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
 				Set<ExpectedResults> expectedResults = parseExpectedQueryResults(sootTestMethod);
@@ -131,48 +93,14 @@ public abstract class IDEALTestingFramework {
 					throw new RuntimeException("Unsound results: " + unsound);
 				IDEALTestingFramework.this.removeVizFile();
 				if (!imprecise.isEmpty()) {
-					Assert.fail("Imprecise results: " + imprecise);
+					throw new ImprecisionException("Imprecise results: " + imprecise);
 				}
 			}
-		});
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
-		PackManager.v().getPack("wjtp").add(transform);
-		PackManager.v().getPack("cg").apply();
-		PackManager.v().getPack("wjtp").apply();
+		};
 	}
 
 	protected void executeAnalysis() {
 		IDEALTestingFramework.this.createAnalysis().run();
-	}
-
-	private File getOrCreateVizFile() {
-		vizFile = new File("target/IDEViz/" + this.getClass().getName() + "/IDEViz-" + name.getMethodName() + ".json");
-		if (!vizFile.getParentFile().exists()) {
-			try {
-				Files.createDirectories(vizFile.getParentFile().toPath());
-			} catch (IOException e) {
-				throw new RuntimeException("Was not able to create directories for IDEViz output!");
-			}
-		}
-		return vizFile;
-	}
-
-	public void removeVizFile() {
-		File parentFile = getOrCreateVizFile().getParentFile();
-		if (vizFile.exists())
-			vizFile.delete();
-		try {
-			if (isDirEmpty(parentFile.toPath()))
-				parentFile.delete();
-		} catch (IOException e) {
-			throw new RuntimeException("Was not able to delete directories for IDEViz output!");
-		}
-	}
-
-	private static boolean isDirEmpty(final Path directory) throws IOException {
-		try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory)) {
-			return !dirStream.iterator().hasNext();
-		}
 	}
 
 	private Set<ExpectedResults> parseExpectedQueryResults(SootMethod sootTestMethod) {
@@ -218,110 +146,6 @@ public abstract class IDEALTestingFramework {
 					queries.add(new MustBe(stmt, val, State.ACCEPTING));
 			}
 		}
-	}
-
-	@SuppressWarnings("static-access")
-	private void initializeSootWithEntryPoint(String methodName) {
-		G.v().reset();
-		Options.v().set_whole_program(true);
-		Options.v().setPhaseOption("jb", "use-original-names:true");
-		Options.v().setPhaseOption("cg.spark", "on");
-		Options.v().setPhaseOption("cg.spark", "verbose:true");
-		Options.v().set_output_format(Options.output_format_none);
-		String userdir = System.getProperty("user.dir");
-		String sootCp = userdir + "/target/test-classes";
-		if (includeJDK()) {
-			String javaHome = System.getProperty("java.home");
-			if (javaHome == null || javaHome.equals(""))
-				throw new RuntimeException("Could not get property java.home!");
-			sootCp += File.pathSeparator + javaHome + "/lib/rt.jar";
-			sootCp += File.pathSeparator + javaHome + "/lib/jce.jar";
-			System.out.println(sootCp);
-			Options.v().setPhaseOption("cg", "trim-clinit:false");
-			Options.v().set_no_bodies_for_excluded(true);
-			Options.v().set_allow_phantom_refs(true);
-
-			List<String> includeList = new LinkedList<String>();
-			includeList.add("java.lang.*");
-			includeList.add("java.util.*");
-			includeList.add("java.io.*");
-			includeList.add("sun.misc.*");
-			includeList.add("java.net.*");
-			includeList.add("javax.servlet.*");
-			includeList.add("javax.crypto.*");
-			includeList.add("javax.security.*");
-
-			Options.v().set_include(includeList);
-
-		} else {
-			Options.v().set_no_bodies_for_excluded(true);
-			Options.v().set_allow_phantom_refs(true);
-			// Options.v().setPhaseOption("cg", "all-reachable:true");
-		}
-
-		Options.v().set_exclude(excludedPackages());
-		Options.v().set_soot_classpath(sootCp);
-		// Options.v().set_main_class(this.getTargetClass());
-		SootClass sootTestCaseClass = Scene.v().forceResolve(getTestCaseClassName(), SootClass.BODIES);
-
-		for (SootMethod m : sootTestCaseClass.getMethods()) {
-			if (m.getName().equals(methodName))
-				sootTestMethod = m;
-		}
-		if (sootTestMethod == null)
-			throw new RuntimeException("The method with name " + methodName + " was not found in the Soot Scene.");
-		Scene.v().addBasicClass(getTargetClass(), SootClass.BODIES);
-		Scene.v().loadNecessaryClasses();
-		SootClass c = Scene.v().forceResolve(getTargetClass(), SootClass.BODIES);
-		if (c != null) {
-			c.setApplicationClass();
-		}
-
-		SootMethod methodByName = c.getMethodByName("main");
-		List<SootMethod> ePoints = new LinkedList<>();
-		ePoints.add(methodByName);
-		Scene.v().setEntryPoints(ePoints);
-	}
-
-	private String getTargetClass() {
-		SootClass sootClass = new SootClass("dummyClass");
-		SootMethod mainMethod = new SootMethod("main",
-				Arrays.asList(new Type[] { ArrayType.v(RefType.v("java.lang.String"), 1) }), VoidType.v(),
-				Modifier.PUBLIC | Modifier.STATIC);
-		sootClass.addMethod(mainMethod);
-		JimpleBody body = Jimple.v().newBody(mainMethod);
-		mainMethod.setActiveBody(body);
-		RefType testCaseType = RefType.v(getTestCaseClassName());
-		System.out.println(getTestCaseClassName());
-		Local allocatedTestObj = Jimple.v().newLocal("dummyObj", testCaseType);
-		body.getLocals().add(allocatedTestObj);
-		body.getUnits().add(Jimple.v().newAssignStmt(allocatedTestObj, Jimple.v().newNewExpr(testCaseType)));
-		body.getUnits().add(
-				Jimple.v().newInvokeStmt(Jimple.v().newVirtualInvokeExpr(allocatedTestObj, sootTestMethod.makeRef())));
-		Scene.v().addClass(sootClass);
-		return sootClass.toString();
-	}
-
-	private String getTestCaseClassName() {
-		return this.getClass().getName().replace("class ", "");
-	}
-
-	protected boolean includeJDK() {
-		return true;
-	}
-
-	public List<String> excludedPackages() {
-		List<String> excludedPackages = new LinkedList<>();
-		excludedPackages.add("java.*");
-		excludedPackages.add("sun.*");
-		excludedPackages.add("javax.*");
-		excludedPackages.add("com.sun.*");
-		excludedPackages.add("com.ibm.*");
-		excludedPackages.add("org.xml.*");
-		excludedPackages.add("org.w3c.*");
-		excludedPackages.add("apple.awt.*");
-		excludedPackages.add("com.apple.*");
-		return excludedPackages;
 	}
 
 	/**

@@ -40,6 +40,13 @@
 			<version>0.9</version>
 		</dependency>
 		<dependency>
+		  <groupId>de.fraunhofer.iem</groupId>
+		  <artifactId>boomerang</artifactId>
+		  <version>0.9</version>
+		  <type>test-jar</type>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>IDEViz</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
