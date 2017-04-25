@@ -15,21 +15,20 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.AssignStmt;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
+import test.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
 
-public class HasNextStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
+public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  implements TypestateChangeFunction<ConcreteState> {
 
 	private Set<SootMethod> hasNextMethods;
 
-	public static enum States implements State {
+	public static enum States implements ConcreteState {
 		NONE, INIT, HASNEXT, ERROR;
 
 		@Override
@@ -37,26 +36,22 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
 			return this == ERROR;
 		}
 
-		@Override
-		public boolean isInitialState() {
-			return this == INIT;
-		}
 	}
 
 	public HasNextStateMachine() {
-		addTransition(new MatcherTransition(States.NONE, retrieveIteratorConstructors(), Parameter.This, States.INIT,
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, retrieveIteratorConstructors(), Parameter.This, States.INIT,
 				Type.None));
 		addTransition(
-				new MatcherTransition(States.INIT, retrieveNextMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition(States.ERROR, retrieveNextMethods(), Parameter.This, States.ERROR,
+				new MatcherTransition<ConcreteState>(States.INIT, retrieveNextMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, retrieveNextMethods(), Parameter.This, States.ERROR,
 				Type.OnReturn));
-		addTransition(new MatcherTransition(States.HASNEXT, retrieveNextMethods(), Parameter.This, States.INIT,
+		addTransition(new MatcherTransition<ConcreteState>(States.HASNEXT, retrieveNextMethods(), Parameter.This, States.INIT,
 				Type.OnReturn));
-		addTransition(new MatcherTransition(States.INIT, retrieveHasNextMethods(), Parameter.This, States.HASNEXT,
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, retrieveHasNextMethods(), Parameter.This, States.HASNEXT,
 				Type.OnReturn));
-		addTransition(new MatcherTransition(States.HASNEXT, retrieveHasNextMethods(), Parameter.This, States.HASNEXT,
+		addTransition(new MatcherTransition<ConcreteState>(States.HASNEXT, retrieveHasNextMethods(), Parameter.This, States.HASNEXT,
 				Type.OnReturn));
-		addTransition(new MatcherTransition(States.ERROR, retrieveHasNextMethods(), Parameter.This, States.ERROR,
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, retrieveHasNextMethods(), Parameter.This, States.ERROR,
 				Type.OnReturn));
 	}
 
@@ -113,7 +108,7 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
 	}
 
 	@Override
-	public Set<Transition> getReturnTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod calleeMethod,
+	public Set<Transition<ConcreteState>> getReturnTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod calleeMethod,
 			Unit exitStmt, AccessGraph exitNode, Unit returnSite, AccessGraph retNode) {
 //		if (retrieveHasNextMethods().contains(calleeMethod)) {
 //			if (icfg.getMethodOf(callSite).getSignature().contains("java.lang.Object next()"))
@@ -124,7 +119,7 @@ public class HasNextStateMachine extends MatcherStateMachine implements Typestat
 	}
 
 	@Override
-	public TypestateDomainValue getBottomElement() {
-		return new TypestateDomainValue(States.INIT);
+	public TypestateDomainValue<ConcreteState> getBottomElement() {
+		return new TypestateDomainValue<ConcreteState>(States.INIT);
 	}
 }

@@ -9,8 +9,9 @@ import soot.Scene;
 import soot.SootMethod;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
+import test.ConcreteState;
 
-public class MatcherTransition extends Transition {
+public class MatcherTransition<State> extends Transition<State> {
 	private Set<SootMethod> matchingMethods = new HashSet<>();
 	private Type type;
 	private Parameter param;

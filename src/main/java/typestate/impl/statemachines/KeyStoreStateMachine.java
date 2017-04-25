@@ -3,33 +3,26 @@ package typestate.impl.statemachines;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import heros.EdgeFunction;
-import heros.solver.Pair;
-import ideal.Analysis;
 import soot.Local;
-import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.AssignStmt;
-import typestate.TransitionFunction;
+import test.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
-import typestate.finiteautomata.Transition;
 
-public class KeyStoreStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
+public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
-	public static enum States implements State {
+	public static enum States implements ConcreteState {
 		NONE, INIT, LOADED, ERROR;
 
 		@Override
@@ -37,20 +30,16 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
 			return this == ERROR;
 		}
 
-		@Override
-		public boolean isInitialState() {
-			return this == INIT;
-		}
 	}
 
 	public KeyStoreStateMachine() {
 		// addTransition(new MatcherTransition(States.NONE,
 		// keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn));
-		addTransition(new MatcherTransition(States.INIT, loadMethods(), Parameter.This, States.LOADED, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, loadMethods(), Parameter.This, States.LOADED, Type.OnReturn));
 
-		addTransition(new MatcherTransition(States.INIT, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
 				Type.OnReturn));
-		addTransition(new MatcherTransition(States.ERROR, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
 				Type.OnReturn));
 
 	}
@@ -98,8 +87,8 @@ public class KeyStoreStateMachine extends MatcherStateMachine implements Typesta
 	}
 
 	@Override
-	public TypestateDomainValue getBottomElement() {
-		return new TypestateDomainValue(States.INIT);
+	public TypestateDomainValue<ConcreteState> getBottomElement() {
+		return new TypestateDomainValue<ConcreteState>(States.INIT);
 	}
 
 }

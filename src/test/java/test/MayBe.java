@@ -4,20 +4,20 @@ import boomerang.accessgraph.AccessGraph;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 
-public class MayBe extends ExpectedResults {
+public class MayBe extends ExpectedResults<ConcreteState> {
 
-	MayBe(Unit unit, AccessGraph accessGraph, State state) {
+	MayBe(Unit unit, AccessGraph accessGraph, InternalState state) {
 		super(unit, accessGraph, state);
 	}
 	public String toString(){
 		return "Maybe " + super.toString();
 	}
 	@Override
-	public void computedResults(TypestateDomainValue results) {
-		for(typestate.finiteautomata.State s : results.getStates()){
-			if(state == State.ACCEPTING){
+	public void computedResults(TypestateDomainValue<ConcreteState> results) {
+		for(ConcreteState s : results.getStates()){
+			if(state == InternalState.ACCEPTING){
 				satisfied |= !s.isErrorState();
-			} else if(state == State.ERROR){
+			} else if(state == InternalState.ERROR){
 				satisfied |= s.isErrorState();
 			}
 		}

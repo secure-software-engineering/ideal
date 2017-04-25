@@ -1,30 +1,25 @@
 package typestate.impl.statemachines;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import heros.EdgeFunction;
-import heros.solver.Pair;
-import ideal.Analysis;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
+import test.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
 
-public class PrintWriterStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
+public class PrintWriterStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
-	public static enum States implements State {
+	public static enum States implements ConcreteState {
 		NONE, CLOSED, ERROR;
 
 		@Override
@@ -32,18 +27,14 @@ public class PrintWriterStateMachine extends MatcherStateMachine implements Type
 			return this == ERROR;
 		}
 
-		@Override
-		public boolean isInitialState() {
-			return this == CLOSED;
-		}
 	}
 
 	public PrintWriterStateMachine() {
-		addTransition(new MatcherTransition(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(
-				new MatcherTransition(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
-		addTransition(new MatcherTransition(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition(States.ERROR, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 
 	}
 
@@ -70,8 +61,8 @@ public class PrintWriterStateMachine extends MatcherStateMachine implements Type
 	}
 
 	@Override
-	public TypestateDomainValue getBottomElement() {
-		return new TypestateDomainValue(States.CLOSED);
+	public TypestateDomainValue<ConcreteState> getBottomElement() {
+		return new TypestateDomainValue<ConcreteState>(States.CLOSED);
 	}
 
 }

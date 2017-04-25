@@ -5,17 +5,17 @@ import java.util.Collection;
 import boomerang.accessgraph.AccessGraph;
 import soot.SootMethod;
 import soot.Unit;
+import test.ConcreteState;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
 import typestate.test.helper.File;
 
-public class FileMustBeClosedStateMachine extends MatcherStateMachine{
+public class FileMustBeClosedStateMachine extends MatcherStateMachine<ConcreteState>{
 
-  public static enum States implements State {
+  public static enum States implements ConcreteState {
     NONE, INIT, OPENED, CLOSED;
 
     @Override
@@ -23,16 +23,12 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine{
       return this == OPENED;
     }
 
-    @Override
-    public boolean isInitialState() {
-      return this == INIT;
-    }
   }
 
   public FileMustBeClosedStateMachine() {
-    addTransition(new MatcherTransition(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn));
-    addTransition(new MatcherTransition(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn));
-    addTransition(new MatcherTransition(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn));
+    addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn));
+    addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn));
+    addTransition(new MatcherTransition<ConcreteState>(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn));
   }
 
 
@@ -45,8 +41,8 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine{
 
 
 
-public TypestateDomainValue getBottomElement() {
-	return new TypestateDomainValue(States.INIT);
+public TypestateDomainValue<ConcreteState> getBottomElement() {
+	return new TypestateDomainValue<ConcreteState>(States.INIT);
 }
 
 

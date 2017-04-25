@@ -24,35 +24,35 @@ import typestate.TypestateChangeFunction;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 
-public abstract class MatcherStateMachine implements TypestateChangeFunction {
-	public Set<MatcherTransition> transition = new HashSet<>();
+public abstract class MatcherStateMachine<State> implements TypestateChangeFunction<State> {
+	public Set<MatcherTransition<State>> transition = new HashSet<>();
 
-	public void addTransition(MatcherTransition trans) {
+	public void addTransition(MatcherTransition<State> trans) {
 		transition.add(trans);
 	}
 
-	public Set<Transition> getReturnTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod calleeMethod,
+	public Set<Transition<State>> getReturnTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod calleeMethod,
 			Unit exitStmt, AccessGraph exitNode, Unit returnSite, AccessGraph retNode) {
 		return getMatchingTransitions(calleeMethod, exitNode, Type.OnReturn);
 	}
 
-	public Set<Transition> getCallTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod callee,
+	public Set<Transition<State>> getCallTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod callee,
 			AccessGraph srcNode, AccessGraph destNode) {
 		return getMatchingTransitions(callee, destNode, Type.OnCall);
 	}
 
-	public Set<Transition> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2,
+	public Set<Transition<State>> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2,
 			Unit returnSite, AccessGraph d3) {
-		Set<Transition> res = new HashSet<>();
+		Set<Transition<State>> res = new HashSet<>();
 		if(callSite instanceof Stmt){
 			Stmt stmt = (Stmt) callSite;
 			if(stmt.containsInvokeExpr() && stmt.getInvokeExpr() instanceof InstanceInvokeExpr){
 				SootMethod method = stmt.getInvokeExpr().getMethod();
 				InstanceInvokeExpr e = (InstanceInvokeExpr)stmt.getInvokeExpr();
 				if(e.getBase().equals(d2.getBase())){
-					for (MatcherTransition trans : transition) {
+					for (MatcherTransition<State> trans : transition) {
 						if(trans.matches(method) && trans.getType().equals(Type.OnCallToReturn)){
-							res.add(new Transition(trans.from(),trans.to()));
+							res.add(new Transition<State>(trans.from(),trans.to()));
 						}
 					}	
 				}
@@ -61,20 +61,20 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 		return res;
 	}
 
-	private Set<Transition> getMatchingTransitions(SootMethod method, AccessGraph node, Type type) {
-		Set<Transition> res = new HashSet<>();
+	private Set<Transition<State>> getMatchingTransitions(SootMethod method, AccessGraph node, Type type) {
+		Set<Transition<State>> res = new HashSet<>();
 		if (node.getFieldCount() == 0) {
-			for (MatcherTransition trans : transition) {
+			for (MatcherTransition<State> trans : transition) {
 				if (trans.matches(method) && trans.getType().equals(type)) {
 					Parameter param = trans.getParam();
 					if (param.equals(Parameter.This) && BoomerangContext.isThisValue(method, node.getBase()))
-						res.add(new Transition(trans.from(), trans.to()));
+						res.add(new Transition<State>(trans.from(), trans.to()));
 					if (param.equals(Parameter.Param1)
 							&& method.getActiveBody().getParameterLocal(0).equals(node.getBase()))
-						res.add(new Transition(trans.from(), trans.to()));
+						res.add(new Transition<State>(trans.from(), trans.to()));
 					if (param.equals(Parameter.Param2)
 							&& method.getActiveBody().getParameterLocal(1).equals(node.getBase()))
-						res.add(new Transition(trans.from(), trans.to()));
+						res.add(new Transition<State>(trans.from(), trans.to()));
 				}
 			}
 		}
@@ -104,7 +104,7 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 	}
 
 	protected Collection<AccessGraph> generateAtConstructor(Unit unit,
-			Collection<SootMethod> calledMethod, MatcherTransition initialTrans) {
+			Collection<SootMethod> calledMethod, MatcherTransition<State> initialTrans) {
 		boolean matches = false;
 		for (SootMethod method : calledMethod) {
 			if (initialTrans.matches(method)) {
@@ -130,7 +130,7 @@ public abstract class MatcherStateMachine implements TypestateChangeFunction {
 	}
 
 	protected Collection<AccessGraph> generateReturnValueOf(Unit unit,
-			Collection<SootMethod> calledMethod, MatcherTransition initialTrans) {
+			Collection<SootMethod> calledMethod, MatcherTransition<State> initialTrans) {
 		boolean matches = false;
 		for (SootMethod method : calledMethod) {
 			if (initialTrans.matches(method)) {

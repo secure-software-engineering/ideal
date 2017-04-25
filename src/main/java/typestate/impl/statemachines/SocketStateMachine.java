@@ -10,36 +10,30 @@ import boomerang.accessgraph.AccessGraph;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import test.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
 
-public class SocketStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
+public class SocketStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
-	public static enum States implements State {
+	public static enum States implements ConcreteState {
 		NONE, INIT, CONNECTED, ERROR;
 
 		@Override
 		public boolean isErrorState() {
 			return this == ERROR;
 		}
-
-		@Override
-		public boolean isInitialState() {
-			return this == INIT;
-		}
 	}
-
 	public SocketStateMachine() {
 		addTransition(
-				new MatcherTransition(States.NONE, socketConstructor(), Parameter.This, States.INIT, Type.OnReturn));
-		addTransition(new MatcherTransition(States.INIT, connect(), Parameter.This, States.CONNECTED, Type.OnReturn));
-		addTransition(new MatcherTransition(States.INIT, useMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition(States.ERROR, useMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.NONE, socketConstructor(), Parameter.This, States.INIT, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, connect(), Parameter.This, States.CONNECTED, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, useMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, useMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 	}
 
 	private Set<SootMethod> socketConstructor() {
@@ -75,8 +69,8 @@ public class SocketStateMachine extends MatcherStateMachine implements Typestate
 	}
 
 	@Override
-	public TypestateDomainValue getBottomElement() {
-		return new TypestateDomainValue(States.NONE);
+	public TypestateDomainValue<ConcreteState> getBottomElement() {
+		return new TypestateDomainValue<ConcreteState>(States.NONE);
 	}
 
 }

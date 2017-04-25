@@ -23,25 +23,25 @@ import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
-import test.ExpectedResults.State;
+import test.ExpectedResults.InternalState;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateAnalysisProblem;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 
-public abstract class IDEALTestingFramework extends AbstractTestingFramework{
+public abstract class IDEALTestingFramework<State> extends AbstractTestingFramework{
 	protected IInfoflowCFG icfg;
 	protected long analysisTime;
-	private IDEVizDebugger<TypestateDomainValue> debugger;
-	protected TestingResultReporter testingResultReporter;
+	private IDEVizDebugger<TypestateDomainValue<State>> debugger;
+	protected TestingResultReporter<State> testingResultReporter;
 
-	protected abstract TypestateChangeFunction createTypestateChangeFunction();
+	protected abstract TypestateChangeFunction<State> createTypestateChangeFunction();
 
-	protected Analysis<TypestateDomainValue> createAnalysis() {
-		return new Analysis<TypestateDomainValue>(new TypestateAnalysisProblem() {
+	protected Analysis<TypestateDomainValue<State>> createAnalysis() {
+		return new Analysis<TypestateDomainValue<State>>(new TypestateAnalysisProblem<State>() {
 			@Override
-			public ResultReporter<TypestateDomainValue> resultReporter() {
+			public ResultReporter<TypestateDomainValue<State>> resultReporter() {
 				return IDEALTestingFramework.this.testingResultReporter;
 			}
 
@@ -51,18 +51,18 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			}
 
 			@Override
-			public IDebugger<TypestateDomainValue> debugger() {
+			public IDebugger<TypestateDomainValue<State>> debugger() {
 				return IDEALTestingFramework.this.getDebugger();
 			}
 
 			@Override
-			public TypestateChangeFunction createTypestateChangeFunction() {
+			public TypestateChangeFunction<State> createTypestateChangeFunction() {
 				return IDEALTestingFramework.this.createTypestateChangeFunction();
 			}
 		});
 	}
 
-	protected IDebugger<TypestateDomainValue> getDebugger() {
+	protected IDebugger<TypestateDomainValue<State>> getDebugger() {
 		if(debugger == null)
 			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
 		return debugger;
@@ -73,19 +73,19 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
-				Set<ExpectedResults> expectedResults = parseExpectedQueryResults(sootTestMethod);
+				Set<IExpectedResults> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				testingResultReporter = new TestingResultReporter(expectedResults);
 				
 				executeAnalysis();
-				List<ExpectedResults> unsound = Lists.newLinkedList();
-				List<ExpectedResults> imprecise = Lists.newLinkedList();
-				for (ExpectedResults r : expectedResults) {
-					if (!r.satisfied) {
+				List<IExpectedResults> unsound = Lists.newLinkedList();
+				List<IExpectedResults> imprecise = Lists.newLinkedList();
+				for (IExpectedResults r : expectedResults) {
+					if (!r.isSatisfied()) {
 						unsound.add(r);
 					}
 				}
-				for (ExpectedResults r : expectedResults) {
-					if (r.imprecise) {
+				for (IExpectedResults r : expectedResults) {
+					if (r.isImprecise()) {
 						imprecise.add(r);
 					}
 				}
@@ -103,13 +103,13 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 		IDEALTestingFramework.this.createAnalysis().run();
 	}
 
-	private Set<ExpectedResults> parseExpectedQueryResults(SootMethod sootTestMethod) {
-		Set<ExpectedResults> results = new HashSet<>();
+	private Set<IExpectedResults> parseExpectedQueryResults(SootMethod sootTestMethod) {
+		Set<IExpectedResults> results = new HashSet<>();
 		parseExpectedQueryResults(sootTestMethod, results, new HashSet<SootMethod>());
 		return results;
 	}
 
-	private void parseExpectedQueryResults(SootMethod m, Set<ExpectedResults> queries, Set<SootMethod> visited) {
+	private void parseExpectedQueryResults(SootMethod m, Set<IExpectedResults> queries, Set<SootMethod> visited) {
 		if (!m.hasActiveBody() || visited.contains(m))
 			return;
 		visited.add(m);
@@ -136,14 +136,14 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
 			if (invocationName.startsWith("mayBeIn")) {
 				if (invocationName.contains("Error"))
-					queries.add(new MayBe(stmt, val, State.ERROR));
+					queries.add(new MayBe(stmt, val, InternalState.ERROR));
 				else
-					queries.add(new MayBe(stmt, val, State.ACCEPTING));
+					queries.add(new MayBe(stmt, val, InternalState.ACCEPTING));
 			} else if (invocationName.startsWith("mustBeIn")) {
 				if (invocationName.contains("Error"))
-					queries.add(new MustBe(stmt, val, State.ERROR));
+					queries.add(new MustBe(stmt, val, InternalState.ERROR));
 				else
-					queries.add(new MustBe(stmt, val, State.ACCEPTING));
+					queries.add(new MustBe(stmt, val, InternalState.ACCEPTING));
 			}
 		}
 	}

@@ -14,18 +14,18 @@ import ideal.ResultReporter;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 
-public class TestingResultReporter implements ResultReporter<TypestateDomainValue>{
-	private Multimap<Unit, ExpectedResults> stmtToResults = HashMultimap.create();
-	public TestingResultReporter(Set<ExpectedResults> expectedResults) {
-		for(ExpectedResults e : expectedResults){
-			stmtToResults.put(e.unit, e);
+public class TestingResultReporter<State> implements ResultReporter<TypestateDomainValue<State>>{
+	private Multimap<Unit, IExpectedResults<State>> stmtToResults = HashMultimap.create();
+	public TestingResultReporter(Set<IExpectedResults<State>> expectedResults) {
+		for(IExpectedResults<State> e : expectedResults){
+			stmtToResults.put(e.getStmt(), e);
 		}
 	}
 
 	@Override
-	public void onSeedFinished(FactAtStatement seed, AnalysisSolver<TypestateDomainValue> solver) {
-		for(Entry<Unit, ExpectedResults> e : stmtToResults.entries()){
-			TypestateDomainValue resultAt = solver.resultAt(e.getKey(), e.getValue().accessGraph);
+	public void onSeedFinished(FactAtStatement seed, AnalysisSolver<TypestateDomainValue<State>> solver) {
+		for(Entry<Unit, IExpectedResults<State>> e : stmtToResults.entries()){
+			TypestateDomainValue<State> resultAt = solver.resultAt(e.getKey(), e.getValue().getAccessGraph());
 			if(resultAt != null)
 				e.getValue().computedResults(resultAt);
 		}

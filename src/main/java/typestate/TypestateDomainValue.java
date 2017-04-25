@@ -3,9 +3,7 @@ package typestate;
 import java.util.HashSet;
 import java.util.Set;
 
-import typestate.finiteautomata.State;
-
-public class TypestateDomainValue {
+public class TypestateDomainValue<State> {
 
   private final Set<State> states;
 
@@ -50,37 +48,15 @@ public class TypestateDomainValue {
     return new HashSet<>(states);
   }
 
-  public boolean endsInErrorState() {
-    for (State t : states) {
-      if (t.isErrorState())
-        return true;
-    }
-    return false;
-  }
-
   @Override
   public String toString() {
     return states.toString();
   }
-
-  static final TypestateDomainValue BOTTOM = new TypestateDomainValue() {
-    public int hashCode() {
-      return 101001011;
-    };
-
-    public boolean equals(Object obj) {
-      return obj == BOTTOM;
-    };
-
-    public String toString() {
-      return "BOTTOM";
-    };
-  };
-  static final TypestateDomainValue TOP = new TypestateDomainValue() {
-    public int hashCode() {
-      return 101001010;
-    };
-
+  
+  public static <State> TypestateDomainValue<State> top(){
+	  return TOP;
+  }
+  private  static final TypestateDomainValue TOP = new TypestateDomainValue() {
     public boolean equals(Object obj) {
       return obj == TOP;
     };

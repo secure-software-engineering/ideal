@@ -1,6 +1,6 @@
 package typestate.finiteautomata;
 
-public class IdentityTransition implements ITransition {
+public class IdentityTransition<State> implements ITransition<State> {
 
 	public IdentityTransition() {
 	}

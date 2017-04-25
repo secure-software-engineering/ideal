@@ -2,19 +2,18 @@ package test;
 
 import boomerang.accessgraph.AccessGraph;
 import soot.Unit;
-import typestate.TypestateDomainValue;
 
-public abstract class ExpectedResults {
+public abstract class ExpectedResults<State> implements IExpectedResults<State>{
 	final Unit unit;
 	final AccessGraph accessGraph;
-	final State state;
+	final InternalState state;
 	protected boolean satisfied;
 	protected boolean imprecise;
 
-	enum State{
-		ERROR, ACCEPTING
+	enum InternalState{
+		ERROR, ACCEPTING;
 	}
-	ExpectedResults(Unit unit, AccessGraph accessGraph, State state){
+	ExpectedResults(Unit unit, AccessGraph accessGraph, InternalState state){
 		this.unit = unit;
 		this.accessGraph = accessGraph;
 		this.state = state;
@@ -26,8 +25,15 @@ public abstract class ExpectedResults {
 	public boolean isImprecise(){
 		return imprecise;
 	}
-	public abstract void computedResults(TypestateDomainValue results);
-	
+
+	@Override
+	public AccessGraph getAccessGraph() {
+		return accessGraph;
+	}
+	@Override
+	public Unit getStmt() {
+		return unit;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;

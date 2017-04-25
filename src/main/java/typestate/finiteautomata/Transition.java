@@ -1,6 +1,6 @@
 package typestate.finiteautomata;
 
-public class Transition implements ITransition {
+public class Transition<State> implements ITransition<State> {
   private final State from;
   private final State to;
 

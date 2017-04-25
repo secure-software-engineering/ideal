@@ -8,18 +8,17 @@ import boomerang.accessgraph.AccessGraph;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
+import test.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
 
-public class URLConnStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
+public class URLConnStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
-	public static enum States implements State {
+	public static enum States implements ConcreteState {
 		NONE, INIT, CONNECTED, ERROR;
 
 		@Override
@@ -27,17 +26,13 @@ public class URLConnStateMachine extends MatcherStateMachine implements Typestat
 			return this == ERROR;
 		}
 
-		@Override
-		public boolean isInitialState() {
-			return this == INIT;
-		}
 	}
 
 	public URLConnStateMachine() {
-		addTransition(new MatcherTransition(States.CONNECTED, illegalOpertaion(), Parameter.This, States.ERROR,
+		addTransition(new MatcherTransition<ConcreteState>(States.CONNECTED, illegalOpertaion(), Parameter.This, States.ERROR,
 				Type.OnReturn));
 		addTransition(
-				new MatcherTransition(States.ERROR, illegalOpertaion(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.ERROR, illegalOpertaion(), Parameter.This, States.ERROR, Type.OnReturn));
 	}
 
 	private Set<SootMethod> connect() {
@@ -56,7 +51,7 @@ public class URLConnStateMachine extends MatcherStateMachine implements Typestat
 	}
 
 	@Override
-	public TypestateDomainValue getBottomElement() {
-		return new TypestateDomainValue(States.CONNECTED);
+	public TypestateDomainValue<ConcreteState> getBottomElement() {
+		return new TypestateDomainValue<ConcreteState>(States.CONNECTED);
 	}
 }

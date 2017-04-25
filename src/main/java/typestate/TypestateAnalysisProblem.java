@@ -4,26 +4,25 @@ import java.util.Collection;
 
 import boomerang.accessgraph.AccessGraph;
 import ideal.DefaultIDEALAnalysisDefinition;
-import ideal.IDEALAnalysisDefinition;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import soot.SootMethod;
 import soot.Unit;
 
-public abstract class TypestateAnalysisProblem extends DefaultIDEALAnalysisDefinition<TypestateDomainValue> {
-	private TypestateChangeFunction func;
+public abstract class TypestateAnalysisProblem<State> extends DefaultIDEALAnalysisDefinition<TypestateDomainValue<State>> {
+	private TypestateChangeFunction<State> func;
 
 	@Override
-	public AnalysisEdgeFunctions<TypestateDomainValue> edgeFunctions() {
-		return new TypestateEdgeFunctions(getOrCreateTransitionFunctions());
+	public AnalysisEdgeFunctions<TypestateDomainValue<State>> edgeFunctions() {
+		return new TypestateEdgeFunctions<State>(getOrCreateTransitionFunctions());
 	}
 
-	private TypestateChangeFunction getOrCreateTransitionFunctions() {
+	private TypestateChangeFunction<State> getOrCreateTransitionFunctions() {
 		if(func == null)
 			func = createTypestateChangeFunction();
 		return func;
 	}
 
-	public abstract TypestateChangeFunction createTypestateChangeFunction();
+	public abstract TypestateChangeFunction<State> createTypestateChangeFunction();
 
 	@Override
 	public Collection<AccessGraph> generate(SootMethod method, Unit stmt, Collection<SootMethod> optional) {
