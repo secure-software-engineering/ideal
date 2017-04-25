@@ -5,6 +5,7 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
+import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
 import typestate.impl.statemachines.PrintStreamStateMachine;
@@ -20,7 +21,7 @@ public class PrintStreamTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected TypestateChangeFunction createTypestateChangeFunction() {
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 		return new PrintStreamStateMachine();
 	}
 }

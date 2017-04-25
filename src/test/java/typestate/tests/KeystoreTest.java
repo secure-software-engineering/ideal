@@ -8,6 +8,7 @@ import java.security.cert.CertificateException;
 
 import org.junit.Test;
 
+import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
 import typestate.impl.statemachines.KeyStoreStateMachine;
@@ -55,7 +56,7 @@ public class KeystoreTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected TypestateChangeFunction createTypestateChangeFunction() {
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 		return new KeyStoreStateMachine();
 	}
 }

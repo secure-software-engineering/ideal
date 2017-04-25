@@ -2,6 +2,7 @@ package typestate.tests;
 
 import org.junit.Test;
 
+import test.ConcreteState;
 import test.IDEALTestingFramework;
 import test.slowmethod.SlowMethodDetector;
 import typestate.TypestateChangeFunction;
@@ -332,7 +333,7 @@ public class FileMustBeClosedTest extends IDEALTestingFramework{
 	}
 
 	@Override
-	protected TypestateChangeFunction createTypestateChangeFunction() {
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 		return new FileMustBeClosedStateMachine();
 	}
 }

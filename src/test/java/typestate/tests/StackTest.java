@@ -4,6 +4,7 @@ import java.util.Stack;
 
 import org.junit.Test;
 
+import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
 import typestate.impl.statemachines.VectorStateMachine;
@@ -59,7 +60,7 @@ public class StackTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected TypestateChangeFunction createTypestateChangeFunction() {
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 		return new VectorStateMachine();
 	}
 }

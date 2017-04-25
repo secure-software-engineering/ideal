@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
+import test.ConcreteState;
 import test.IDEALTestingFramework;
 import test.slowmethod.SlowMethodDetector;
 import typestate.TypestateChangeFunction;
@@ -43,12 +44,12 @@ public class InputStreamTest extends SlowMethodDetector {
 	}
 
 	@Override
-	protected TypestateChangeFunction createTypestateChangeFunction() {
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 		return new InputStreamStateMachine();
 	}
 	
 	@Override
-	protected IDebugger<TypestateDomainValue> getDebugger() {
-		return new NullDebugger<TypestateDomainValue>();
+	protected IDebugger<TypestateDomainValue<ConcreteState>> getDebugger() {
+		return new NullDebugger<TypestateDomainValue<ConcreteState>>();
 	}
 }

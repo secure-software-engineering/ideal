@@ -30,18 +30,18 @@ import typestate.TypestateAnalysisProblem;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 
-public abstract class IDEALTestingFramework<State> extends AbstractTestingFramework{
+public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 	protected IInfoflowCFG icfg;
 	protected long analysisTime;
-	private IDEVizDebugger<TypestateDomainValue<State>> debugger;
-	protected TestingResultReporter<State> testingResultReporter;
+	private IDEVizDebugger<TypestateDomainValue<ConcreteState>> debugger;
+	protected TestingResultReporter<ConcreteState> testingResultReporter;
 
-	protected abstract TypestateChangeFunction<State> createTypestateChangeFunction();
+	protected abstract TypestateChangeFunction<ConcreteState> createTypestateChangeFunction();
 
-	protected Analysis<TypestateDomainValue<State>> createAnalysis() {
-		return new Analysis<TypestateDomainValue<State>>(new TypestateAnalysisProblem<State>() {
+	protected Analysis<TypestateDomainValue<ConcreteState>> createAnalysis() {
+		return new Analysis<TypestateDomainValue<ConcreteState>>(new TypestateAnalysisProblem<ConcreteState>() {
 			@Override
-			public ResultReporter<TypestateDomainValue<State>> resultReporter() {
+			public ResultReporter<TypestateDomainValue<ConcreteState>> resultReporter() {
 				return IDEALTestingFramework.this.testingResultReporter;
 			}
 
@@ -51,18 +51,18 @@ public abstract class IDEALTestingFramework<State> extends AbstractTestingFramew
 			}
 
 			@Override
-			public IDebugger<TypestateDomainValue<State>> debugger() {
+			public IDebugger<TypestateDomainValue<ConcreteState>> debugger() {
 				return IDEALTestingFramework.this.getDebugger();
 			}
 
 			@Override
-			public TypestateChangeFunction<State> createTypestateChangeFunction() {
+			public TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 				return IDEALTestingFramework.this.createTypestateChangeFunction();
 			}
 		});
 	}
 
-	protected IDebugger<TypestateDomainValue<State>> getDebugger() {
+	protected IDebugger<TypestateDomainValue<ConcreteState>> getDebugger() {
 		if(debugger == null)
 			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
 		return debugger;
@@ -73,18 +73,18 @@ public abstract class IDEALTestingFramework<State> extends AbstractTestingFramew
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
-				Set<IExpectedResults> expectedResults = parseExpectedQueryResults(sootTestMethod);
-				testingResultReporter = new TestingResultReporter(expectedResults);
+				Set<IExpectedResults<ConcreteState>> expectedResults = parseExpectedQueryResults(sootTestMethod);
+				testingResultReporter = new TestingResultReporter<ConcreteState>(expectedResults);
 				
 				executeAnalysis();
-				List<IExpectedResults> unsound = Lists.newLinkedList();
-				List<IExpectedResults> imprecise = Lists.newLinkedList();
-				for (IExpectedResults r : expectedResults) {
+				List<IExpectedResults<ConcreteState>> unsound = Lists.newLinkedList();
+				List<IExpectedResults<ConcreteState>> imprecise = Lists.newLinkedList();
+				for (IExpectedResults<ConcreteState> r : expectedResults) {
 					if (!r.isSatisfied()) {
 						unsound.add(r);
 					}
 				}
-				for (IExpectedResults r : expectedResults) {
+				for (IExpectedResults<ConcreteState> r : expectedResults) {
 					if (r.isImprecise()) {
 						imprecise.add(r);
 					}
@@ -103,13 +103,13 @@ public abstract class IDEALTestingFramework<State> extends AbstractTestingFramew
 		IDEALTestingFramework.this.createAnalysis().run();
 	}
 
-	private Set<IExpectedResults> parseExpectedQueryResults(SootMethod sootTestMethod) {
-		Set<IExpectedResults> results = new HashSet<>();
+	private Set<IExpectedResults<ConcreteState>> parseExpectedQueryResults(SootMethod sootTestMethod) {
+		Set<IExpectedResults<ConcreteState>> results = new HashSet<>();
 		parseExpectedQueryResults(sootTestMethod, results, new HashSet<SootMethod>());
 		return results;
 	}
 
-	private void parseExpectedQueryResults(SootMethod m, Set<IExpectedResults> queries, Set<SootMethod> visited) {
+	private void parseExpectedQueryResults(SootMethod m, Set<IExpectedResults<ConcreteState>> queries, Set<SootMethod> visited) {
 		if (!m.hasActiveBody() || visited.contains(m))
 			return;
 		visited.add(m);

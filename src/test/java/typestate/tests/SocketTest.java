@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
-import test.IDEALTestingFramework;
+import test.ConcreteState;
 import test.slowmethod.SlowMethodDetector;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
@@ -71,12 +71,12 @@ public class SocketTest extends SlowMethodDetector {
 	}
 
 	@Override
-	protected TypestateChangeFunction createTypestateChangeFunction() {
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 		return new SocketStateMachine();
 	}
 
 	@Override
-	protected IDebugger<TypestateDomainValue> getDebugger() {
+	protected IDebugger<TypestateDomainValue<ConcreteState>> getDebugger() {
 		return new NullDebugger<>();
 	}
 }

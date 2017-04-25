@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import org.junit.Test;
 
+import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
 import typestate.impl.statemachines.VectorStateMachine;
@@ -81,7 +82,7 @@ public class VectorTest extends IDEALTestingFramework {
 	}
 	
 	@Override
-	protected TypestateChangeFunction createTypestateChangeFunction() {
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 		return new VectorStateMachine();
 	}
 }
