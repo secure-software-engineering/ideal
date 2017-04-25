@@ -4,14 +4,25 @@ import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import heros.solver.IPropagationController;
 import soot.Unit;
+import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDefinition<V> {
 	@Override
 	public BoomerangOptions boomerangOptions() {
-		BoomerangOptions opts = new BoomerangOptions();
-		opts.setQueryBudget(500);
-		opts.setTrackStaticFields(Analysis.ALIASING_FOR_STATIC_FIELDS);
-		return opts;
+		return new BoomerangOptions(){
+			@Override
+			public long getTimeBudget() {
+				return 500;
+			}
+			@Override
+			public boolean getTrackStaticFields() {
+				return Analysis.ALIASING_FOR_STATIC_FIELDS;
+			}
+			@Override
+			public IInfoflowCFG icfg() {
+				return DefaultIDEALAnalysisDefinition.this.icfg();
+			}
+		};
 	}
 	
 	@Override

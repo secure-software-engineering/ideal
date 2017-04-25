@@ -16,7 +16,6 @@ import heros.InterproceduralCFG;
 import heros.solver.IDESolver;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
-import heros.solver.IDESolver.PathEdgeProcessingTask;
 import soot.SootMethod;
 import soot.Unit;
 

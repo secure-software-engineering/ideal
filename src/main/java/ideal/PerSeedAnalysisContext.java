@@ -294,7 +294,7 @@ public class PerSeedAnalysisContext<V> {
 			return new AliasResults();
 		checkTimeout();
 		if (boomerang == null)
-			boomerang = new AliasFinder(icfg(), analysisDefinition.boomerangOptions());
+			boomerang = new AliasFinder(analysisDefinition.boomerangOptions());
 		if (!boomerangAccessGraph.isStatic()
 				&& Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
 			return new AliasResults();

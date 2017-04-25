@@ -106,7 +106,7 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 
 			@Override
 			public BoomerangOptions boomerangOptions() {
-				BoomerangOptions opts = new BoomerangOptions() {
+				return new BoomerangOptions() {
 					@Override
 					public IPropagationController<Unit, AccessGraph> propagationController() {
 						return new IPropagationController<Unit, AccessGraph>() {
@@ -117,10 +117,20 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 							}
 						};
 					}
+					@Override
+					public IInfoflowCFG icfg() {
+						return SlowMethodDetector.this.icfg;
+					}
+					@Override
+					public long getTimeBudget() {
+						return 500;
+					}
+					@Override
+					public boolean getTrackStaticFields() {
+						return Analysis.ALIASING_FOR_STATIC_FIELDS;
+					}
+					
 				};
-				opts.setQueryBudget(500);
-				opts.setTrackStaticFields(Analysis.ALIASING_FOR_STATIC_FIELDS);
-				return opts;
 			}
 			@Override
 			public String toString() {
