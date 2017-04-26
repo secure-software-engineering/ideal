@@ -129,18 +129,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		return Collections.emptySet();
 	}
 
-	protected Collection<AccessGraph> generateReturnValueOf(Unit unit,
-			Collection<SootMethod> calledMethod, MatcherTransition<State> initialTrans) {
-		boolean matches = false;
-		for (SootMethod method : calledMethod) {
-			if (initialTrans.matches(method)) {
-				matches = true;
-			}
-		}
-		if (!matches)
-			return Collections.emptySet();
-		if (!matches)
-			return Collections.emptySet();
+	protected Collection<AccessGraph> getLeftSideOf(Unit unit) {
 		if (unit instanceof AssignStmt) {
 			Set<AccessGraph> out = new HashSet<>();
 			AssignStmt stmt = (AssignStmt) unit;

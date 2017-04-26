@@ -1,5 +1,6 @@
 package typestate.finiteautomata;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -12,7 +13,7 @@ import soot.util.queue.QueueReader;
 import test.ConcreteState;
 
 public class MatcherTransition<State> extends Transition<State> {
-	private Set<SootMethod> matchingMethods = new HashSet<>();
+	private Collection<SootMethod> matchingMethods = new HashSet<>();
 	private Type type;
 	private Parameter param;
 
@@ -39,7 +40,7 @@ public class MatcherTransition<State> extends Transition<State> {
 		}
 	}
 
-	public MatcherTransition(State from, Set<SootMethod> matchingMethods, Parameter param, State to, Type type) {
+	public MatcherTransition(State from, Collection<SootMethod> matchingMethods, Parameter param, State to, Type type) {
 		super(from, to);
 		this.type = type;
 		this.param = param;

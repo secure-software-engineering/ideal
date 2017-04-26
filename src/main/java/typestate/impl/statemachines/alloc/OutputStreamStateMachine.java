@@ -1,65 +1,44 @@
-package typestate.impl.outputstream.allocsite;
+package typestate.impl.statemachines.alloc;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import heros.EdgeFunction;
-import heros.solver.Pair;
-import ideal.Analysis;
-import soot.Local;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.InstanceInvokeExpr;
-import soot.jimple.ReturnVoidStmt;
-import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
-import typestate.TransitionFunction;
+import test.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
-import typestate.finiteautomata.Transition;
 
-public class OutputStreamStateMachine extends MatcherStateMachine implements TypestateChangeFunction {
+public class OutputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
-	private MatcherTransition initialTrans;
-	private InfoflowCFG icfg;
-
-	public static enum States implements State {
-		NONE, OPEN, CLOSED, ERROR;
+	public static enum States implements ConcreteState {
+		OPEN, CLOSED, ERROR;
 
 		@Override
 		public boolean isErrorState() {
 			return this == ERROR;
 		}
 
-		@Override
-		public boolean isInitialState() {
-			return this == OPEN;
-		}
 	}
 
-	OutputStreamStateMachine(InfoflowCFG icfg) {
-		this.icfg = icfg;
-		initialTrans = new MatcherTransition(States.NONE, constructors(), Parameter.This, States.OPEN, Type.OnReturn);
-		addTransition(initialTrans);
+	OutputStreamStateMachine() {
 		addTransition(
-				new MatcherTransition(States.OPEN, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(
-				new MatcherTransition(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
-		addTransition(new MatcherTransition(States.OPEN, writeMethods(), Parameter.This, States.OPEN, Type.OnReturn));
-		addTransition(new MatcherTransition(States.CLOSED, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition(States.ERROR, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, writeMethods(), Parameter.This, States.OPEN, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 	}
 
 
@@ -95,7 +74,13 @@ public class OutputStreamStateMachine extends MatcherStateMachine implements Typ
 	@Override
 	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
-		return generateThisAtAnyCallSitesOf(unit,calledMethod,constructors(), initialTrans);
+		return generateThisAtAnyCallSitesOf(unit,calledMethod,constructors());
+	}
+
+
+	@Override
+	public TypestateDomainValue<ConcreteState> getBottomElement() {
+		return new TypestateDomainValue<ConcreteState>(States.OPEN);
 	}
 
 
