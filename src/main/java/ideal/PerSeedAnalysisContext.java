@@ -234,7 +234,7 @@ public class PerSeedAnalysisContext<V> {
 	private void phase1(AnalysisSolver<V> solver) {
 		debugger().startPhase1WithSeed(seed, solver);
 		Set<PathEdge<Unit, AccessGraph>> worklist = new HashSet<>();
-		if (icfg().isExitStmt(seed.getStmt()) || icfg().isCallStmt(seed.getStmt())) {
+		if (icfg().isExitStmt(seed.getStmt())) {
 			worklist.add(new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact()));
 		} else {
 			for (Unit u : icfg().getSuccsOf(seed.getStmt())) {
@@ -273,7 +273,7 @@ public class PerSeedAnalysisContext<V> {
 	private void phase2(AnalysisSolver<V> solver) {
 		debugger().startPhase2WithSeed(seed, solver);
 		enableIDEPhase();
-		if (icfg().isExitStmt(seed.getStmt()) || icfg().isCallStmt(seed.getStmt())) {
+		if (icfg().isExitStmt(seed.getStmt())) {
 			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact(), EdgeIdentity.<V>v());
 		} else {
 			for (Unit u : icfg().getSuccsOf(seed.getStmt())) {

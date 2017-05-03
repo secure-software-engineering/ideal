@@ -11,7 +11,6 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import test.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
