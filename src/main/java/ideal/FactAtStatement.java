@@ -2,6 +2,7 @@ package ideal;
 
 import boomerang.accessgraph.AccessGraph;
 import soot.Unit;
+import soot.jimple.Stmt;
 
 public class FactAtStatement {
 
@@ -50,5 +51,10 @@ public class FactAtStatement {
 		} else if (!u.equals(other.u))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return fact + " @ " + u;
 	}
 }

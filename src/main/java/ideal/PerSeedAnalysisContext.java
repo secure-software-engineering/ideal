@@ -286,7 +286,8 @@ public class PerSeedAnalysisContext<V> {
 			map.put(sp, Collections.singleton(InternalAnalysisProblem.ZERO));
 		}
 		solver.computeValues(map);
-		debugger().finishPhase2WithSeed(seed, solver);
+		analysisDefinition.onFinishWithSeed(seed,solver);
+//		debugger().finishPhase2WithSeed(seed, solver);
 	}
 
 	public AliasResults aliasesFor(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {

@@ -70,5 +70,8 @@ public abstract class IDEALAnalysisDefinition<V> {
 		return str;
 	}
 
+	public abstract NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler();
+
+	public abstract void onFinishWithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
 
 }

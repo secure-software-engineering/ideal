@@ -52,7 +52,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 				if(e.getBase().equals(d2.getBase())){
 					for (MatcherTransition<State> trans : transition) {
 						if(trans.matches(method) && trans.getType().equals(Type.OnCallToReturn)){
-							res.add(new Transition<State>(trans.from(),trans.to()));
+							res.add(trans);
 						}
 					}	
 				}

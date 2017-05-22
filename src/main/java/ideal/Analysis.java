@@ -44,16 +44,20 @@ public class Analysis<V> {
 			System.err.println("Analysing " + initialSeeds.size() + " seeds!");
 		debugger.beforeAnalysis();
 		for (FactAtStatement seed : initialSeeds) {
-			new PerSeedAnalysisContext<>(analysisDefinition, seed).run();
+			analysisForSeed(seed);
 		}
 		debugger.afterAnalysis();
 	}
 
+	public void analysisForSeed(FactAtStatement seed){
+		new PerSeedAnalysisContext<>(analysisDefinition, seed).run();
+	}
+	
 	private void printOptions() {
 		System.out.println(analysisDefinition);
 	}
 
-	private Set<FactAtStatement> computeSeeds() {
+	public Set<FactAtStatement> computeSeeds() {
 		Set<FactAtStatement> seeds = new HashSet<>();
 		ReachableMethods rm = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = rm.listener();

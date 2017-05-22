@@ -28,7 +28,8 @@ public class InternalAnalysisProblem<V> implements
   private InterproceduralCFG<Unit, SootMethod> icfg;
   private PerSeedAnalysisContext<V> context;
   private AnalysisEdgeFunctions<V> edgeFunctions;
-private IPropagationController<Unit, AccessGraph> propagationController;
+  private IPropagationController<Unit, AccessGraph> propagationController;
+  private NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler;
   public final static AccessGraph ZERO = new AccessGraph(null, null){
 	  public String toString(){
 		  return "{ZERO}";
@@ -39,6 +40,7 @@ private IPropagationController<Unit, AccessGraph> propagationController;
     this.icfg = analysisDefinition.icfg();
     this.edgeFunctions = analysisDefinition.edgeFunctions();
     this.propagationController = analysisDefinition.propagationController();
+    this.nonIdentityEdgeFlowHandler = analysisDefinition.nonIdentityEdgeFlowHandler();
     this.context = context;
   }
 
@@ -133,16 +135,18 @@ private IPropagationController<Unit, AccessGraph> propagationController;
 	public Flow<Unit,AccessGraph,V> flowWrapper() {
 		return new Flow<Unit,AccessGraph,V>(){
 
+
 			@Override
 			public void nonIdentityCallToReturnFlow( AccessGraph d2,Unit callSite, AccessGraph d3, Unit returnSite,
 					AccessGraph d1, EdgeFunction<V> func) {
-				// TODO Auto-generated method stub
-				
+				//TODO search for aliases and update results.
+				InternalAnalysisProblem.this.nonIdentityEdgeFlowHandler.onCallToReturnFlow(d2,callSite,d3,returnSite,d1,func);
 			}
 
 			@Override
 			public void nonIdentityReturnFlow(Unit exitStmt,AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite,
 					AccessGraph d1, EdgeFunction<V> func) {
+				InternalAnalysisProblem.this.nonIdentityEdgeFlowHandler.onReturnFlow(d2,callSite,d3,returnSite,d1,func);
 				if(!context.isInIDEPhase())
 					context.addPOA(new ReturnEvent<V>(exitStmt,d2, callSite, d3, returnSite, d1, func));
 			}};

@@ -2,6 +2,7 @@ package ideal;
 
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
+import heros.EdgeFunction;
 import heros.solver.IPropagationController;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
@@ -58,5 +59,23 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 			public boolean continuePropagate(AccessGraph d1, Unit n, AccessGraph d2) {
 				return true;
 			}};
+	}
+	
+	@Override
+	public void onFinishWithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
+	}
+	@Override
+	public NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler(){
+		return new NonIdentityEdgeFlowHandler<V>() {
+			@Override
+			public void onCallToReturnFlow(AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite,
+					AccessGraph d1, EdgeFunction<V> func) {
+			}
+
+			@Override
+			public void onReturnFlow(AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite, AccessGraph d1,
+					EdgeFunction<V> func) {
+			}
+		};
 	}
 }
