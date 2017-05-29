@@ -73,18 +73,18 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
-				Set<IExpectedResults<ConcreteState>> expectedResults = parseExpectedQueryResults(sootTestMethod);
-				testingResultReporter = new TestingResultReporter<ConcreteState>(expectedResults);
+				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
+				testingResultReporter = new TestingResultReporter(expectedResults);
 				
 				executeAnalysis();
-				List<IExpectedResults<ConcreteState>> unsound = Lists.newLinkedList();
-				List<IExpectedResults<ConcreteState>> imprecise = Lists.newLinkedList();
-				for (IExpectedResults<ConcreteState> r : expectedResults) {
+				List<Assertion> unsound = Lists.newLinkedList();
+				List<Assertion> imprecise = Lists.newLinkedList();
+				for (Assertion r : expectedResults) {
 					if (!r.isSatisfied()) {
 						unsound.add(r);
 					}
 				}
-				for (IExpectedResults<ConcreteState> r : expectedResults) {
+				for (Assertion r : expectedResults) {
 					if (r.isImprecise()) {
 						imprecise.add(r);
 					}
@@ -103,13 +103,13 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 		IDEALTestingFramework.this.createAnalysis().run();
 	}
 
-	private Set<IExpectedResults<ConcreteState>> parseExpectedQueryResults(SootMethod sootTestMethod) {
-		Set<IExpectedResults<ConcreteState>> results = new HashSet<>();
+	private Set<Assertion> parseExpectedQueryResults(SootMethod sootTestMethod) {
+		Set<Assertion> results = new HashSet<>();
 		parseExpectedQueryResults(sootTestMethod, results, new HashSet<SootMethod>());
 		return results;
 	}
 
-	private void parseExpectedQueryResults(SootMethod m, Set<IExpectedResults<ConcreteState>> queries, Set<SootMethod> visited) {
+	private void parseExpectedQueryResults(SootMethod m, Set<Assertion> queries, Set<SootMethod> visited) {
 		if (!m.hasActiveBody() || visited.contains(m))
 			return;
 		visited.add(m);

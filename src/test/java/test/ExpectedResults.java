@@ -2,8 +2,9 @@ package test;
 
 import boomerang.accessgraph.AccessGraph;
 import soot.Unit;
+import typestate.TypestateDomainValue;
 
-public abstract class ExpectedResults<State> implements IExpectedResults<State>{
+public abstract class ExpectedResults<State> implements Assertion, ComparableResult<State>{
 	final Unit unit;
 	final AccessGraph accessGraph;
 	final InternalState state;
@@ -26,11 +27,9 @@ public abstract class ExpectedResults<State> implements IExpectedResults<State>{
 		return imprecise;
 	}
 
-	@Override
 	public AccessGraph getAccessGraph() {
 		return accessGraph;
 	}
-	@Override
 	public Unit getStmt() {
 		return unit;
 	}
@@ -70,4 +69,5 @@ public abstract class ExpectedResults<State> implements IExpectedResults<State>{
 	public String toString() {
 		return "[" + accessGraph +" @ " + unit + " in state " + state + "]";
 	}
+	
 }
