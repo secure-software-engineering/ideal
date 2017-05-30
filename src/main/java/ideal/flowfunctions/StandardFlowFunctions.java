@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
 import boomerang.AliasFinder;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
@@ -51,13 +53,14 @@ import soot.jimple.Stmt;
  * This class defines the flow function for IDEAL. 
  *
  */
-public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
+public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 		implements FlowFunctions<Unit, AccessGraph, SootMethod> {
-	private PerSeedAnalysisContext<V> context;
-	public ForwardFlowFunctions(PerSeedAnalysisContext<V> context) {
+	private final PerSeedAnalysisContext<V> context;
+	public StandardFlowFunctions(PerSeedAnalysisContext<V> context) {
 		this.context = context;
 	}
 
+	
 	@Override
 	public FlowFunction<AccessGraph> getNormalFlowFunction(final AccessGraph sourceFact, final Unit curr,
 			final Unit succ) {
@@ -499,22 +502,22 @@ public class ForwardFlowFunctions<V> extends AbstractFlowFunctions
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
 				if(context.isStrongUpdate(callStmt, source))
-					return Collections.emptySet();
+					return  Sets.newHashSet();
 				if(hasCallees){
 					for (int i = 0; i < invokeExpr.getArgCount(); i++) {
 						if (source.baseMatches(invokeExpr.getArg(i))) {
-							return Collections.emptySet();
+							return  Sets.newHashSet();
 						}
 					}
 					if (invokeExpr instanceof InstanceInvokeExpr) {
 						InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
 						Value base = iie.getBase();
 						if (source.baseMatches(base)) {
-							return Collections.emptySet();
+							return  Sets.newHashSet();
 						}
 					}
 				}
-				return Collections.singleton(source);
+				return Sets.newHashSet(source);
 			}
 		};
 	}

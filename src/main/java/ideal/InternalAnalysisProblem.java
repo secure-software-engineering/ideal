@@ -17,7 +17,7 @@ import heros.solver.IPropagationController;
 import heros.solver.Scheduler;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.edgefunction.ForwardEdgeFunctions;
-import ideal.flowfunctions.ForwardFlowFunctions;
+import ideal.flowfunctions.StandardFlowFunctions;
 import ideal.pointsofaliasing.ReturnEvent;
 import soot.SootMethod;
 import soot.Unit;
@@ -30,6 +30,7 @@ public class InternalAnalysisProblem<V> implements
   private AnalysisEdgeFunctions<V> edgeFunctions;
   private IPropagationController<Unit, AccessGraph> propagationController;
   private NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler;
+  private StandardFlowFunctions<V> flowFunctions;
   public final static AccessGraph ZERO = new AccessGraph(null, null){
 	  public String toString(){
 		  return "{ZERO}";
@@ -41,6 +42,7 @@ public class InternalAnalysisProblem<V> implements
     this.edgeFunctions = analysisDefinition.edgeFunctions();
     this.propagationController = analysisDefinition.propagationController();
     this.nonIdentityEdgeFlowHandler = analysisDefinition.nonIdentityEdgeFlowHandler();
+    this.flowFunctions = analysisDefinition.flowFunctions(context);
     this.context = context;
   }
 
@@ -66,7 +68,7 @@ public class InternalAnalysisProblem<V> implements
 
   @Override
   public FlowFunctions<Unit, AccessGraph, SootMethod> flowFunctions() {
-    return new ForwardFlowFunctions<V>(context);
+    return flowFunctions;
   }
 
   @Override

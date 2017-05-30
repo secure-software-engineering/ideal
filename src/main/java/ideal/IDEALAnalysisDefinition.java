@@ -8,6 +8,7 @@ import heros.solver.IPropagationController;
 import heros.solver.Scheduler;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
+import ideal.flowfunctions.StandardFlowFunctions;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
@@ -73,5 +74,7 @@ public abstract class IDEALAnalysisDefinition<V> {
 	public abstract NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler();
 
 	public abstract void onFinishWithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
+
+	public abstract StandardFlowFunctions<V> flowFunctions(PerSeedAnalysisContext<V> context);
 
 }

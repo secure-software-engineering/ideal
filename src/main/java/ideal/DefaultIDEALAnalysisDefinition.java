@@ -4,6 +4,7 @@ import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.solver.IPropagationController;
+import ideal.flowfunctions.StandardFlowFunctions;
 import soot.Unit;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
@@ -77,5 +78,10 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 					EdgeFunction<V> func) {
 			}
 		};
+	}
+	
+	@Override
+	public StandardFlowFunctions<V> flowFunctions(PerSeedAnalysisContext<V> context) {
+		return new StandardFlowFunctions<>(context);
 	}
 }
