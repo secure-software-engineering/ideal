@@ -197,7 +197,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 							AccessGraph withNewLocal = source.deriveWithNewLocal(lBase, lBase.getType());
 							WrappedSootField newFirstField = new WrappedSootField(field, source.getBaseType(), curr);
-							if (!Scene.v().getPointsToAnalysis().reachingObjects(lBase).isEmpty() && withNewLocal.canPrepend(newFirstField)) {
+							if (!pointsToSetEmpty(lBase) && withNewLocal.canPrepend(newFirstField)) {
 								AccessGraph newAp = withNewLocal.prependField(newFirstField);
 								out.add(newAp);
 								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as,
@@ -376,7 +376,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 	protected boolean pointsToSetEmpty(Local local) {
-		return Scene.v().getPointsToAnalysis().reachingObjects(local).isEmpty();
+		return Analysis.FLOWS_WITH_NON_EMPTY_PTS_SETS && Scene.v().getPointsToAnalysis().reachingObjects(local).isEmpty();
 	}
 
 	@Override
@@ -431,7 +431,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 								InstanceInvokeExpr iIExpr = (InstanceInvokeExpr) is.getInvokeExpr();
 								Local newBase = (Local) iIExpr.getBase();
-								if(Scene.v().getPointsToAnalysis().reachingObjects((Local) newBase).isEmpty())
+								if(pointsToSetEmpty((Local) newBase))
 									return Collections.emptySet();
 								if (pointsToSetCompatible(newBase, source.getBase()) && typeCompatible(newBase.getType(), source.getBaseType())) {
 									AccessGraph possibleAccessPath = source.deriveWithNewLocal((Local) iIExpr.getBase(),
@@ -480,7 +480,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 	protected boolean pointsToSetCompatible(Local l1, Local l2) {
 		PointsToAnalysis ptAnalysis = Scene.v().getPointsToAnalysis();
-		return ptAnalysis.reachingObjects(l1).hasNonEmptyIntersection(ptAnalysis.reachingObjects(l2));
+		return !Analysis.FLOWS_WITH_NON_EMPTY_PTS_SETS || ptAnalysis.reachingObjects(l1).hasNonEmptyIntersection(ptAnalysis.reachingObjects(l2));
 	}
 
 	@Override
@@ -501,8 +501,9 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 		return new FlowFunction<AccessGraph>() {
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
-				if(context.isStrongUpdate(callStmt, source))
+				if(context.isStrongUpdate(callStmt, source)){
 					return  Sets.newHashSet();
+				}
 				if(hasCallees){
 					for (int i = 0; i < invokeExpr.getArgCount(); i++) {
 						if (source.baseMatches(invokeExpr.getArg(i))) {

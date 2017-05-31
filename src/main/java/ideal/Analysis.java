@@ -6,8 +6,6 @@ import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
-import heros.solver.Pair;
-import heros.solver.PathEdge;
 import ideal.debug.IDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -19,9 +17,11 @@ import soot.util.queue.QueueReader;
 
 public class Analysis<V> {
 
+	public static boolean FLOWS_WITH_NON_EMPTY_PTS_SETS = false;
 	public static boolean ENABLE_STATIC_FIELDS = true;
 	public static boolean ALIASING_FOR_STATIC_FIELDS = false;
 	public static boolean SEED_IN_APPLICATION_CLASS_METHOD = false;
+	public static boolean PRINT_OPTIONS = false;
 
 	private final IDebugger<V> debugger;
 	private final IInfoflowCFG icfg;
@@ -54,7 +54,8 @@ public class Analysis<V> {
 	}
 	
 	private void printOptions() {
-		System.out.println(analysisDefinition);
+		if(PRINT_OPTIONS)
+			System.out.println(analysisDefinition);
 	}
 
 	public Set<FactAtStatement> computeSeeds() {
