@@ -6,12 +6,12 @@ import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
+import boomerang.cfg.IExtendedICFG;
 import ideal.debug.IDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 
@@ -24,7 +24,7 @@ public class Analysis<V> {
 	public static boolean PRINT_OPTIONS = false;
 
 	private final IDebugger<V> debugger;
-	private final IInfoflowCFG icfg;
+	private final IExtendedICFG icfg;
 	protected final IDEALAnalysisDefinition<V> analysisDefinition;
 
 	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {

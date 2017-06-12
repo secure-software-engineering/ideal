@@ -14,6 +14,7 @@ import com.google.common.collect.Multimap;
 
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.IExtendedICFG;
 import boomerang.ifdssolver.IPathEdge;
 import boomerang.ifdssolver.IPropagationController;
 import ideal.Analysis;
@@ -21,7 +22,6 @@ import ideal.ResultReporter;
 import ideal.debug.IDebugger;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateAnalysisProblem;
@@ -80,7 +80,7 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 			}
 
 			@Override
-			public IInfoflowCFG icfg() {
+			public IExtendedICFG icfg() {
 				return SlowMethodDetector.this.icfg;
 			}
 
@@ -119,7 +119,7 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 						};
 					}
 					@Override
-					public IInfoflowCFG icfg() {
+					public IExtendedICFG icfg() {
 						return SlowMethodDetector.this.icfg;
 					}
 					@Override

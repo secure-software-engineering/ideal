@@ -19,6 +19,7 @@ import com.google.common.base.Joiner;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.IExtendedICFG;
 import heros.EdgeFunction;
 import heros.debug.visualization.ExplodedSuperGraph;
 import heros.debug.visualization.IDEToJSON;
@@ -37,15 +38,14 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public class IDEVizDebugger<V> implements IDebugger<V> {
 
-	private IDEToJSON<SootMethod, Unit, AccessGraph, V, IInfoflowCFG> ideToJSON;
-	private IInfoflowCFG icfg;
+	private IDEToJSON<SootMethod, Unit, AccessGraph, V, IExtendedICFG> ideToJSON;
+	private IExtendedICFG icfg;
 
-	public IDEVizDebugger(File file, IInfoflowCFG icfg) {
-		this.ideToJSON = new IDEToJSON<SootMethod, Unit, AccessGraph, V, IInfoflowCFG>(file, icfg){
+	public IDEVizDebugger(File file, IExtendedICFG icfg) {
+		this.ideToJSON = new IDEToJSON<SootMethod, Unit, AccessGraph, V, IExtendedICFG>(file, icfg){
 			@Override
 			public String getShortLabel(Unit u) {
 				return IDEVizDebugger.this.getShortLabel(u);

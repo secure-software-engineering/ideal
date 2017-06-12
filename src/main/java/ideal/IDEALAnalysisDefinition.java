@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.IExtendedICFG;
 import heros.solver.IPropagationController;
 import heros.solver.Scheduler;
 import ideal.debug.IDebugger;
@@ -11,7 +12,6 @@ import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.flowfunctions.StandardFlowFunctions;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public abstract class IDEALAnalysisDefinition<V> {
 
@@ -41,7 +41,7 @@ public abstract class IDEALAnalysisDefinition<V> {
 
 	public abstract ResultReporter<V> resultReporter();
 
-	public abstract IInfoflowCFG icfg();
+	public abstract IExtendedICFG icfg();
 
 	public abstract IDebugger<V> debugger();
 

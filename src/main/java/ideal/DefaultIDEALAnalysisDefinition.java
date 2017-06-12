@@ -2,11 +2,11 @@ package ideal;
 
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.IExtendedICFG;
 import heros.EdgeFunction;
 import heros.solver.IPropagationController;
 import ideal.flowfunctions.StandardFlowFunctions;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDefinition<V> {
 	@Override
@@ -21,7 +21,7 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 				return Analysis.ALIASING_FOR_STATIC_FIELDS;
 			}
 			@Override
-			public IInfoflowCFG icfg() {
+			public IExtendedICFG icfg() {
 				return DefaultIDEALAnalysisDefinition.this.icfg();
 			}
 		};

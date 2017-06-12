@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.ExtendedICFG;
 import heros.EdgeFunction;
 import heros.solver.Pair;
 import ideal.Analysis;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import test.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
@@ -35,7 +35,7 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 		}
 	}
 
-	SignatureStateMachine(InfoflowCFG icfg) {
+	SignatureStateMachine(ExtendedICFG icfg) {
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, constructor(), Parameter.This,
 				States.UNITIALIZED, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, initSign(), Parameter.This,

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.ExtendedICFG;
 import heros.EdgeFunction;
 import heros.solver.Pair;
 import ideal.Analysis;
@@ -19,7 +20,6 @@ import soot.Unit;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.ReturnVoidStmt;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import test.ConcreteState;
 import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;

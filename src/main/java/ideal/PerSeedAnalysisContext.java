@@ -16,6 +16,7 @@ import boomerang.AliasFinder;
 import boomerang.AliasResults;
 import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.IExtendedICFG;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
@@ -30,7 +31,6 @@ import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
 import soot.Scene;
 import soot.Unit;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public class PerSeedAnalysisContext<V> {
 
@@ -137,7 +137,7 @@ public class PerSeedAnalysisContext<V> {
 		}
 	}
 
-	public IInfoflowCFG icfg() {
+	public IExtendedICFG icfg() {
 		return analysisDefinition.icfg();
 	}
 
@@ -219,7 +219,7 @@ public class PerSeedAnalysisContext<V> {
 			phase2(solver);
 			setSolver(solver);
 		} catch (IDEALTimeoutException e) {
-			System.out.println("Timeout of IDEAL");
+			System.out.println("Timeout of IDEAL, Budget:" + analysisDefinition.analysisBudgetInSeconds());
 			debugger().onAnalysisTimeout(seed);
 		}
 		reporter().onSeedFinished(seed, solver);

@@ -8,6 +8,8 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.ExtendedICFG;
+import boomerang.cfg.IExtendedICFG;
 import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDEVizDebugger;
@@ -20,8 +22,6 @@ import soot.Unit;
 import soot.Value;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.ExpectedResults.InternalState;
 import test.core.selfrunning.AbstractTestingFramework;
@@ -31,7 +31,7 @@ import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 
 public abstract class IDEALTestingFramework extends AbstractTestingFramework{
-	protected IInfoflowCFG icfg;
+	protected IExtendedICFG icfg;
 	protected long analysisTime;
 	private IDEVizDebugger<TypestateDomainValue<ConcreteState>> debugger;
 	protected TestingResultReporter<ConcreteState> testingResultReporter;
@@ -46,7 +46,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			}
 
 			@Override
-			public IInfoflowCFG icfg() {
+			public IExtendedICFG icfg() {
 				return icfg;
 			}
 
@@ -72,7 +72,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
+				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				testingResultReporter = new TestingResultReporter(expectedResults);
 				
