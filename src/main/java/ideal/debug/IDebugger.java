@@ -12,6 +12,7 @@ import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;
@@ -21,15 +22,15 @@ public interface IDebugger<V>
 
 	void beforeAnalysis();
 
-	void startWithSeed(FactAtStatement seed);
+	void startWithSeed(IFactAtStatement seed);
 
-	void startPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
+	void startPhase1WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
 
-	void startPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
+	void startPhase2WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
 
-	void finishPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
+	void finishPhase1WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
 
-	void finishPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
+	void finishPhase2WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
 
 	void finishWithSeed(PathEdge<Unit, AccessGraph> seed, boolean timeout, boolean isInErrorState,
 			AnalysisSolver<V> solver);
@@ -51,7 +52,7 @@ public interface IDebugger<V>
 
 	void detectedStrongUpdate(Unit callSite, AccessGraph receivesUpdate);
 
-	void onAnalysisTimeout(FactAtStatement seed);
+	void onAnalysisTimeout(IFactAtStatement seed);
 
 	void solvePOA(PointOfAlias<V> p);
 

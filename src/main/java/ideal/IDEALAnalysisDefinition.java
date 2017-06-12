@@ -73,7 +73,7 @@ public abstract class IDEALAnalysisDefinition<V> {
 
 	public abstract NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler();
 
-	public abstract void onFinishWithSeed(FactAtStatement seed, AnalysisSolver<V> solver);
+	public abstract void onFinishWithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
 
 	public abstract StandardFlowFunctions<V> flowFunctions(PerSeedAnalysisContext<V> context);
 

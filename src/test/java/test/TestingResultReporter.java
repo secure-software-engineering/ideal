@@ -8,6 +8,7 @@ import com.google.common.collect.Multimap;
 
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import soot.Unit;
 import typestate.TypestateDomainValue;
@@ -22,7 +23,7 @@ public class TestingResultReporter<State> implements ResultReporter<TypestateDom
 	}
 
 	@Override
-	public void onSeedFinished(FactAtStatement seed, AnalysisSolver<TypestateDomainValue<State>> solver) {
+	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<State>> solver) {
 		for(Entry<Unit, Assertion> e : stmtToResults.entries()){
 			if(e.getValue() instanceof ComparableResult){
 				ComparableResult expectedResults = (ComparableResult) e.getValue();

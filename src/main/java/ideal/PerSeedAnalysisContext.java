@@ -47,11 +47,11 @@ public class PerSeedAnalysisContext<V> {
 	private AliasFinder boomerang;
 	private IDEALAnalysisDefinition<V> analysisDefinition;
 	private Stopwatch startTime;
-	private FactAtStatement seed;
+	private IFactAtStatement seed;
 	private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
 	private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
 
-	public PerSeedAnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition, FactAtStatement seed) {
+	public PerSeedAnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition, IFactAtStatement seed) {
 		this.seed = seed;
 		this.analysisDefinition = analysisDefinition;
 		this.scheduler = this.analysisDefinition.getScheduler();

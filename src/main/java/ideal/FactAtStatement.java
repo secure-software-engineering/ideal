@@ -4,7 +4,7 @@ import boomerang.accessgraph.AccessGraph;
 import soot.Unit;
 import soot.jimple.Stmt;
 
-public class FactAtStatement {
+public class FactAtStatement implements IFactAtStatement {
 
 	private AccessGraph fact;
 	private Unit u;

@@ -37,19 +37,19 @@ public class Analysis<V> {
 		printOptions();
 		WrappedSootField.TRACK_TYPE = false;
 		WrappedSootField.TRACK_STMT = false;
-		Set<FactAtStatement> initialSeeds = computeSeeds();
+		Set<IFactAtStatement> initialSeeds = computeSeeds();
 		if (initialSeeds.isEmpty())
 			System.err.println("No seeds found!");
 		else
 			System.err.println("Analysing " + initialSeeds.size() + " seeds!");
 		debugger.beforeAnalysis();
-		for (FactAtStatement seed : initialSeeds) {
+		for (IFactAtStatement seed : initialSeeds) {
 			analysisForSeed(seed);
 		}
 		debugger.afterAnalysis();
 	}
 
-	public void analysisForSeed(FactAtStatement seed){
+	public void analysisForSeed(IFactAtStatement seed){
 		new PerSeedAnalysisContext<>(analysisDefinition, seed).run();
 	}
 	
@@ -58,8 +58,8 @@ public class Analysis<V> {
 			System.out.println(analysisDefinition);
 	}
 
-	public Set<FactAtStatement> computeSeeds() {
-		Set<FactAtStatement> seeds = new HashSet<>();
+	public Set<IFactAtStatement> computeSeeds() {
+		Set<IFactAtStatement> seeds = new HashSet<>();
 		ReachableMethods rm = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = rm.listener();
 		while (listener.hasNext()) {
@@ -69,8 +69,8 @@ public class Analysis<V> {
 		return seeds;
 	}
 
-	private Collection<FactAtStatement> computeSeeds(SootMethod method) {
-		Set<FactAtStatement> seeds = new HashSet<>();
+	private Collection<IFactAtStatement> computeSeeds(SootMethod method) {
+		Set<IFactAtStatement> seeds = new HashSet<>();
 		if (!method.hasActiveBody())
 			return seeds;
 		if (SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())

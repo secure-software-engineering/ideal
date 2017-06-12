@@ -28,7 +28,7 @@ import heros.debug.visualization.IDEToJSON.Direction;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
-import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;
@@ -126,26 +126,26 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void startWithSeed(FactAtStatement seed) {
+	public void startWithSeed(IFactAtStatement seed) {
 
 	}
 
 	@Override
-	public void startPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
+	public void startPhase1WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver) {
 
 	}
 
 	@Override
-	public void startPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
+	public void startPhase2WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver) {
 	}
 
 	@Override
-	public void finishPhase1WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
+	public void finishPhase1WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver) {
 
 	}
 
 	@Override
-	public void finishPhase2WithSeed(FactAtStatement seed, AnalysisSolver<V> solver) {
+	public void finishPhase2WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver) {
 
 	}
 
@@ -191,7 +191,7 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void onAnalysisTimeout(FactAtStatement seed) {
+	public void onAnalysisTimeout(IFactAtStatement seed) {
 
 	}
 
