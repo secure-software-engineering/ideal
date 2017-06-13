@@ -77,4 +77,6 @@ public abstract class IDEALAnalysisDefinition<V> {
 
 	public abstract StandardFlowFunctions<V> flowFunctions(PerSeedAnalysisContext<V> context);
 
+	public abstract void onStartWithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
+
 }

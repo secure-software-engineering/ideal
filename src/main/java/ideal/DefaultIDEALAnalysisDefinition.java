@@ -65,6 +65,10 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 	@Override
 	public void onFinishWithSeed(IFactAtStatement seed, AnalysisSolver<V> solver) {
 	}
+
+	@Override
+	public void onStartWithSeed(IFactAtStatement seed, AnalysisSolver<V> solver) {
+	}
 	@Override
 	public NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler(){
 		return new NonIdentityEdgeFlowHandler<V>() {

@@ -210,6 +210,7 @@ public class PerSeedAnalysisContext<V> {
 		startTime = Stopwatch.createStarted();
 		AnalysisSolver<V> solver = new AnalysisSolver<>(analysisDefinition, this);
 		setSolver(solver);
+		analysisDefinition.onStartWithSeed(seed,solver);
 		try {
 //			System.out.println("================== STARTING PHASE 1 ==================");
 			phase1(solver);
