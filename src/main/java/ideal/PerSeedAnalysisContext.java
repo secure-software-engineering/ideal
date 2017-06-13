@@ -222,6 +222,7 @@ public class PerSeedAnalysisContext<V> {
 		} catch (IDEALTimeoutException e) {
 			System.out.println("Timeout of IDEAL, Budget:" + analysisDefinition.analysisBudgetInSeconds());
 			debugger().onAnalysisTimeout(seed);
+			reporter().onSeedTimeout(seed);
 		}
 		reporter().onSeedFinished(seed, solver);
 		destroy();

@@ -34,4 +34,10 @@ public class TestingResultReporter<State> implements ResultReporter<TypestateDom
 		}
 	}
 
+	@Override
+	public void onSeedTimeout(IFactAtStatement seed) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
