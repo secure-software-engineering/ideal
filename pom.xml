@@ -9,8 +9,6 @@
   <modules>
     <module>ideal</module>
     <module>Boomerang</module>
-    <module>Boomerang/soot</module>
-    <module>Boomerang/heros</module>
   </modules>
   <build>
     <plugins>
