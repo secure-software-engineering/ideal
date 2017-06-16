@@ -98,7 +98,7 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 				if (unit instanceof AssignStmt) {
 					Set<AccessGraph> out = new HashSet<>();
 					AssignStmt stmt = (AssignStmt) unit;
-					out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+					out.add(new AccessGraph((Local) stmt.getLeftOp()));
 					return out;
 				}
 			}

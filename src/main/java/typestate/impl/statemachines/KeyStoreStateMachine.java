@@ -78,7 +78,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 			if(stmt.containsInvokeExpr()){
 				if(keyStoreConstructor().contains(stmt.getInvokeExpr().getMethod())){
 					Set<AccessGraph> out = new HashSet<>();
-					out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+					out.add(new AccessGraph((Local) stmt.getLeftOp()));
 					return out;
 				}
 			}

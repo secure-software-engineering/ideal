@@ -133,7 +133,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			if (!(param instanceof Local))
 				continue;
 			Local queryVar = (Local) param;
-			AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+			AccessGraph val = new AccessGraph(queryVar);
 			if (invocationName.startsWith("mayBeIn")) {
 				if (invocationName.contains("Error"))
 					queries.add(new MayBe(stmt, val, InternalState.ERROR));
