@@ -121,7 +121,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 					if (iie.getBase() instanceof Local) {
 						Local l = (Local) iie.getBase();
 						Set<AccessGraph> out = new HashSet<>();
-						out.add(new AccessGraph(l, l.getType()));
+						out.add(new AccessGraph(l));
 						return out;
 					}
 				}
@@ -134,7 +134,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 			Set<AccessGraph> out = new HashSet<>();
 			AssignStmt stmt = (AssignStmt) unit;
 			out.add(
-					new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+					new AccessGraph((Local) stmt.getLeftOp()));
 			return out;
 		}
 		return Collections.emptySet();
@@ -149,7 +149,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 						InstanceInvokeExpr iie = (InstanceInvokeExpr) ((Stmt) unit).getInvokeExpr();
 						Local thisLocal = (Local) iie.getBase();
 						Set<AccessGraph> out = new HashSet<>();
-						out.add(new AccessGraph(thisLocal, thisLocal.getType()));
+						out.add(new AccessGraph(thisLocal));
 						return out;
 						
 					}
@@ -169,7 +169,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 				Value leftOp = assignStmt.getLeftOp();
 				soot.Type type = newExpr.getType();
 				if(Scene.v().getOrMakeFastHierarchy().canStoreType(type, Scene.v().getType(allocationSuperType.getName()))){
-					return Collections.singleton(new AccessGraph((Local)leftOp,leftOp.getType()));
+					return Collections.singleton(new AccessGraph((Local)leftOp));
 				}
 			}
 		}

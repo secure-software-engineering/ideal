@@ -37,7 +37,7 @@ public class InstanceFieldWrite<V> extends AbstractPointOfAlias<V> {
 	}
 
 	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
-		AccessGraph accessGraph = new AccessGraph(base, base.getType());
+		AccessGraph accessGraph = new AccessGraph(base);
 		Collection<AccessGraph> results = tsanalysis.aliasesFor(accessGraph, curr, d1).mayAliasSet();
 		return results;
 	}

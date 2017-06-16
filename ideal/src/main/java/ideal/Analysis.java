@@ -35,7 +35,6 @@ public class Analysis<V> {
 
 	public void run() {
 		printOptions();
-		WrappedSootField.TRACK_TYPE = false;
 		WrappedSootField.TRACK_STMT = false;
 		Set<IFactAtStatement> initialSeeds = computeSeeds();
 		if (initialSeeds.isEmpty())

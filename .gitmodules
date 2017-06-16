@@ -1,0 +1,3 @@
+[submodule "Boomerang"]
+	path = Boomerang
+	url = https://github.com/johspaeth/Boomerang.git

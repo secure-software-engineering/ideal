@@ -31,7 +31,7 @@ public class InternalAnalysisProblem<V> implements
   private IPropagationController<Unit, AccessGraph> propagationController;
   private NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler;
   private StandardFlowFunctions<V> flowFunctions;
-  public final static AccessGraph ZERO = new AccessGraph(null, null){
+  public final static AccessGraph ZERO = new AccessGraph(null){
 	  public String toString(){
 		  return "{ZERO}";
 	  }
