@@ -7,8 +7,10 @@ import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.BoomerangContext;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
@@ -46,7 +48,6 @@ public class AnalysisSolver<V>
 		worklist.add(new PathEdgeProcessingTask(edge));
 		propagationCount++;
 	}
-
 
 	@Override
 	protected void scheduleValueProcessing(ValuePropagationTask vpt) {
@@ -110,5 +111,43 @@ public class AnalysisSolver<V>
 
 	public Set<Cell<AccessGraph, AccessGraph, EdgeFunction<V>>> getPathEdgesAt(Unit statement) {
 		return jumpFn.lookupByTarget(statement);
+	}
+
+	public Multimap<Unit, AccessGraph> getEndPathOfPropagation() {
+		Multimap<Unit,AccessGraph> endPathOfPropagation = HashMultimap.create();
+		for (SootMethod method : getVisitedMethods()) {
+			if (!method.hasActiveBody())
+				continue;
+
+			Collection<Unit> endPointsOf = getEndPointsOf(method);
+
+			for (Unit eP : endPointsOf) {
+				Set<AccessGraph> parameterLocalsAtEndPoint = new HashSet<>();
+				Set<AccessGraph> nonParameterLocalsAtEndPoint = new HashSet<>();
+				for (Cell<AccessGraph, AccessGraph, EdgeFunction<V>> cell : getPathEdgesAt(eP)) {
+					if (!cell.getRowKey().equals(InternalAnalysisProblem.ZERO)) {
+						continue;
+					}
+					if (cell.getColumnKey().isStatic()
+							|| BoomerangContext.isParameterOrThisValue(method, cell.getColumnKey().getBase())) {
+						parameterLocalsAtEndPoint.add(cell.getColumnKey());
+					} else {
+						nonParameterLocalsAtEndPoint.add(cell.getColumnKey());
+					}
+				}
+				if (parameterLocalsAtEndPoint.isEmpty()) {
+					endPathOfPropagation.putAll(eP, nonParameterLocalsAtEndPoint);
+				}
+			}
+		}
+		return endPathOfPropagation;
+	}
+
+	private Collection<Unit> getEndPointsOf(SootMethod method) {
+		Set<Unit> endPoints = Sets.newHashSet();
+		for (Unit u : method.getActiveBody().getUnits())
+			if (icfg.isExitStmt(u))
+				endPoints.add(u);
+		return endPoints;
 	}
 }
