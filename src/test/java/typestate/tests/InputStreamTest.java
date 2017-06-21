@@ -9,14 +9,14 @@ import org.junit.Test;
 
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
-import test.ConcreteState;
 import test.IDEALTestingFramework;
 import test.slowmethod.SlowMethodDetector;
+import typestate.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.impl.statemachines.InputStreamStateMachine;
 
-public class InputStreamTest extends SlowMethodDetector {
+public class InputStreamTest extends IDEALTestingFramework {
 
 	@Test
 	public void test1() throws IOException {

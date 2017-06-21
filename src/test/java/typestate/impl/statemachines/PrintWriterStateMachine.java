@@ -9,7 +9,7 @@ import boomerang.accessgraph.AccessGraph;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import test.ConcreteState;
+import typestate.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
@@ -17,8 +17,7 @@ import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 
-public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
-
+public class PrintWriterStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
 	public static enum States implements ConcreteState {
 		NONE, CLOSED, ERROR;
@@ -30,18 +29,21 @@ public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 
 	}
 
-	public PrintStreamStateMachine() {
+	public PrintWriterStateMachine() {
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+
 	}
 
 	private Set<SootMethod> closeMethods() {
-		return selectMethodByName(getSubclassesOf("java.io.PrintStream"), "close");
+		return selectMethodByName(getSubclassesOf("java.io.PrintWriter"), "close");
 	}
 
 	private Set<SootMethod> readMethods() {
-		List<SootClass> subclasses = getSubclassesOf("java.io.PrintStream");
+		List<SootClass> subclasses = getSubclassesOf("java.io.PrintWriter");
 		Set<SootMethod> closeMethods = closeMethods();
 		Set<SootMethod> out = new HashSet<>();
 		for (SootClass c : subclasses) {
@@ -53,12 +55,14 @@ public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit, Collection<SootMethod> calledMethod) {
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
+	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
+			Collection<SootMethod> calledMethod) {
+		return generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
 	}
 
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.CLOSED);
 	}
+
 }

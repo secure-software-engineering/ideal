@@ -5,7 +5,7 @@ import java.util.Collection;
 import boomerang.accessgraph.AccessGraph;
 import soot.SootMethod;
 import soot.Unit;
-import test.ConcreteState;
+import typestate.ConcreteState;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;

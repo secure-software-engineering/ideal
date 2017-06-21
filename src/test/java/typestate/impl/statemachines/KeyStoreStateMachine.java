@@ -12,7 +12,7 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.AssignStmt;
-import test.ConcreteState;
+import typestate.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
@@ -36,6 +36,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 		// addTransition(new MatcherTransition(States.NONE,
 		// keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, loadMethods(), Parameter.This, States.LOADED, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.LOADED, anyMethodOtherThanLoad(), Parameter.This, States.LOADED, Type.OnReturn));
 
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
 				Type.OnReturn));
@@ -50,8 +51,9 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 		Set<SootMethod> out = new HashSet<>();
 		for (SootClass c : subclasses) {
 			for (SootMethod m : c.getMethods())
-				if (m.isPublic() && !loadMethods.contains(m) && !m.isStatic())
+				if (m.isPublic() && !loadMethods.contains(m) && !m.isStatic()){
 					out.add(m);
+				}
 		}
 		return out;
 	}

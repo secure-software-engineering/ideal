@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import test.ConcreteState;
 import test.IDEALTestingFramework;
+import typestate.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.impl.statemachines.HasNextStateMachine;
 

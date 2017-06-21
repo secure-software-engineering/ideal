@@ -2,6 +2,7 @@ package test;
 
 import boomerang.accessgraph.AccessGraph;
 import soot.Unit;
+import typestate.ConcreteState;
 import typestate.TypestateDomainValue;
 
 public class MustBe extends ExpectedResults<ConcreteState> {

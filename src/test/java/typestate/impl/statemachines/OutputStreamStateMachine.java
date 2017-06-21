@@ -2,24 +2,37 @@ package typestate.impl.statemachines;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.ExtendedICFG;
+import heros.EdgeFunction;
+import heros.solver.Pair;
+import ideal.Analysis;
+import soot.Local;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import test.ConcreteState;
+import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.ReturnVoidStmt;
+import soot.jimple.Stmt;
+import typestate.ConcreteState;
+import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
+import typestate.finiteautomata.State;
+import typestate.finiteautomata.Transition;
 
-public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
+public class OutputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
+
 
 	public static enum States implements ConcreteState {
 		NONE, CLOSED, ERROR;
@@ -31,22 +44,21 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 
 	}
 
-	public InputStreamStateMachine() {
+	OutputStreamStateMachine() {
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>")), Parameter.This, States.ERROR, Type.OnCallToReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>")), Parameter.This, States.ERROR, Type.OnCallToReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
 	}
+
+
 	private Set<SootMethod> closeMethods() {
-		return selectMethodByName(getImplementersOf("java.io.InputStream"), "close");
+		return selectMethodByName(getImplementersOf("java.io.OutputStream"), "close");
 	}
 
-	private Set<SootMethod> readMethods() {
-		return selectMethodByName(getImplementersOf("java.io.InputStream"), "read");
+	private Set<SootMethod> writeMethods() {
+		return selectMethodByName(getImplementersOf("java.io.OutputStream"), "write");
 	}
 
 
@@ -63,10 +75,14 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	@Override
 	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit,
 			Collection<SootMethod> calledMethod) {
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
+		return generateThisAtAnyCallSitesOf(unit,calledMethod,closeMethods());
 	}
+
+
 	@Override
-	public TypestateDomainValue getBottomElement() {
-		return new TypestateDomainValue(States.NONE);
+	public TypestateDomainValue<ConcreteState> getBottomElement() {
+		return new TypestateDomainValue<ConcreteState>(States.CLOSED);
 	}
+
+
 }
