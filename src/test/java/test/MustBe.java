@@ -22,7 +22,6 @@ public class MustBe extends ExpectedResults<ConcreteState> {
 				satisfied |= !s.isErrorState();
 				imprecise = results.getStates().size() > 1;
 			} else if(state == InternalState.ERROR){
-				System.out.println(results);
 				satisfied |= s.isErrorState();
 				imprecise = results.getStates().size() > 1;
 			}
