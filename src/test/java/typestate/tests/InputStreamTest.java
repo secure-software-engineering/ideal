@@ -20,14 +20,6 @@ public class InputStreamTest extends IDEALTestingFramework {
 
 	@Test
 	public void test1() throws IOException {
-		InputStream inputStream = new FileInputStream("");
-		inputStream.close();
-		inputStream.read();
-		mustBeInErrorState(inputStream);
-	}
-
-	@Test
-	public void test2() throws IOException {
 	    InputStream inputStream = new FileInputStream("");
 	    inputStream.close();
 	    inputStream.close();
@@ -36,7 +28,7 @@ public class InputStreamTest extends IDEALTestingFramework {
 	}
 
 	@Test
-	public void test3() throws IOException {
+	public void test2() throws IOException {
 	    InputStream inputStream = new FileInputStream("");
 	    inputStream.read();
 	    inputStream.close();

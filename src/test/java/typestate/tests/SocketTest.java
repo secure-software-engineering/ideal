@@ -44,32 +44,7 @@ public class SocketTest extends IDEALTestingFramework {
 		mustBeInErrorState(socket);
 	}
 
-	@Test
-	public void test4() throws IOException {
-		Collection<Socket> sockets = createSockets();
-	    for (Iterator<Socket> it = sockets.iterator(); it.hasNext();) {
-	      Socket s = (Socket) it.next();
-	      s.connect(null);
-	      talk(s);
-	      mustBeInAcceptingState(s);
-	    }
-	}
 
-	public static Socket createSocket() {
-		return new Socket();
-	}
-
-	public static Collection<Socket> createSockets() {
-		Collection<Socket> result = new LinkedList<>();
-		for (int i = 0; i < 5; i++) {
-			result.add(new Socket());
-		}
-		return result;
-	}
-
-	public static void talk(Socket s) throws IOException {
-		s.getChannel();
-	}
 
 	@Override
 	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
