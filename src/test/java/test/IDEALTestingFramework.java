@@ -26,6 +26,7 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.ExpectedResults.InternalState;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
+import typestate.ConcreteState;
 import typestate.TypestateAnalysisProblem;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;

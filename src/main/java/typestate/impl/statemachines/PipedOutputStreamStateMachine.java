@@ -20,7 +20,7 @@ import soot.Unit;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.ReturnVoidStmt;
 import soot.jimple.Stmt;
-import test.ConcreteState;
+import typestate.ConcreteState;
 import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;

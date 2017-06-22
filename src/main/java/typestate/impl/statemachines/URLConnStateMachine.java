@@ -8,7 +8,7 @@ import boomerang.accessgraph.AccessGraph;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import test.ConcreteState;
+import typestate.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;

@@ -1,11 +1,12 @@
 package typestate.impl.statemachines;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import boomerang.accessgraph.AccessGraph;
 import soot.SootMethod;
 import soot.Unit;
-import test.ConcreteState;
+import typestate.ConcreteState;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
@@ -36,7 +37,12 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine<ConcreteSt
   @Override
   public Collection<AccessGraph> generateSeed(SootMethod method,Unit unit,
       Collection<SootMethod> calledMethod) {
-    return generateAtAllocationSiteOf(unit, File.class);
+    try {
+		return generateAtAllocationSiteOf(unit, Class.forName("typestate.test.helper.File"));
+	} catch (ClassNotFoundException e) {
+		e.printStackTrace();
+	}
+    return Collections.emptySet();
   }
 
 

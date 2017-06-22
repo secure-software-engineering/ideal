@@ -2,6 +2,7 @@ package test;
 
 import boomerang.accessgraph.AccessGraph;
 import soot.Unit;
+import typestate.ConcreteState;
 import typestate.TypestateDomainValue;
 
 public class MustBe extends ExpectedResults<ConcreteState> {
@@ -21,6 +22,7 @@ public class MustBe extends ExpectedResults<ConcreteState> {
 				satisfied |= !s.isErrorState();
 				imprecise = results.getStates().size() > 1;
 			} else if(state == InternalState.ERROR){
+				System.out.println(results);
 				satisfied |= s.isErrorState();
 				imprecise = results.getStates().size() > 1;
 			}
