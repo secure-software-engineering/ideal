@@ -92,7 +92,6 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 				}
 				if (!unsound.isEmpty())
 					throw new RuntimeException("Unsound results: " + unsound);
-				IDEALTestingFramework.this.removeVizFile();
 				if (!imprecise.isEmpty()) {
 					throw new ImprecisionException("Imprecise results: " + imprecise);
 				}

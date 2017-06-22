@@ -63,6 +63,10 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	public void beforeAnalysis() {
 
 	}
+	
+	public void addInformationAtStmt(Unit stmt, Object information){
+		getESG(stmt).addInformationForStatement(stmt, information);
+	}
 
 	@Override
 	public void addSummary(SootMethod methodToSummary, PathEdge<Unit, AccessGraph> summary) {
