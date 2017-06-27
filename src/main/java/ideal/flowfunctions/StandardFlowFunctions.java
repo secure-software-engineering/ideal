@@ -171,7 +171,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					Value op = castExpr.getOp();
 					if (op instanceof Local) {
 						if (!source.isStatic() && source.baseMatches(op)
-								&& typeCompatible(castExpr.getCastType(), source.getBaseType())) {
+								) {
 							Type newType = (Scene.v().getFastHierarchy().canStoreType(castExpr.getCastType(),
 									source.getBaseType()) ? castExpr.getCastType() : source.getBaseType());
 							out.add(source.deriveWithNewLocal((Local) leftOp, newType));

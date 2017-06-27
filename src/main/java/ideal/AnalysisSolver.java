@@ -128,8 +128,7 @@ public class AnalysisSolver<V>
 					if (!cell.getRowKey().equals(InternalAnalysisProblem.ZERO)) {
 						continue;
 					}
-					if (cell.getColumnKey().isStatic()
-							|| BoomerangContext.isParameterOrThisValue(method, cell.getColumnKey().getBase()) || BoomerangContext.isReturnValue(method,cell.getColumnKey().getBase())) {
+					if (BoomerangContext.isParameterOrThisValue(method, cell.getColumnKey().getBase()) || BoomerangContext.isReturnValue(method,cell.getColumnKey().getBase())) {
 						parameterLocalsAtEndPoint.add(cell.getColumnKey());
 					} else {
 						nonParameterLocalsAtEndPoint.add(cell.getColumnKey());
@@ -149,5 +148,22 @@ public class AnalysisSolver<V>
 			if (icfg.isExitStmt(u))
 				endPoints.add(u);
 		return endPoints;
+	}
+	
+	
+	public Multimap<Unit, AccessGraph> getResultsAtStatement() {
+		Multimap<Unit,AccessGraph> results = HashMultimap.create();
+		for (SootMethod method : getVisitedMethods()) {
+			if (!method.hasActiveBody())
+				continue;
+
+
+			for (Unit u : method.getActiveBody().getUnits()) {
+				for (Cell<AccessGraph, AccessGraph, EdgeFunction<V>> cell : getPathEdgesAt(u)) {
+					results.put(u, cell.getColumnKey());
+				}
+			}
+		}
+		return results;
 	}
 }
