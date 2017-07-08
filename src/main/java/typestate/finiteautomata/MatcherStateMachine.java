@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Joiner;
+
 import boomerang.BoomerangContext;
 import boomerang.accessgraph.AccessGraph;
 import soot.Local;
@@ -183,5 +185,10 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 	
 	public abstract Collection<AccessGraph> generateSeed(SootMethod method, Unit stmt,
 			Collection<SootMethod> calledMethods);
+	
+	@Override
+	public String toString() {
+		return Joiner.on("\n").join(transition);
+	}
 }
 	
