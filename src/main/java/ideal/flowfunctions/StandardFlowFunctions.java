@@ -65,6 +65,8 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	@Override
 	public FlowFunction<AccessGraph> getNormalFlowFunction(final AccessGraph sourceFact, final Unit curr,
 			final Unit succ) {
+		if(succ != null)
+			Analysis.VISITED_METHODS.add(context.icfg().getMethodOf(succ));
 		return new FlowFunction<AccessGraph>() {
 
 			@Override
