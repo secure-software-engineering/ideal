@@ -508,6 +508,12 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 				if(context.isStrongUpdate(callStmt, source) && hasCallees){
 					return  Sets.newHashSet();
 				}
+
+				if(callSite instanceof AssignStmt){
+					AssignStmt assignStmt = (AssignStmt) callSite;
+					if(!source.isStatic() && source.baseMatches((Local)assignStmt.getLeftOp()))
+						return Collections.emptySet();
+				}
 				Set<AccessGraph> out = Sets.newHashSet();
 				if(context.isInIDEPhase()){
 					Set<AccessGraph> indirectFlows = new HashSet<>();
