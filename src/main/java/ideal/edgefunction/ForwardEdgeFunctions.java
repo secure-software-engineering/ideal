@@ -52,7 +52,7 @@ public class ForwardEdgeFunctions<V> implements EdgeFunctions<Unit, AccessGraph,
   public EdgeFunction<V> getCallToReturnEdgeFunction(AccessGraph d1,
       Unit callSite, AccessGraph callNode, Unit returnSite, AccessGraph returnSiteNode) {
     // Assign the top function to call-to-return flows where we know about a strong update.
-    if (context.isStrongUpdate(callSite, returnSiteNode)) {
+    if (context.isStrongUpdate(callSite, returnSiteNode) && callNode.equals(returnSiteNode)) {
       return ALL_TOP;
     }
     return edgeFunctions.getCallToReturnEdgeFunction(d1, callSite, callNode, returnSite,

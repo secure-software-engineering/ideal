@@ -90,4 +90,8 @@ public class MatcherTransition<State> extends Transition<State> {
 	public Parameter getParam() {
 		return param;
 	}
+	@Override
+	public String toString() {
+		return super.toString() + " with " + matchingMethods;
+	}
 }

@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.IExtendedICFG;
@@ -22,6 +24,7 @@ public class Analysis<V> {
 	public static boolean ALIASING_FOR_STATIC_FIELDS = false;
 	public static boolean SEED_IN_APPLICATION_CLASS_METHOD = false;
 	public static boolean PRINT_OPTIONS = false;
+	public static Set<SootMethod> VISITED_METHODS = Sets.newHashSet();
 
 	private final IDebugger<V> debugger;
 	private final IExtendedICFG icfg;

@@ -17,6 +17,7 @@ import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import ideal.Analysis;
 import ideal.PerSeedAnalysisContext;
+import ideal.pointsofaliasing.Call2ReturnEvent;
 import ideal.pointsofaliasing.CallSite;
 import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
@@ -64,6 +65,8 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	@Override
 	public FlowFunction<AccessGraph> getNormalFlowFunction(final AccessGraph sourceFact, final Unit curr,
 			final Unit succ) {
+		if(succ != null)
+			Analysis.VISITED_METHODS.add(context.icfg().getMethodOf(succ));
 		return new FlowFunction<AccessGraph>() {
 
 			@Override
@@ -480,7 +483,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 		if (!(callStmt instanceof Stmt)) {
 			return Identity.v();
 		}
-		Stmt callSite = (Stmt) callStmt;
+		final Stmt callSite = (Stmt) callStmt;
 		if (!callSite.containsInvokeExpr()) {
 			return Identity.v();
 		}
@@ -489,24 +492,40 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 		return new FlowFunction<AccessGraph>() {
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
-				if(context.isStrongUpdate(callStmt, source)){
+				
+				if(context.isStrongUpdate(callStmt, source) && hasCallees){
 					return  Sets.newHashSet();
 				}
+
+				if(callSite instanceof AssignStmt){
+					AssignStmt assignStmt = (AssignStmt) callSite;
+					if(!source.isStatic() && source.baseMatches((Local)assignStmt.getLeftOp()))
+						return Collections.emptySet();
+				}
+				Set<AccessGraph> out = Sets.newHashSet();
+				if(context.isInIDEPhase()){
+					Set<AccessGraph> indirectFlows = new HashSet<>();
+					indirectFlows.addAll(context.getFlowAtPointOfAlias(new Call2ReturnEvent<V>(sourceFact, callSite, source, returnSite, null)));
+					
+					out.addAll(indirectFlows);
+				}
+				
 				if(hasCallees){
 					for (int i = 0; i < invokeExpr.getArgCount(); i++) {
 						if (source.baseMatches(invokeExpr.getArg(i))) {
-							return  Sets.newHashSet();
+							return out;
 						}
 					}
 					if (invokeExpr instanceof InstanceInvokeExpr) {
 						InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
 						Value base = iie.getBase();
 						if (source.baseMatches(base)) {
-							return  Sets.newHashSet();
+							return out;
 						}
 					}
 				}
-				return Sets.newHashSet(source);
+				out.add(source);
+				return out;
 			}
 		};
 	}

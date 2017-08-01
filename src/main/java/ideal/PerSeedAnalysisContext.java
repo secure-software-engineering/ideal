@@ -26,6 +26,7 @@ import heros.solver.Scheduler;
 import heros.utilities.DefaultValueMap;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
+import ideal.pointsofaliasing.Call2ReturnEvent;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
@@ -267,6 +268,12 @@ public class PerSeedAnalysisContext<V> {
 						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
 					}
 				}
+				if (p instanceof Call2ReturnEvent) {
+					Call2ReturnEvent<V> returnEvent = (Call2ReturnEvent) p;
+					for (PathEdge<Unit, AccessGraph> edge : edges) {
+						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
+					}
+				}
 			}
 		}
 		debugger().finishPhase1WithSeed(seed, solver);
@@ -298,9 +305,6 @@ public class PerSeedAnalysisContext<V> {
 		checkTimeout();
 		if (boomerang == null)
 			boomerang = new AliasFinder(analysisDefinition.boomerangOptions());
-		if (!boomerangAccessGraph.isStatic()
-				&& Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
-			return new AliasResults();
 
 		analysisDefinition.debugger().beforeAlias(boomerangAccessGraph, curr, d1);
 		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph, curr, d1));

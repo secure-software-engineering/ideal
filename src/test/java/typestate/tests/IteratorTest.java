@@ -14,19 +14,9 @@ import typestate.impl.statemachines.HasNextStateMachine;
 
 public class IteratorTest extends IDEALTestingFramework {
 
-	@Test
-	public void test1() {
-		List<Object> list = new LinkedList<>();
-		list.add(new Object());
-		java.util.Iterator<Object> iterator = list.iterator();
-		iterator.hasNext();
-		iterator.next();
-		iterator.next();
-		mustBeInErrorState(iterator);
-	}
 
 	@Test
-	public void test2() {
+	public void test1() {
 		List<Object> list = new LinkedList<>();
 		list.add(new Object());
 		list.add(new Object());
@@ -37,7 +27,7 @@ public class IteratorTest extends IDEALTestingFramework {
 	}
 
 	@Test
-	public void test3() {
+	public void test2() {
 		MyLinkedList<Object> list = new MyLinkedList<>();
 		list.add(new Object());
 		java.util.Iterator<Object> iterator = list.iterator();
@@ -48,7 +38,7 @@ public class IteratorTest extends IDEALTestingFramework {
 	}
 
 	@Test
-	public void test4() {
+	public void test3() {
 		LinkedList<Object> list = new LinkedList<>();
 		list.add(new Object());
 		Iterator it1 = list.iterator();
@@ -64,7 +54,7 @@ public class IteratorTest extends IDEALTestingFramework {
 	}
 
 	@Test
-	public void test9() {
+	public void test4() {
 		List l1 = new ArrayList();
 		List l2 = new ArrayList();
 

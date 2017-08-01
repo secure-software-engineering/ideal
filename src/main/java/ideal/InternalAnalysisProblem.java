@@ -18,6 +18,7 @@ import heros.solver.Scheduler;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.edgefunction.ForwardEdgeFunctions;
 import ideal.flowfunctions.StandardFlowFunctions;
+import ideal.pointsofaliasing.Call2ReturnEvent;
 import ideal.pointsofaliasing.ReturnEvent;
 import soot.SootMethod;
 import soot.Unit;
@@ -143,6 +144,8 @@ public class InternalAnalysisProblem<V> implements
 					AccessGraph d1, EdgeFunction<V> func) {
 				//TODO search for aliases and update results.
 				InternalAnalysisProblem.this.nonIdentityEdgeFlowHandler.onCallToReturnFlow(d2,callSite,d3,returnSite,d1,func);
+				if(!context.isInIDEPhase())
+					context.addPOA(new Call2ReturnEvent<V>(d1, callSite, d3, returnSite, func));
 			}
 
 			@Override
