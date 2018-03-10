@@ -1,3 +1,5 @@
+**A new and more efficient version of IDE/AL can be found [here](https://github.com/CROSSINGTUD/WPDS).**
+
 IDE/AL - Alias-Aware Framework for Interprocedural Dataflow Analysis
 ===============================================================
 
